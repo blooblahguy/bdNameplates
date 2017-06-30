@@ -160,7 +160,7 @@ local defaults = {}
 	defaults[#defaults+1] = {fixatealert = {
 		type = "dropdown",
 		value = "All",
-		options = {"All","Personal","None"},
+		options = {"All","Always","Personal","None"},
 		label = "Fixate Alert"
 	}}
 	defaults[#defaults+1] = {showhptexttargetonly = {
@@ -656,6 +656,10 @@ local function threatColor(self, forced)
 	end
 	
 	self.Fixate:Hide()
+	if (config.fixatealert == "Always") then
+		self.Fixate:Show()
+		self.Fixate.text:SetText(UnitName(self.unit.."target"))
+	end
 	if (fixateMobs[name] and UnitExists(self.unit.."target")) then
 		if (config.fixatealert == "All") then
 			self.Fixate:Show()
@@ -908,6 +912,7 @@ local function style(self,unit)
 	self.Fixate:SetFrameLevel(4)
 	self.Fixate:SetPoint("BOTTOMLEFT", self.Health, "BOTTOMLEFT", 0, -20)
 	self.Fixate:SetPoint("TOPRIGHT", self.Health, "BOTTOMRIGHT", 0, -8)
+	self.Fixate:SetFrameLevel(100)
 	self.Fixate.text = self.Fixate:CreateFontString(nil, "OVERLAY")
 	self.Fixate.text:SetFont(bdCore.media.font, 18, "OUTLINE")
 	local icon = select(3, GetSpellInfo(210099))
@@ -918,7 +923,7 @@ local function style(self,unit)
 			self:SetAlpha(1)
 			self:SetText_Old("|T"..icon..":16:16:0:0:60:60:4:56:4:56|t ".."|cff"..color..text.."|r")
 		else
-			self:SetAlpha(0.6)
+			self:SetAlpha(0.8)
 			self:SetText_Old("|cff"..color..text.."|r")
 		end
 	end
