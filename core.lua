@@ -346,6 +346,11 @@ defaults[#defaults+1] = {tab = {
 	type="tab",
 	value="Blacklist"
 }}
+defaults[#defaults+1] = {disableauras={
+	type="checkbox",
+	value=false,
+	label="Don't show any auras."
+}}
 defaults[#defaults+1] = {text = {
 	type="text",
 	value="Certain abilities are tracked by default, i.e. stuns / silences. You can stop these from showing up using the blacklist. "
@@ -755,6 +760,10 @@ local function npcallback(event,nameplate,unit)
 		else
 			--print("enemystyle"..UnitName(unit))
 			enemyStlye(self,unit)
+		end
+		
+		if (config.disableauras) then
+			self.Debuffs:Hide()
 		end
 	end
 	
