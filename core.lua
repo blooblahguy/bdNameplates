@@ -556,8 +556,10 @@ local function playerStyle(self,unit)
 	local nameplate = C_NamePlate.GetNamePlateForUnit(unit)
 	local self = nameplate.ouf
 	
+	self.Power:Show()
+	self.Health:SetPoint("TOP", self, "BOTTOM")
 	--nameplate:EnableMouse(false)
-	self.Debuffs:Hide()
+	--[[self.Debuffs:Hide()
 	self.Auras:Show()
 	self.Auras:ClearAllPoints()
 	self.Auras:SetPoint("BOTTOM", self.Name, "TOP", -2, 10)
@@ -581,7 +583,7 @@ local function playerStyle(self,unit)
 	nameplate:SetScript("OnUpdate",function()	
 		local selfpoint, object, objectpoint, x, y = nameplate:GetPoint()
 		self.Name:SetPoint("CENTER", WorldFrame, "CENTER", 0, (30-((y-350)/4))*scale)
-	end)
+	end)--]]
 end
 
 -- Style your friends
@@ -877,6 +879,21 @@ local function style(self,unit)
 	self.Health.colorHealth = true
 	bdCore:setBackdrop(self.Health,true)
 	self.Health:EnableMouse(false)
+	
+	self.Power = CreateFrame("StatusBar", nil, self)
+	self.Power:SetStatusBarTexture(bdCore.media.flat)
+	self.Power:ClearAllPoints()
+	self.Power:SetPoint("TOPLEFT", self.Health, "BOTTOMLEFT",0, -2)
+	self.Power:SetPoint("TOPRIGHT", self.Health, "BOTTOMRIGHT",0, -2)
+	self.Power:SetHeight(6)
+	self.Power.frequentUpdates = true
+	self.Power.colorTapping = true
+	self.Power.colorDisconnected = true
+	self.Power.colorPower = true
+	self.Power.colorClass = true
+	self.Power.colorReaction = true
+	bdCore:setBackdrop(self.Power)
+	self.Power:Hide()
 
 	
 	self.Curhp = self.Health:CreateFontString(nil,"OVERLAY")
