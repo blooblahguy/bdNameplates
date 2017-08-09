@@ -742,6 +742,7 @@ local function npcallback(event,nameplate,unit)
 		-- not UnitIsCharmed(unit) or
 		
 		nameplate:SetScript("OnUpdate",function() return end)
+		self.Name:Show()
 		if (UnitIsUnit(unit,"player")) then
 			--print("playerstyle"..UnitName(unit))
 			playerStyle(self,unit)
