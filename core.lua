@@ -556,8 +556,15 @@ local function playerStyle(self,unit)
 	local nameplate = C_NamePlate.GetNamePlateForUnit(unit)
 	local self = nameplate.ouf
 	
+	self.Name:Hide()
 	self.Power:Show()
-	self.Health:SetPoint("TOP", self, "BOTTOM")
+	self.background:Hide()
+	self.Health:ClearAllPoints()
+	self.Health:SetPoint("TOP", self, "BOTTOM", 0, -30)
+	self.Health:SetSize(config.width, config.height)
+	self.Castbar:SetPoint("TOPLEFT", self.Power, "BOTTOMLEFT", 0, -2)
+	self.Castbar:SetPoint("BOTTOMRIGHT", self.Power, "BOTTOMRIGHT", 0, -config.castbarheight)
+	
 	--nameplate:EnableMouse(false)
 	--[[self.Debuffs:Hide()
 	self.Auras:Show()
