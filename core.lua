@@ -748,6 +748,7 @@ local function npcallback(event,nameplate,unit)
 		
 		nameplate:SetScript("OnUpdate",function() return end)
 		self.Name:Show()
+		self.Power:Hide()
 		if (UnitIsUnit(unit,"player")) then
 			--print("playerstyle"..UnitName(unit))
 			playerStyle(self,unit)
