@@ -57,12 +57,15 @@ local modules = {}
 
 local function cvar_set() end
 local function npcallback() end
+
 local function enumerateNameplates()
+	config = bdCore.config.profile['Nameplates']
 	for _, frame in pairs(C_NamePlate.GetNamePlates()) do
 		local unit = frame.unitFrame.unit
-		npcallback("",frame,unit)
+		npcallback("", "", frame,unit)
 	end
 end
+
 local defaults = {}
 
 --------------
@@ -363,7 +366,8 @@ defaults[#defaults+1] = {blacklist={
 }}
 
 
-local config = bdCore:addModule("Nameplates", defaults)
+bdCore:addModule("Nameplates", defaults)
+local config = bdCore.config.profile['Nameplates']
 local scale = UIParent:GetEffectiveScale()*1
 C_NamePlate.SetNamePlateFriendlySize(config.width * scale + 10,0.1)
 C_NamePlate.SetNamePlateSelfSize(config.width * scale + 10,0.1)
@@ -389,7 +393,9 @@ local function cvar_set()
 		['nameplateMaxAlphaDistance'] = 0,
 		['nameplateMaxDistance'] = config.nameplatedistance+6, -- for some reason there is a 6yd diff
 		["nameplateOverlapV"] = config.verticalspacing, --0.8
-		--['nameplateShowFriends'] = config.showfriends,
+		['nameplateShowFriends'] = 1,
+		['nameplateShowOnlyNames'] = 1,
+		['nameplateShowDebuffsOnFriendly'] = 1,
 		--['nameplatePersonalShowAlways'] = 1,
 		--['nameplateShowSelf'] = 1,
 		--["nameplateMotionSpeed"] = config.speed, --0.1
@@ -684,91 +690,9 @@ local function threatColor(self, forced)
 		end
 	end
 	
-	if (not forced) then
-		self.Health:ForceUpdate()
+	if (not forced and healthbar.ForceUpdate) then
+		healthbar:ForceUpdate()
 	end
-end
-
-local function npcallback(event,nameplate,unit)
-	local scale = UIParent:GetEffectiveScale()*1
-	if (not InCombatLockdown()) then
-		C_NamePlate.SetNamePlateFriendlySize(config.width * scale + 10,0.1)
-		C_NamePlate.SetNamePlateEnemySize(config.width * scale + 10, config.height * scale + config.enemynamesize + 4)
-	end
-	if (unit) then
-		local unit = unit or "target"
-		local nameplate = C_NamePlate.GetNamePlateForUnit(unit)
-		local self = nameplate.ouf
-		local reaction = UnitReaction("player",unit)
-		--local ufaction = select(1, UnitFactionGroup(unit))
-		--local pfaction = select(1, UnitFactionGroup("player"))
-		self.Health.Shadow:Hide()
-		self:EnableMouse(false)
-		self.Health:EnableMouse(false)
-		self.Name:Show()
-		self.Namecontainer:SetAlpha(1)
-		-- Update configurations
-		self:SetHeight(config.height)
-		self.Curhp:SetFont(bdCore.media.font, config.height*.85,"OUTLINE")
-		self.Castbar:SetPoint("BOTTOMRIGHT", self.Health, "BOTTOMRIGHT", 0, -config.castbarheight)
-		self.Castbar.Text:SetFont(bdCore.media.font, config.castbarheight*.85, "OUTLINE")
-		self.Castbar.Icon:SetSize(config.height+config.castbarheight, config.height+config.castbarheight)
-		self.Auras:SetSize((config.raidbefuffs*2)+4, config.raidbefuffs)
-		self.Auras.size = config.raidbefuffs
-		self.Debuffs:SetSize(config.width+4, config.debuffsize)
-		self.Debuffs.size = config.debuffsize
-		self.RaidIcon:SetSize(config.raidmarkersize, config.raidmarkersize)
-		self.RaidIcon:ClearAllPoints()
-		self.RaidIcon:SetAlpha(1)
-		if (config.markposition == "LEFT") then
-			self.RaidIcon:SetPoint('RIGHT', self, "LEFT", -(config.raidmarkersize/2), 0)
-		elseif (config.markposition == "RIGHT") then
-			self.RaidIcon:SetPoint('LEFT', self, "RIGHT", config.raidmarkersize/2, 0)
-		else
-			self.RaidIcon:SetPoint('BOTTOM', self, "TOP", 0, config.raidmarkersize)
-		end
-		
-		if (config.hptext == "None" or (config.showhptexttargetonly and not UnitIsUnit(unit,"target"))) then
-			self.Curhp:Hide()
-		else
-			self.Curhp:Show()
-		end
-		
-		
-		
-		--IsUnitOnQuest
-		--[[self.Quest:Hide()
-		for q = 1, GetNumQuestLogEntries() do	
-			if (IsUnitOnQuest(q,unit) == 1) then
-				self.Quest:Show()
-				break
-			end
-		end--]]
-		-- not UnitIsCharmed(unit) or
-		
-		nameplate:SetScript("OnUpdate",function() return end)
-		self.Name:Show()
-		self.Power:Hide()
-		if (UnitIsUnit(unit,"player")) then
-			--print("playerstyle"..UnitName(unit))
-			playerStyle(self,unit)
-		elseif (UnitIsPVPSanctuary(unit) or (UnitIsPlayer(unit) and UnitIsFriend("player",unit) and reaction and reaction >= 5)) then
-			--print("friendlystyle"..UnitName(unit))
-			friendlyStyle(self, unit)
-		elseif (not UnitIsPlayer(unit) and (reaction and reaction >= 5) or ufaction == "Neutral") then
-			--print("npcstyle"..UnitName(unit))
-			npcStyle(self, unit)
-		else
-			--print("enemystyle"..UnitName(unit))
-			enemyStlye(self,unit)
-		end
-		
-		if (config.disableauras) then
-			self.Debuffs:Hide()
-		end
-	end
-	
-	cvar_set()
 end
 
 local function kickable(self)
@@ -786,10 +710,11 @@ local function round(num, numDecimalPlaces)
 	return math.floor(num * mult + 0.5) / mult
 end
 
-local function style(self,unit)
+local function style(self, unit)
 	local scale = UIParent:GetEffectiveScale()*1
 	local nameplate = C_NamePlate.GetNamePlateForUnit(unit)
 	local main = self
+	self.styled = true
 	nameplate.ouf = self
 	--self:RegisterForClicks('AnyDown')
 	
@@ -897,6 +822,7 @@ local function style(self,unit)
 	self.Health.colorHealth = true
 	bdCore:setBackdrop(self.Health,true)
 	self.Health:EnableMouse(false)
+
 	
 	self.Power = CreateFrame("StatusBar", nil, self)
 	self.Power:SetStatusBarTexture(bdCore.media.flat)
@@ -908,8 +834,8 @@ local function style(self,unit)
 	self.Power.colorTapping = true
 	self.Power.colorDisconnected = true
 	self.Power.colorPower = true
-	self.Power.colorClass = true
 	self.Power.colorReaction = true
+	self.Power.colorClass = true
 	bdCore:setBackdrop(self.Power)
 	self.Power:Hide()
 
@@ -1122,8 +1048,8 @@ local function style(self,unit)
 	self.Castbar.bg = self.Castbar:CreateTexture(nil, "BORDER")
 	self.Castbar.bg:SetTexture(bdCore.media.flat)
 	self.Castbar.bg:SetVertexColor(unpack(bdCore.media.border))
-	self.Castbar.bg:SetPoint("TOPLEFT", self.Castbar.Icon, "TOPLEFT", -bdCore.config.General.border, bdCore.config.General.border)
-	self.Castbar.bg:SetPoint("BOTTOMRIGHT", self.Castbar.Icon, "BOTTOMRIGHT", bdCore.config.General.border, -bdCore.config.General.border)
+	self.Castbar.bg:SetPoint("TOPLEFT", self.Castbar.Icon, "TOPLEFT", -bdCore.config.profile.General.border, bdCore.config.profile.General.border)
+	self.Castbar.bg:SetPoint("BOTTOMRIGHT", self.Castbar.Icon, "BOTTOMRIGHT", bdCore.config.profile.General.border, -bdCore.config.profile.General.border)
 	
 	self.Castbar.PostChannelStart = kickable
 	self.Castbar.PostChannelUpdate = kickable
@@ -1132,282 +1058,98 @@ local function style(self,unit)
 	self.Castbar.PostCastNotInterruptible = kickable
 	self.Castbar.PostCastInterruptible = kickable
 end
---[[
-local bossmodules = CreateFrame("frame",nil)
-bossmodules:RegisterEvent("ENCOUNTER_START")
 
-bossmodules:SetScript("OnEvent",function()
-	
-end)--]]
---[[
-local modules = {}
-modules["Guarm"] = {}
-modules["Guarm"]["Flaming Volatile Foam"] = {0,6,0.5,0,0,1}
-modules["Guarm"]["Briney Volatile Foam"] = {0,6,0,0,0.5,1}
-modules["Guarm"]["Shadowy Volatile Foam"] = {0,6,0.7,0.4,0.9,1}
-
-modules["Helya"] = {}
-modules["Helya"]["Fetid Rot"] = {0,5,0.1,0.5,0,1}
-
-modules['Spellblade Aluriel'] = {}
-modules['Spellblade Aluriel']["Mark of Frost"] = {0,3,0,0,0.5,1}
-modules['Spellblade Aluriel']["Searing Brand"] = {24,8,0.5,0,0,1}
-
-modules["Solarist Tel'arn"] = {}
-modules["Solarist Tel'arn"]["Parasitic Fetter"] = {0,6,0,0.5,0,1}
-
-modules["Tichondrius"] = {}
-modules["Tichondrius"]["Burning Soul"] = {0,8,0,0,0.5,1}--]]
-
---[[
-local moduledriver = CreateFrame('frame',nil)
-moduledriver:RegisterEvent("UNIT_AURA")
-moduledriver:RegisterEvent("NAME_PLATE_UNIT_ADDED")
-moduledriver:SetScript("OnEvent",function()
-	if (not UnitExists("boss1")) then return end
-	local mod = modules[UnitName("boss1")]
-	if not mod then return end
-	local show = false
-	local cyards = 0
-	local colors = {}
-	for _, frame in pairs(C_NamePlate.GetNamePlates()) do
-		local unit = frame.unitFrame.unit
-		local ouf = frame.ouf
-		for spell, data in pairs(mod) do
-			local debuff = select(1, UnitDebuff(unit,spell))
-			local duration, yards, r, g, b, a = unpack(data)
-			ouf.Circle:Hide()
-			if (debuff) then
-				local expiration = select(7, UnitDebuff(unit, spell)) - GetTime()
-				show = true
-				cyards = yards
-				colors = {r,g,b,a}
-				if (expiration < duration) then
-					show = false
-				end
-			end
-		end
+local function npcallback(self, event, unit)
+	config = bdCore.config.profile['Nameplates']
+	local scale = UIParent:GetEffectiveScale()*1
+	if (not InCombatLockdown()) then
+		C_NamePlate.SetNamePlateFriendlySize(config.width * scale + 10,0.1)
+		C_NamePlate.SetNamePlateEnemySize(config.width * scale + 10, config.height * scale + config.enemynamesize + 4)
+		C_NamePlate.SetNamePlateFriendlyClickThrough(true)
 	end
 	
-	if (show) then
-		ouf.Circle:Show()
-		ouf.Circle:SetYards(cyards)
-		ouf.Circle:SetColor(unpack(colors))
-	else
-		ouf.Circle:Hide()
-	end
-end)--]]
---[[
-local test = CreateFrame("frame")
-test:RegisterEvent("UNIT_AURA")
-test:RegisterEvent("")
-test:SetScript("OnEvent",function()
-	for _, frame in pairs(C_NamePlate.GetNamePlates()) do
-		local unit = frame.unitFrame.unit
-		local ouf = frame.ouf
-		ouf.Circle:Hide()
-		
-		local freedom = select(1, UnitBuff(unit,"Blessing of Freedom"))
-		
-		if (freedom) then
-			local expiration = select(7, UnitBuff(unit,"Blessing of Freedom")) - GetTime()
-
-			if (expiration > 2) then
-				ouf.Circle:Show()
-				ouf.Circle:SetYards(3)
-				ouf.Circle:SetColor(0,0,0.5,1)
-			end
-		end
-	end
-end)--]]
---[[
-local spellblade = CreateFrame("frame")
-spellblade:RegisterEvent("UNIT_AURA")
-spellblade:RegisterEvent("NAME_PLATE_UNIT_ADDED")
-spellblade:SetScript("OnEvent",function()
-	if (not UnitExists("boss1")) then return end 
-	if (not UnitName("boss1") == "Spellblade Aluriel") then return end 
-	
-	for _, frame in pairs(C_NamePlate.GetNamePlates()) do
-		if (not frame.unitFrame) then return end
-		local unit = frame.unitFrame.unit
-		local ouf = frame.ouf
-		local frost = select(1, UnitDebuff(unit,"Mark of Frost"))
-		local flame = select(1, UnitDebuff(unit,"Searing Brand"))
-		local tank = UnitIsUnit("boss1target",unit)
-		ouf.Circle:Hide()
-		
-	
-		if (frost) then
-			ouf.Circle:Show()
-			ouf.Circle:SetYards(3)
-			ouf.Circle:SetColor(0,0,0.5,1)
-		end
-		
-		if (flame) then
-			local expiration = select(7, UnitDebuff(unit, "Searing Brand")) - GetTime()
-			if (expiration > 24) then
-				ouf.Circle:Show()
-				ouf.Circle:SetYards(3)
-				ouf.Circle:SetColor(0,0,0,1)
-			end
-		end
-		
-		if (parasite) then
-			ouf.Circle:Show()
-			ouf.Circle:SetYards(3)
-			ouf.Circle:SetColor(.7,.4,.9,1)
-		end
-	end
-end)
---]]
---[[
-local guldan = CreateFrame("frame")
-guldan:RegisterEvent("UNIT_AURA")
-guldan:RegisterEvent("NAME_PLATE_UNIT_ADDED")
-guldan:RegisterEvent("PLAYER_TARGET_CHANGED")
-guldan:SetScript("OnEvent",function(self,event)
-	for _, frame in pairs(C_NamePlate.GetNamePlates()) do
-		if (not frame.unitFrame) then return end
-		local unit = frame.unitFrame.unit
-		local ouf = frame.ouf
-		ouf.Circle:Hide()
-		ouf.Circle:SetType(1)
-		ouf.Namecontainer:SetAlpha(config.friendnamealpha)
-		if (not config.bossmodules) then return end
-		if (UnitExists("boss1") and UnitName("boss1") == "Gul'dan") then
-			local eye = select(1, UnitDebuff(unit,"Eye of Gul'dan"))
-			local eye2 = select(1, UnitDebuff(unit,"Empowered Eye of Gul'dan"))
-			local bonds = select(1, UnitDebuff(unit,"Bonds of Fel"))
-			local bonds2 = select(1, UnitDebuff(unit,"Empowered Bonds of Fel"))
-			local flames = select(1, UnitDebuff(unit,"Flames of Sargeras"))
-			local tank = UnitIsUnit("boss1target",unit)
-			
-			if ((eye or eye2) and UnitIsPlayer(unit)) then
-				ouf.Circle:Show()
-				ouf.Circle:SetYards(8)
-				ouf.Circle:SetColor(.5,0,0,1,0.5)
-				ouf.Circle:SetType(2)
-				ouf.Namecontainer:SetAlpha(1)
-			end
-			
-			if (flames) then
-				ouf.Circle:Show()
-				ouf.Circle:SetYards(8)
-				ouf.Circle:SetColor(.8,0,0,1,0.5)
-				ouf.Circle:SetType(2)
-				ouf.Namecontainer:SetAlpha(1)
-			end
-			
-			if (bonds or bonds2) then
-				ouf.Circle:Show()
-				ouf.Circle:SetYards(5)
-				ouf.Circle:SetColor(.5,0.5,0,0.8,1)
-				ouf.Namecontainer:SetAlpha(1)
-			end
-			
-			if (tank) then
-				ouf.Circle:Show()
-				ouf.Circle:SetYards(3)
-				ouf.Circle:SetColor(0,0,0,1)
-				ouf.Namecontainer:SetAlpha(1)
-			end
-		end
-	end
-end)--]]
---[[
-local augur = CreateFrame("frame")
-augur:RegisterEvent("UNIT_AURA")
-augur:RegisterEvent("NAME_PLATE_UNIT_ADDED")
-augur:SetScript("OnEvent",function()
-	if (not config.bossmodules) then return end
-	if (not UnitExists("boss1")) then return end 
-	if (not UnitName("boss1") == "Star Augur Etraeus") then return end 
-
-	local playermark = select(1, UnitDebuff("player","Star Sign: Crab")) or nil
-	playermark = playermark or select(1, UnitDebuff("player","Star Sign: Wolf")) or nil
-	playermark = playermark or select(1, UnitDebuff("player","Star Sign: Dragon")) or nil
-	playermark = playermark or select(1, UnitDebuff("player","Star Sign: Hunter")) or nil
-	
-	for _, frame in pairs(C_NamePlate.GetNamePlates()) do
-		if (not frame.unitFrame) then return end
-		local unit = frame.unitFrame.unit
-		if (not UnitExists(unit)) then return end
-		local ouf = frame.ouf
-		
-		if (not frame.MarkAlert) then
-			frame.MarkAlert = CreateFrame("Cooldown",nil,frame,"CooldownFrameTemplate")
-			frame.MarkAlert:SetFrameStrata("TOOLTIP")
-			frame.MarkAlert:SetFrameLevel(10)
-			frame.MarkAlert:SetSize(50,50)
-			frame.MarkAlert:SetReverse(true)
-			frame.MarkAlert:SetHideCountdownNumbers(true)
-			frame.MarkAlert:SetBlingTexture('')
-			bdCore:setBackdrop(frame.MarkAlert)
-			
-			frame.MarkAlert.tex = frame.MarkAlert:CreateTexture(nil,"BORDER")
-			frame.MarkAlert.tex:SetAllPoints(frame.MarkAlert)
-			frame.MarkAlert.tex:SetTexCoord(0.08, 0.9, 0.08, 0.9)
-			
-			frame.MarkAlert.text = frame.MarkAlert:CreateFontString(nil,"OVERLAY")
-			frame.MarkAlert.text:SetFont(bdCore.media.font,20,"OUTLINE")
-			frame.MarkAlert.text:SetJustifyH("CENTER")
-			frame.MarkAlert.text:SetText("1")
-			frame.MarkAlert.text:SetPoint("CENTER")
-
-		end
-		
-		frame.MarkAlert:ClearAllPoints()
-		if (UnitIsUnit("player",unit)) then
-			frame.MarkAlert:SetPoint("BOTTOM", ouf.Name, "TOP", -2, 10)
+	if (unit) then
+		local unit = unit or "target"
+		local nameplate = C_NamePlate.GetNamePlateForUnit(unit)
+		--print(nameplate.ouf)
+		--local self = nameplate.ouf
+		local reaction = UnitReaction("player",unit)
+		--local ufaction = select(1, UnitFactionGroup(unit))
+		--local pfaction = select(1, UnitFactionGroup("player"))
+		self.Health.Shadow:Hide()
+		self:EnableMouse(false)
+		self.Health:EnableMouse(false)
+		self.Name:Show()
+		self.Namecontainer:SetAlpha(1)
+		-- Update configurations
+		self:SetHeight(config.height)
+		self.Curhp:SetFont(bdCore.media.font, config.height*.85,"OUTLINE")
+		self.Castbar:SetPoint("BOTTOMRIGHT", self.Health, "BOTTOMRIGHT", 0, -config.castbarheight)
+		self.Castbar.Text:SetFont(bdCore.media.font, config.castbarheight*.85, "OUTLINE")
+		self.Castbar.Icon:SetSize(config.height+config.castbarheight, config.height+config.castbarheight)
+		self.Auras:SetSize((config.raidbefuffs*2)+4, config.raidbefuffs)
+		self.Auras.size = config.raidbefuffs
+		self.Debuffs:SetSize(config.width+4, config.debuffsize)
+		self.Debuffs.size = config.debuffsize
+		self.RaidIcon:SetSize(config.raidmarkersize, config.raidmarkersize)
+		self.RaidIcon:ClearAllPoints()
+		self.RaidIcon:SetAlpha(1)
+		if (config.markposition == "LEFT") then
+			self.RaidIcon:SetPoint('RIGHT', self, "LEFT", -(config.raidmarkersize/2), 0)
+		elseif (config.markposition == "RIGHT") then
+			self.RaidIcon:SetPoint('LEFT', self, "RIGHT", config.raidmarkersize/2, 0)
 		else
-			frame.MarkAlert:SetPoint("BOTTOM", ouf, "TOP", -2, 18)
+			self.RaidIcon:SetPoint('BOTTOM', self, "TOP", 0, config.raidmarkersize)
 		end
 		
-		local platemark = select(1, UnitDebuff(unit,"Star Sign: Crab")) or nil
-		platemark = platemark or select(1, UnitDebuff(unit,"Star Sign: Wolf")) or nil
-		platemark = platemark or select(1, UnitDebuff(unit,"Star Sign: Dragon")) or nil
-		platemark = platemark or select(1, UnitDebuff(unit,"Star Sign: Hunter")) or nil
-	
-		if (platemark == "Star Sign: Crab") then
-			frame.MarkAlert.text:SetText("1")
-		elseif (platemark == "Star Sign: Wolf") then
-			frame.MarkAlert.text:SetText("2")
-		elseif (platemark == "Star Sign: Dragon") then
-			frame.MarkAlert.text:SetText("3")
-		elseif (platemark == "Star Sign: Hunter") then
-			frame.MarkAlert.text:SetText("4")
-		end
-		
-		if (platemark and playermark and platemark == playermark) then -- make green
-			local duration = select(6, UnitDebuff(unit, platemark))
-			local expiration = select(7, UnitDebuff(unit, platemark))
-			frame.MarkAlert.tex:SetTexture(236595)
-			frame.MarkAlert:SetFrameLevel(10)
-			frame.MarkAlert:Show()
-			frame.MarkAlert:SetAlpha(1)
-			frame.MarkAlert:SetCooldown(expiration - duration, duration)
-		elseif (platemark) then -- make red
-			local duration = select(6, UnitDebuff(unit, platemark))
-			local expiration = select(7, UnitDebuff(unit, platemark))
-			local icon = select(3, UnitDebuff(unit, platemark))
-			frame.MarkAlert.tex:SetTexture(236612)
-			frame.MarkAlert:SetFrameLevel(12)
-			frame.MarkAlert:Show()
-			frame.MarkAlert:SetAlpha(1)
-			frame.MarkAlert:SetCooldown(expiration - duration, duration)
-			if (not playermark and icon) then 
-				frame.MarkAlert.tex:SetTexture(icon) 
-				frame.MarkAlert:SetAlpha(0.5)
-			end
+		if (config.hptext == "None" or (config.showhptexttargetonly and not UnitIsUnit(unit,"target"))) then
+			self.Curhp:Hide()
 		else
-			frame.MarkAlert:Hide()
+			self.Curhp:Show()
 		end
-
+		
+		
+		
+		--IsUnitOnQuest
+		-- self.Quest:Hide()
+		-- for q = 1, GetNumQuestLogEntries() do	
+			-- if (IsUnitOnQuest(q,unit) == 1) then
+				-- self.Quest:Show()
+				-- break
+			-- end
+		-- end
+		-- not UnitIsCharmed(unit) or
+		
+		nameplate:SetScript("OnUpdate",function() return end)
+		self.Name:Show()
+		self.Power:Hide()
+		if (UnitIsUnit(unit,"player")) then
+			--print("playerstyle"..UnitName(unit))
+			playerStyle(self,unit)
+		elseif (UnitIsPVPSanctuary(unit) or (UnitIsPlayer(unit) and UnitIsFriend("player",unit) and reaction and reaction >= 5)) then
+			--print("friendlystyle"..UnitName(unit))
+			friendlyStyle(self, unit)
+		elseif (not UnitIsPlayer(unit) and (reaction and reaction >= 5) or ufaction == "Neutral") then
+			--print("npcstyle"..UnitName(unit))
+			npcStyle(self, unit)
+		else
+			--print("enemystyle"..UnitName(unit))
+			enemyStlye(self,unit)
+		end
+		
+		if (config.disableauras) then
+			self.Debuffs:Hide()
+		end
 	end
-end)--]]
+	
+	cvar_set()
+end
+
 
 bdCore:hookEvent("nameplate_update",enumerateNameplates)
+bdCore:hookEvent("bd_reconfig", enumerateNameplates)
+
 local tchange = CreateFrame("frame",nil,UIParent)
 oUF:RegisterStyle("bdNameplates", style) --styleName: String, styleFunc: Function
-oUF:SpawnNamePlates("bdNameplates", "bdNameplates", npcallback)
+oUF:SetActiveStyle("bdNameplates")
+oUF:SpawnNamePlates("bdNameplates", npcallback)
