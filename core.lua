@@ -759,7 +759,7 @@ local function npcallback(self, event, unit)
 		-- end
 		-- not UnitIsCharmed(unit) or
 		
-		nameplate:SetScript("OnUpdate",function() return end)
+		--nameplate:SetScript("OnUpdate",function() return end)
 		self.Name:Show()
 		self.Power:Hide()
 		if (UnitIsUnit(unit,"player")) then
@@ -947,7 +947,7 @@ local function style(self, unit)
 	self.Health:RegisterEvent("UNIT_THREAT_LIST_UPDATE")
 	self.Health:RegisterEvent("UNIT_TARGET")
 	self:RegisterEvent("PLAYER_TARGET_CHANGED",function(self, event)
-		npcallback(self, event, unit)
+		npcallback(self, event, self.unit)
 	end)
 	
 	self.Health:SetScript("OnEvent",function()
