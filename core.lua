@@ -56,8 +56,6 @@ local modules = {}
 --modules["Star Augur Etraeus"] = function()
 
 local function cvar_set() end
-local function npcallback() end
-
 local function enumerateNameplates()
 	config = bdCore.config.profile['Nameplates']
 	for _, frame in pairs(C_NamePlate.GetNamePlates()) do
@@ -651,8 +649,13 @@ local function threatColor(self, forced)
 	local threat = select(2, UnitDetailedThreatSituation("player", self.unit));
 	local targeted = select(1, UnitDetailedThreatSituation("player", self.unit));
 	local reaction = UnitReaction("player", self.unit);
-	--local perc = (UnitHealth(self.unit) / UnitHealthMax(self.unit)) * 100
+
+	-- ptr lets unithealthmax be 0 all the time for some reason
 	local perc = 100;
+	if (UnitHealthMax(self.unit) ~= 0) then
+		perc = (UnitHealth(self.unit) / UnitHealthMax(self.unit)) * 100
+	end
+	
 	local name = UnitName(self.unit) or "";
 
 	if (UnitIsTapDenied(self.unit)) then
@@ -694,6 +697,94 @@ local function threatColor(self, forced)
 	if (not forced and healthbar.ForceUpdate) then
 		healthbar:ForceUpdate()
 	end
+end
+
+local function npcallback(self, event, unit)
+	config = bdCore.config.profile['Nameplates']
+	local scale = UIParent:GetEffectiveScale()*1
+	if (not InCombatLockdown()) then
+		C_NamePlate.SetNamePlateFriendlySize(config.width * scale + 10,0.1)
+		C_NamePlate.SetNamePlateEnemySize(config.width * scale + 10, config.height * scale + config.enemynamesize + 4)
+		C_NamePlate.SetNamePlateFriendlyClickThrough(true)
+	end
+
+	print(event, unit)
+	
+	if (unit) then
+		local unit = unit or "target"
+		local nameplate = C_NamePlate.GetNamePlateForUnit(unit)
+		--print(nameplate.ouf)
+		--local self = nameplate.ouf
+		local reaction = UnitReaction("player",unit)
+		--local ufaction = select(1, UnitFactionGroup(unit))
+		--local pfaction = select(1, UnitFactionGroup("player"))
+		self.Health.Shadow:Hide()
+		self:EnableMouse(false)
+		self.Health:EnableMouse(false)
+		self.Name:Show()
+		self.Namecontainer:SetAlpha(1)
+		-- Update configurations
+		self:SetHeight(config.height)
+		self.Curhp:SetFont(bdCore.media.font, config.height*.85,"OUTLINE")
+		self.Castbar:SetPoint("BOTTOMRIGHT", self.Health, "BOTTOMRIGHT", 0, -config.castbarheight)
+		self.Castbar.Text:SetFont(bdCore.media.font, config.castbarheight*.85, "OUTLINE")
+		self.Castbar.Icon:SetSize(config.height+config.castbarheight, config.height+config.castbarheight)
+		self.Auras:SetSize((config.raidbefuffs*2)+4, config.raidbefuffs)
+		self.Auras.size = config.raidbefuffs
+		self.Debuffs:SetSize(config.width+4, config.debuffsize)
+		self.Debuffs.size = config.debuffsize
+		self.RaidIcon:SetSize(config.raidmarkersize, config.raidmarkersize)
+		self.RaidIcon:ClearAllPoints()
+		self.RaidIcon:SetAlpha(1)
+		if (config.markposition == "LEFT") then
+			self.RaidIcon:SetPoint('RIGHT', self, "LEFT", -(config.raidmarkersize/2), 0)
+		elseif (config.markposition == "RIGHT") then
+			self.RaidIcon:SetPoint('LEFT', self, "RIGHT", config.raidmarkersize/2, 0)
+		else
+			self.RaidIcon:SetPoint('BOTTOM', self, "TOP", 0, config.raidmarkersize)
+		end
+		
+		if (config.hptext == "None" or (config.showhptexttargetonly and not UnitIsUnit(unit,"target"))) then
+			self.Curhp:Hide()
+		else
+			self.Curhp:Show()
+		end
+		
+		
+		
+		--IsUnitOnQuest
+		-- self.Quest:Hide()
+		-- for q = 1, GetNumQuestLogEntries() do	
+			-- if (IsUnitOnQuest(q,unit) == 1) then
+				-- self.Quest:Show()
+				-- break
+			-- end
+		-- end
+		-- not UnitIsCharmed(unit) or
+		
+		nameplate:SetScript("OnUpdate",function() return end)
+		self.Name:Show()
+		self.Power:Hide()
+		if (UnitIsUnit(unit,"player")) then
+			--print("playerstyle"..UnitName(unit))
+			playerStyle(self,unit)
+		elseif (UnitIsPVPSanctuary(unit) or (UnitIsPlayer(unit) and UnitIsFriend("player",unit) and reaction and reaction >= 5)) then
+			--print("friendlystyle"..UnitName(unit))
+			friendlyStyle(self, unit)
+		elseif (not UnitIsPlayer(unit) and (reaction and reaction >= 5) or ufaction == "Neutral") then
+			--print("npcstyle"..UnitName(unit))
+			npcStyle(self, unit)
+		else
+			--print("enemystyle"..UnitName(unit))
+			enemyStlye(self,unit)
+		end
+		
+		if (config.disableauras) then
+			self.Debuffs:Hide()
+		end
+	end
+	
+	cvar_set()
 end
 
 local function kickable(self)
@@ -858,8 +949,8 @@ local function style(self, unit)
 	self.Health:RegisterEvent("UNIT_THREAT_SITUATION_UPDATE")
 	self.Health:RegisterEvent("UNIT_THREAT_LIST_UPDATE")
 	self.Health:RegisterEvent("UNIT_TARGET")
-	self:RegisterEvent("PLAYER_TARGET_CHANGED",function(self)
-		npcallback("","",self.unit,self)
+	self:RegisterEvent("PLAYER_TARGET_CHANGED",function(self, event)
+		npcallback(self, event, unit)
 	end)
 	
 	self.Health:SetScript("OnEvent",function()
@@ -1058,92 +1149,6 @@ local function style(self, unit)
 	self.Castbar.PostCastDelayed = kickable
 	self.Castbar.PostCastNotInterruptible = kickable
 	self.Castbar.PostCastInterruptible = kickable
-end
-
-local function npcallback(self, event, unit)
-	config = bdCore.config.profile['Nameplates']
-	local scale = UIParent:GetEffectiveScale()*1
-	if (not InCombatLockdown()) then
-		C_NamePlate.SetNamePlateFriendlySize(config.width * scale + 10,0.1)
-		C_NamePlate.SetNamePlateEnemySize(config.width * scale + 10, config.height * scale + config.enemynamesize + 4)
-		C_NamePlate.SetNamePlateFriendlyClickThrough(true)
-	end
-	
-	if (unit) then
-		local unit = unit or "target"
-		local nameplate = C_NamePlate.GetNamePlateForUnit(unit)
-		--print(nameplate.ouf)
-		--local self = nameplate.ouf
-		local reaction = UnitReaction("player",unit)
-		--local ufaction = select(1, UnitFactionGroup(unit))
-		--local pfaction = select(1, UnitFactionGroup("player"))
-		self.Health.Shadow:Hide()
-		self:EnableMouse(false)
-		self.Health:EnableMouse(false)
-		self.Name:Show()
-		self.Namecontainer:SetAlpha(1)
-		-- Update configurations
-		self:SetHeight(config.height)
-		self.Curhp:SetFont(bdCore.media.font, config.height*.85,"OUTLINE")
-		self.Castbar:SetPoint("BOTTOMRIGHT", self.Health, "BOTTOMRIGHT", 0, -config.castbarheight)
-		self.Castbar.Text:SetFont(bdCore.media.font, config.castbarheight*.85, "OUTLINE")
-		self.Castbar.Icon:SetSize(config.height+config.castbarheight, config.height+config.castbarheight)
-		self.Auras:SetSize((config.raidbefuffs*2)+4, config.raidbefuffs)
-		self.Auras.size = config.raidbefuffs
-		self.Debuffs:SetSize(config.width+4, config.debuffsize)
-		self.Debuffs.size = config.debuffsize
-		self.RaidIcon:SetSize(config.raidmarkersize, config.raidmarkersize)
-		self.RaidIcon:ClearAllPoints()
-		self.RaidIcon:SetAlpha(1)
-		if (config.markposition == "LEFT") then
-			self.RaidIcon:SetPoint('RIGHT', self, "LEFT", -(config.raidmarkersize/2), 0)
-		elseif (config.markposition == "RIGHT") then
-			self.RaidIcon:SetPoint('LEFT', self, "RIGHT", config.raidmarkersize/2, 0)
-		else
-			self.RaidIcon:SetPoint('BOTTOM', self, "TOP", 0, config.raidmarkersize)
-		end
-		
-		if (config.hptext == "None" or (config.showhptexttargetonly and not UnitIsUnit(unit,"target"))) then
-			self.Curhp:Hide()
-		else
-			self.Curhp:Show()
-		end
-		
-		
-		
-		--IsUnitOnQuest
-		-- self.Quest:Hide()
-		-- for q = 1, GetNumQuestLogEntries() do	
-			-- if (IsUnitOnQuest(q,unit) == 1) then
-				-- self.Quest:Show()
-				-- break
-			-- end
-		-- end
-		-- not UnitIsCharmed(unit) or
-		
-		nameplate:SetScript("OnUpdate",function() return end)
-		self.Name:Show()
-		self.Power:Hide()
-		if (UnitIsUnit(unit,"player")) then
-			--print("playerstyle"..UnitName(unit))
-			playerStyle(self,unit)
-		elseif (UnitIsPVPSanctuary(unit) or (UnitIsPlayer(unit) and UnitIsFriend("player",unit) and reaction and reaction >= 5)) then
-			--print("friendlystyle"..UnitName(unit))
-			friendlyStyle(self, unit)
-		elseif (not UnitIsPlayer(unit) and (reaction and reaction >= 5) or ufaction == "Neutral") then
-			--print("npcstyle"..UnitName(unit))
-			npcStyle(self, unit)
-		else
-			--print("enemystyle"..UnitName(unit))
-			enemyStlye(self,unit)
-		end
-		
-		if (config.disableauras) then
-			self.Debuffs:Hide()
-		end
-	end
-	
-	cvar_set()
 end
 
 
