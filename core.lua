@@ -391,7 +391,6 @@ local function cvar_set()
 		['nameplateMaxAlphaDistance'] = 0,
 		['nameplateMaxDistance'] = config.nameplatedistance+6, -- for some reason there is a 6yd diff
 		["nameplateOverlapV"] = config.verticalspacing, --0.8
-		['nameplateShowFriends'] = 1,
 		['nameplateShowOnlyNames'] = 1,
 		['nameplateShowDebuffsOnFriendly'] = 1,
 		--['nameplatePersonalShowAlways'] = 1,
@@ -707,8 +706,6 @@ local function npcallback(self, event, unit)
 		C_NamePlate.SetNamePlateEnemySize(config.width * scale + 10, config.height * scale + config.enemynamesize + 4)
 		C_NamePlate.SetNamePlateFriendlyClickThrough(true)
 	end
-
-	print(event, unit)
 	
 	if (unit) then
 		local unit = unit or "target"
