@@ -56,6 +56,7 @@ local modules = {}
 --modules["Star Augur Etraeus"] = function()
 
 local function cvar_set() end
+local function npcallback() end
 local function enumerateNameplates()
 	config = bdCore.config.profile['Nameplates']
 	for _, frame in pairs(C_NamePlate.GetNamePlates()) do
