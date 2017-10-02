@@ -1138,8 +1138,8 @@ local function style(self, unit)
 	self.Castbar.bg = self.Castbar:CreateTexture(nil, "BORDER")
 	self.Castbar.bg:SetTexture(bdCore.media.flat)
 	self.Castbar.bg:SetVertexColor(unpack(bdCore.media.border))
-	self.Castbar.bg:SetPoint("TOPLEFT", self.Castbar.Icon, "TOPLEFT", -bdCore.config.profile.General.border, bdCore.config.profile.General.border)
-	self.Castbar.bg:SetPoint("BOTTOMRIGHT", self.Castbar.Icon, "BOTTOMRIGHT", bdCore.config.profile.General.border, -bdCore.config.profile.General.border)
+	self.Castbar.bg:SetPoint("TOPLEFT", self.Castbar.Icon, "TOPLEFT", -bdCore.config.persistent.General.border, bdCore.config.persistent.General.border)
+	self.Castbar.bg:SetPoint("BOTTOMRIGHT", self.Castbar.Icon, "BOTTOMRIGHT", bdCore.config.persistent.General.border, -bdCore.config.persistent.General.border)
 	
 	self.Castbar.PostChannelStart = kickable
 	self.Castbar.PostChannelUpdate = kickable
