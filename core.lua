@@ -588,7 +588,7 @@ local function playerStyle(self,unit)
 	self.Name:SetShadowColor(0,0,0,0)
 	self.Name:SetTextColor(unitColor(unit))
 	self.Namecontainer:SetAlpha(config.friendnamealpha)
-	self.RaidIcon:SetAlpha(0)
+	self.RaidTargetIndicator:SetAlpha(0)
 	
 	if (UnitIsUnit("target",unit)) then
 		self:SetAlpha(1)
@@ -731,15 +731,15 @@ local function npcallback(self, event, unit)
 		self.Auras.size = config.raidbefuffs
 		self.Debuffs:SetSize(config.width+4, config.debuffsize)
 		self.Debuffs.size = config.debuffsize
-		self.RaidIcon:SetSize(config.raidmarkersize, config.raidmarkersize)
-		self.RaidIcon:ClearAllPoints()
-		self.RaidIcon:SetAlpha(1)
+		self.RaidTargetIndicator:SetSize(config.raidmarkersize, config.raidmarkersize)
+		self.RaidTargetIndicator:ClearAllPoints()
+		self.RaidTargetIndicator:SetAlpha(1)
 		if (config.markposition == "LEFT") then
-			self.RaidIcon:SetPoint('RIGHT', self, "LEFT", -(config.raidmarkersize/2), 0)
+			self.RaidTargetIndicator:SetPoint('RIGHT', self, "LEFT", -(config.raidmarkersize/2), 0)
 		elseif (config.markposition == "RIGHT") then
-			self.RaidIcon:SetPoint('LEFT', self, "RIGHT", config.raidmarkersize/2, 0)
+			self.RaidTargetIndicator:SetPoint('LEFT', self, "RIGHT", config.raidmarkersize/2, 0)
 		else
-			self.RaidIcon:SetPoint('BOTTOM', self, "TOP", 0, config.raidmarkersize)
+			self.RaidTargetIndicator:SetPoint('BOTTOM', self, "TOP", 0, config.raidmarkersize)
 		end
 		
 		if (config.hptext == "None" or (config.showhptexttargetonly and not UnitIsUnit(unit,"target"))) then
@@ -990,14 +990,14 @@ local function style(self, unit)
 	self.TotalAbsorb:SetStatusBarColor(.1,.1,.1,.6)
 	
 	-- Raid Icon
-	self.RaidIcon = self:CreateTexture(nil, "OVERLAY",nil,7)
-	self.RaidIcon:SetSize(config.raidmarkersize, config.raidmarkersize)
+	self.RaidTargetIndicator = self:CreateTexture(nil, "OVERLAY",nil,7)
+	self.RaidTargetIndicator:SetSize(config.raidmarkersize, config.raidmarkersize)
 	if (config.markposition == "LEFT") then
-		self.RaidIcon:SetPoint('LEFT', self, "RIGHT", -(config.raidmarkersize/2), 0)
+		self.RaidTargetIndicator:SetPoint('LEFT', self, "RIGHT", -(config.raidmarkersize/2), 0)
 	elseif (config.markposition == "RIGHT") then
-		self.RaidIcon:SetPoint('RIGHT', self, "LEFT", config.raidmarkersize/2, 0)
+		self.RaidTargetIndicator:SetPoint('RIGHT', self, "LEFT", config.raidmarkersize/2, 0)
 	else
-		self.RaidIcon:SetPoint('BOTTOM', self, "TOP", 0, config.raidmarkersize)
+		self.RaidTargetIndicator:SetPoint('BOTTOM', self, "TOP", 0, config.raidmarkersize)
 	end
 	
 	-- Quest indicator
