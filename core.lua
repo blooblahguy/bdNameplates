@@ -12,6 +12,17 @@ fixateMobs['Soul Residue'] = true
 fixateMobs['Nightmare Ichor'] = true
 fixateMobs['Atrigan'] = true
 
+local specialMobs = {}
+specialMobs["Fel Explosives"] = true
+specialMobs["Fanatical Pyromancer"] = true
+specialMobs["Felblaze Imp"] = true
+specialMobs["Hungering Stalker"] = true
+specialMobs["Fel-Powered Purifier"] = true
+specialMobs["Fel-Infused Destructor"] = true
+specialMobs["Fel-Charged Obfuscator"] = true
+specialMobs["Ember of Taeshalach"] = true
+specialMobs["Screaming Shrike"] = true
+
 local raidwhitelist = {
 	-- CC
 	['Banish'] = true,
@@ -256,6 +267,11 @@ local defaults = {}
 		value={.1, .4, .7,1},
 		name="Execute Range Color"
 	}}
+	defaults[#defaults+1] = {specialcolor={
+		type="color",
+		value={.8, .4, .7,1},
+		name="Special Unit Color"
+	}}
 	defaults[#defaults+1] = {executerange = {
 		type = "slider",
 		value=20,
@@ -274,7 +290,19 @@ local defaults = {}
 		label="Unselected nameplate alpha",
 		callback=function() enumerateNameplates() end
 	}}
-
+-------------
+-- Special Units
+-------------
+	defaults[#defaults+1] = {tab = {
+		type="tab",
+		value="Special Units"
+	}}
+	defaults[#defaults+1] = {specialunits={
+		type = "list",
+		value = specialMobs,
+		label = "Special Unit List",
+		tooltip = "Units who's name are in this list will have their healthbar colored with the 'Special Unit Color' "
+	}}
 -------------
 -- Target
 -------------
@@ -675,8 +703,8 @@ local function threatColor(self, forced)
 		end
 	end
 	
-	if (name == "Fel Explosives") then
-		healthbar:SetStatusBarColor(0.9, .4, 0.9)
+	if (config.specialunits[name]) then
+		healthbar:SetStatusBarColor(unpack(config.specialcolor))
 	end
 	
 	self.Fixate:Hide()
