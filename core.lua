@@ -998,7 +998,7 @@ local function style(self, unit)
 	self.Fixate.text.SetText_Old = self.Fixate.text.SetText
 	self.Fixate.text.SetText = function(self,text)
 		local color = bdCore:RGBToHex(unitColor(text))
-		if (UnitIsUnit(text,"player")) then
+		if (text and UnitIsUnit(text,"player")) then
 			self:SetAlpha(1)
 			self:SetText_Old("|T"..icon..":16:16:0:0:60:60:4:56:4:56|t ".."|cff"..color..text.."|r")
 		else
