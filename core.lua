@@ -141,10 +141,10 @@ local defaults = {}
 		label="Nameplates Draw Distance",
 		callback=function() cvar_set() end
 	}}
-	defaults[#defaults+1] = {bossmodules = {
+	defaults[#defaults+1] = {hidecasticon = {
 		type = "checkbox",
-		value = true,
-		label = "Enable Boss Modules",
+		value = false,
+		label = "Hide Castbar Icon",
 		callback = function() enumerateNameplates() end
 	}}
 	--[[
@@ -783,6 +783,11 @@ local function npcallback(self, event, unit)
 			self.Curhp:Show()
 		end
 		
+		if (config.hidecasticon) then
+			self.Castbar.Icon:Hide()
+		else
+			self.Castbar.Icon:Show()
+		end
 		
 		
 		--IsUnitOnQuest
