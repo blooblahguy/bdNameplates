@@ -676,6 +676,7 @@ local function friendlyStyle(self, unit)
 	end
 end
 
+local lastenergy = 0
 local function threatColor(self, forced)
 	if (UnitIsPlayer(self.unit)) then return end
 	local healthbar = self.Health
@@ -711,6 +712,14 @@ local function threatColor(self, forced)
 	
 	if (config.specialunits[name]) then
 		healthbar:SetStatusBarColor(unpack(config.specialcolor))
+	end
+
+	if (UnitName(unit) == "Ember of Taeshalach") then
+		local power = UnitPower(unit)
+		if (power >= (lastenergy + 40) then
+			healthbar:SetStatusBarColor(unpack(config.specialcolor))
+		end
+		lastenergy = power
 	end
 	
 	self.Fixate:Hide()
