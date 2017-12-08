@@ -714,13 +714,13 @@ local function threatColor(self, forced)
 		healthbar:SetStatusBarColor(unpack(config.specialcolor))
 	end
 
-	if (UnitName(unit) == "Ember of Taeshalach") then
+	--[[if (UnitName(unit) == "Ember of Taeshalach") then
 		local power = UnitPower(unit)
 		if (power >= (lastenergy + 40)) then
 			healthbar:SetStatusBarColor(unpack(config.specialcolor))
 		end
 		lastenergy = power
-	end
+	end--]]
 	
 	self.Fixate:Hide()
 	if (config.fixatealert == "Always") then
