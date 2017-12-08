@@ -940,6 +940,7 @@ local function style(self, unit)
 	oUF.Tags.Methods['bdncurpower'] = function(unit)
 		local pp, ppMax = UnitPower(unit), UnitPowerMax(unit)
 		if not pp then return end
+		if ppMax == 0 then return end
 		local ppPercent = (pp / ppMax) * 100
 		
 		if (not config.showenergy) then
