@@ -794,8 +794,10 @@ local function npcallback(self, event, unit)
 		
 		if (config.hidecasticon) then
 			self.Castbar.Icon:Hide()
+			self.Castbar.bg:Hide()
 		else
 			self.Castbar.Icon:Show()
+			self.Castbar.bg:Show()
 		end
 		
 		
