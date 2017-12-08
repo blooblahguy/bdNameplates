@@ -182,6 +182,12 @@ local defaults = {}
 		label = "Show Health Text on target only",
 		callback = function() enumerateNameplates() end
 	}}
+	defaults[#defaults+1] = {showenergy = {
+		type = "checkbox",
+		value = false,
+		label = "Show energy value on healthbar",
+		callback = function() enumerateNameplates() end
+	}}
 	defaults[#defaults+1] = {hidefriendnames = {
 		type = "checkbox",
 		value = false,
@@ -752,6 +758,7 @@ local function npcallback(self, event, unit)
 		-- Update configurations
 		self:SetHeight(config.height)
 		self.Curhp:SetFont(bdCore.media.font, config.height*.85,"OUTLINE")
+		self.Curpower:SetFont(bdCore.media.font, config.height*.85,"OUTLINE")
 		self.Castbar:SetPoint("BOTTOMRIGHT", self.Health, "BOTTOMRIGHT", 0, -config.castbarheight)
 		self.Castbar.Text:SetFont(bdCore.media.font, config.castbarheight*.85, "OUTLINE")
 		self.Castbar.Icon:SetSize(config.height+config.castbarheight, config.height+config.castbarheight)
@@ -929,6 +936,19 @@ local function style(self, unit)
 		
 	end
 
+	oUF.Tags.Events['bdncurpower'] = 'UNIT_POWER_FREQUENT UNIT_POWER PLAYER_TARGET_CHANGED'
+	oUF.Tags.Methods['bdncurpower'] = function(unit)
+		local pp, ppMax = UnitPower(unit), UnitPowerMax(unit)
+		if not pp then return end
+		local ppPercent = (pp / ppMax) * 100
+		
+		if (not config.showenergy) then
+			return ""
+		else
+			return math.floor(ppPercent);
+		end
+	end
+
 	self.Health = CreateFrame("StatusBar", nil, self)
 	self.Health:SetStatusBarTexture(bdCore.media.smooth)
 	self.Health:SetAllPoints(self)
@@ -965,6 +985,14 @@ local function style(self, unit)
 	self.Curhp:SetAlpha(0.8)
 	self.Curhp:SetPoint("RIGHT", self.Health, "RIGHT", -4, 0)
 	self:Tag(self.Curhp, '[bdncurhp]')
+
+	self.Curpower = self.Health:CreateFontString(nil,"OVERLAY")
+	self.Curpower:SetFont(bdCore.media.font, 12,"OUTLINE")
+	self.Curpower:SetJustifyH("LEFT")
+	self.Curpower:SetShadowColor(0,0,0,0)
+	self.Curpower:SetAlpha(0.8)
+	self.Curpower:SetPoint("LEFT", self.Health, "LEFT", 4, 0)
+	self:Tag(self.Curpower, '[bdncurpower]')
 	
 	bdCore:createShadow(self.Health,10)
 	self.Health.Shadow:SetBackdropColor(1, 1, 1, 1)
