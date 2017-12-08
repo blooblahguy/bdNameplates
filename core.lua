@@ -550,7 +550,7 @@ local function unitColor(unit)
 	end
 end
 
-local function enemyStlye(self,unit)
+local function enemyStyle(self,unit)
 	local nameplate = C_NamePlate.GetNamePlateForUnit(unit)
 	local self = nameplate.ouf
 
@@ -825,7 +825,7 @@ local function npcallback(self, event, unit)
 			npcStyle(self, unit)
 		else
 			--print("enemystyle"..UnitName(unit))
-			enemyStlye(self,unit)
+			enemyStyle(self,unit)
 		end
 		
 		if (config.disableauras) then
@@ -1135,6 +1135,7 @@ local function style(self, unit)
 	
 	-- For Enemies
 	self.Debuffs = CreateFrame("Frame", nil, self)
+	self.Debuffs:SetFrameLevel(0)
 	self.Debuffs:ClearAllPoints()
 	self.Debuffs:SetPoint("BOTTOMLEFT", self, "TOPLEFT", 0, 24)
 	self.Debuffs:SetSize(config.width, config.debuffsize)
