@@ -716,7 +716,7 @@ local function threatColor(self, forced)
 
 	if (UnitName(unit) == "Ember of Taeshalach") then
 		local power = UnitPower(unit)
-		if (power >= (lastenergy + 40) then
+		if (power >= (lastenergy + 40)) then
 			healthbar:SetStatusBarColor(unpack(config.specialcolor))
 		end
 		lastenergy = power
