@@ -98,7 +98,7 @@ local defaults = {}
 		type = "checkbox",
 		value = false,
 		label = "Friendly Names in Raid",
-		tooltip = "This will disable friendly nameplates in raid while keeping the friendly name. Uncheck this before uninstalling bdNameplates. "
+		tooltip = "This will disable friendly nameplates in raid while keeping the friendly name. Uncheck this before uninstalling bdNameplates. ",
 		callback = function() enumerateNameplates() end
 	}}
 	
@@ -448,8 +448,8 @@ local function cvar_set()
 	}
 
 	if (config.friendlynamehack) then
-		cvars['nameplateShowOnlyNames'] = 1,
-		cvars['nameplateShowDebuffsOnFriendly'] = 1,
+		cvars['nameplateShowOnlyNames'] = 1	
+		cvars['nameplateShowDebuffsOnFriendly'] = 1
 	end
 	
 	if (not InCombatLockdown()) then
