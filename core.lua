@@ -94,6 +94,13 @@ local defaults = {}
 		label="Friendly Name Opacity",
 		callback=function() enumerateNameplates() end
 	}}
+	defaults[#defaults+1] = {friendlynamehack = {
+		type = "checkbox",
+		value = false,
+		label = "Friendly Names in Raid",
+		tooltip = "This will disable friendly nameplates in raid while keeping the friendly name. Uncheck this before uninstalling bdNameplates. ",
+		callback = function() enumerateNameplates() end
+	}}
 	
 	defaults[#defaults+1] = {width={
 		type="slider",
@@ -426,8 +433,8 @@ local function cvar_set()
 		['nameplateMaxAlphaDistance'] = 0,
 		['nameplateMaxDistance'] = config.nameplatedistance+6, -- for some reason there is a 6yd diff
 		["nameplateOverlapV"] = config.verticalspacing, --0.8
-		['nameplateShowOnlyNames'] = 1,
-		['nameplateShowDebuffsOnFriendly'] = 1,
+		['nameplateShowOnlyNames'] = 0,
+		['nameplateShowDebuffsOnFriendly'] = 0,
 		--['nameplatePersonalShowAlways'] = 1,
 		--['nameplateShowSelf'] = 1,
 		--["nameplateMotionSpeed"] = config.speed, --0.1
@@ -439,6 +446,11 @@ local function cvar_set()
 		['nameplateMinScaleDistance'] = 0, 
 		['nameplateLargerScale'] = 1, -- for bosses
 	}
+
+	if (config.friendlynamehack) then
+		cvars['nameplateShowOnlyNames'] = 1	
+		cvars['nameplateShowDebuffsOnFriendly'] = 1
+	end
 	
 	if (not InCombatLockdown()) then
 		for k, v in pairs(cvars) do
