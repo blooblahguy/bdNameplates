@@ -994,6 +994,10 @@ local function style(self, unit)
 	bdCore:setBackdrop(self.Power)
 	self.Power:Hide()
 
+	-- quest indicator
+	self.QuestIndicator = self:CreateTexture(nil, 'OVERLAY')
+    self.QuestIndicator:SetSize(20, 20)
+    self.QuestIndicator:SetPoint('LEFT', self.Name, 'RIGHT', 2,  0)
 	
 	self.Curhp = self.Health:CreateFontString(nil,"OVERLAY")
 	self.Curhp:SetFont(bdCore.media.font, 12,"OUTLINE")
