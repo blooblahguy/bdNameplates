@@ -33,32 +33,32 @@ local raidwhitelist = {
 	['Paralyze'] = true,
 	['Imprison'] = true,
 	['Sap'] = true,
-	
+
 	-- ToS
 	-- DI
 	['Fel Squall'] = true,
 	['Bone Saw'] = true,
 	['Harrowing Reconstitution'] = true,
-	
+
 	-- Harjatan
 	['Hardened Shell'] = true,
 	['Frigid Blows'] = true,
 	['Draw In'] = true,
-	
+
 	-- Host
 	['Bonecage Armor'] = true,
-	
+
 	-- Maiden
 	['Titanic Bulwark'] = true,
-	
+
 	-- Sisters
 	['Embrace of the Eclipse'] = true,
-	
+
 	-- Avatar
 	['Tainted Matrix'] = true,
 	['Corrupted Matrix'] = true,
 	['Matrix Empowerment'] = true,
-	
+
 	-- KJ
 	['Felclaws'] = true,
 }
@@ -405,7 +405,6 @@ local defaults = {}
 		tooltip="Useful if you want to blacklist any auras that Blizzard tracks by default."
 }}
 
-
 bdCore:addModule("Nameplates", defaults)
 local config = bdCore.config.profile['Nameplates']
 local scale = UIParent:GetEffectiveScale()*1
@@ -440,18 +439,18 @@ local function cvar_set()
 		--["nameplateMotionSpeed"] = config.speed, --0.1
 		--["nameplateOverlapH"] = config.spacingH, --0.8
 		--['nameplateMotion'] = tonumber(config.nameplatemotion),
-		['nameplateMinScale'] = 1, 
-		['nameplateMaxScale'] = 1, 
-		['nameplateMaxScaleDistance'] = 0, 
-		['nameplateMinScaleDistance'] = 0, 
+		['nameplateMinScale'] = 1,
+		['nameplateMaxScale'] = 1,
+		['nameplateMaxScaleDistance'] = 0,
+		['nameplateMinScaleDistance'] = 0,
 		['nameplateLargerScale'] = 1, -- for bosses
 	}
-	
+
 	if (config.friendlynamehack) then
-		cvars['nameplateShowOnlyNames'] = 1	
+		cvars['nameplateShowOnlyNames'] = 1
 		cvars['nameplateShowDebuffsOnFriendly'] = 1
 	end
-	
+
 	if (not InCombatLockdown()) then
 		for k, v in pairs(cvars) do
 			local current = tonumber(GetCVar(k))
@@ -503,7 +502,7 @@ end)
 --]]
 local function getcolor(unit)
 	local reaction = UnitReaction(unit, "player") or 5
-	
+
 	if UnitIsPlayer(unit) then
 		local class = select(2, UnitClass(unit))
 		local color = RAID_CLASS_COLORS[class]
@@ -548,7 +547,6 @@ local function round(num, numDecimalPlaces)
 	return string.format("%." .. (numDecimalPlaces or 0) .. "f", num)
 end
 
-
 local function unitColor(unit)
 	if (not UnitExists(unit)) then
 		return unpack(colors.tapped)
@@ -565,7 +563,7 @@ end
 local function enemyStyle(self,unit)
 	local nameplate = C_NamePlate.GetNamePlateForUnit(unit)
 	local self = nameplate.ouf
-	
+
 	self.Auras:Hide()
 	self.Debuffs:Show()
 	if (UnitIsUnit(unit,"target")) then
@@ -575,12 +573,12 @@ local function enemyStyle(self,unit)
 	else
 		self:SetAlpha(config.unselectedalpha)
 	end
-	
+
 	self.Name:SetTextColor(1,1,1)
 	self.Name:ClearAllPoints()
 	self.Name:SetFont(bdCore.media.font, config.enemynamesize)
 	self.Name:SetShadowColor(0,0,0)
-	self.Name:SetPoint("BOTTOM", self, "TOP", 0, 6)	
+	self.Name:SetPoint("BOTTOM", self, "TOP", 0, 6)
 	self.Castbar:SetAlpha(1)
 	self.Health:Show()
 end
@@ -588,29 +586,30 @@ end
 local function npcStyle(self,unit)
 	local nameplate = C_NamePlate.GetNamePlateForUnit(unit)
 	local self = nameplate.ouf
-	
+
 	if (UnitIsUnit(unit,"target")) then
 		self:SetAlpha(1)
 	else
 		self:SetAlpha(0.8)
 	end
-	
+
 	self.background:Hide()
 	self.Debuffs:Hide()
 	self.Auras:Hide()
 	self.Health:Hide()
-	
+
 	self.Name:SetFont(bdCore.media.font, config.friendlynamesize, "OUTLINE")
 	self.Name:SetShadowColor(0,0,0,0)
 	self.Name:SetTextColor(unitColor(unit))
 	self.Name:ClearAllPoints()
-	self.Name:SetPoint("TOP", self, "TOP", 0, 10)	
+	self.Name:SetPoint("TOP", self, "TOP", 0, 10)
 	self.Castbar:SetAlpha(0)
 end
+
 local function playerStyle(self,unit)
 	local nameplate = C_NamePlate.GetNamePlateForUnit(unit)
 	local self = nameplate.ouf
-	
+
 	self.Name:Hide()
 	self.Power:Show()
 	self.background:Hide()
@@ -619,7 +618,7 @@ local function playerStyle(self,unit)
 	self.Health:SetSize(config.width, config.height)
 	self.Castbar:SetPoint("TOPLEFT", self.Power, "BOTTOMLEFT", 0, -2)
 	self.Castbar:SetPoint("BOTTOMRIGHT", self.Power, "BOTTOMRIGHT", 0, -config.castbarheight)
-	
+
 	--nameplate:EnableMouse(false)
 	--[[self.Debuffs:Hide()
 	self.Auras:Show()
@@ -635,14 +634,14 @@ local function playerStyle(self,unit)
 	self.Name:SetTextColor(unitColor(unit))
 	self.Namecontainer:SetAlpha(config.friendnamealpha)
 	self.RaidTargetIndicator:SetAlpha(0)
-	
+
 	if (UnitIsUnit("target",unit)) then
 		self:SetAlpha(1)
 	else
 		self:SetAlpha(0.8)
 	end
-	
-	nameplate:SetScript("OnUpdate",function()	
+
+	nameplate:SetScript("OnUpdate",function()
 		local selfpoint, object, objectpoint, x, y = nameplate:GetPoint()
 		self.Name:SetPoint("CENTER", WorldFrame, "CENTER", 0, (30-((y-350)/4))*scale)
 	end)--]]
@@ -652,12 +651,12 @@ end
 local function friendlyStyle(self, unit)
 	local nameplate = C_NamePlate.GetNamePlateForUnit(unit)
 	local self = nameplate.ouf
-	
+
 	--self.Power:Hide()
 	self.Debuffs:Hide()
 	self.Auras:Show()
 	self.Health:Hide()
-	
+
 	if (UnitIsUnit(unit,"target")) then
 		self:SetAlpha(1)
 		--[[if (config.showfriendlybar) then
@@ -671,18 +670,18 @@ local function friendlyStyle(self, unit)
 		self.Name:ClearAllPoints()
 		self.Name:SetPoint("TOP", self, "TOP", 0, 6)
 	end
-	
+
 	if (UnitIsUnit(unit,"pet")) then
 		self.Health:Show()
 	end
-	
+
 	self.background:Hide()
 	self.Namecontainer:SetAlpha(config.friendnamealpha)
 	self.Name:SetTextColor(unitColor(unit))
 	self.Name:SetFont(bdCore.media.font, config.friendlynamesize, "OUTLINE")
 	self.Name:SetShadowColor(0,0,0,0)
 	self.Castbar:SetAlpha(0)
-	
+
 	if (config.hidefriendnames and not UnitIsUnit(unit,"target")) then
 		self.Name:Hide()
 	end
@@ -696,18 +695,18 @@ local function threatColor(self, forced)
 	local threat = select(2, UnitDetailedThreatSituation("player", self.unit));
 	local targeted = select(1, UnitDetailedThreatSituation("player", self.unit));
 	local reaction = UnitReaction("player", self.unit);
-	
+
 	-- ptr lets unithealthmax be 0 all the time for some reason
 	local perc = 100;
 	if (UnitHealthMax(self.unit) ~= 0) then
 		perc = (UnitHealth(self.unit) / UnitHealthMax(self.unit)) * 100
 	end
-	
+
 	local name = UnitName(self.unit) or "";
-	
+
 	if (UnitIsTapDenied(self.unit)) then
 		healthbar:SetStatusBarColor(.5,.5,.5)
-	elseif(combat) then 
+	elseif(combat) then
 		if(threat and threat >= 1) then
 			if(threat == 3) then
 				healthbar:SetStatusBarColor(unpack(config.threatcolor))
@@ -721,11 +720,11 @@ local function threatColor(self, forced)
 			end
 		end
 	end
-	
+
 	if (config.specialunits[name]) then
 		healthbar:SetStatusBarColor(unpack(config.specialcolor))
 	end
-	
+
 	--[[if (UnitName(unit) == "Ember of Taeshalach") then
 	local power = UnitPower(unit)
 	if (power >= (lastenergy + 40)) then
@@ -733,7 +732,7 @@ local function threatColor(self, forced)
 	end
 	lastenergy = power
 end--]]
-	
+
 	self.Fixate:Hide()
 	if (config.fixatealert == "Always") then
 		self.Fixate:Show()
@@ -748,7 +747,7 @@ end--]]
 			self.Fixate.text:SetText(UnitName(self.unit.."target"))
 		end
 	end
-	
+
 	if (not forced and healthbar.ForceUpdate) then
 		healthbar:ForceUpdate()
 	end
@@ -762,7 +761,7 @@ local function npcallback(self, event, unit)
 		C_NamePlate.SetNamePlateEnemySize((config.width * scale) + 10, (config.height * scale) + config.enemynamesize + 4)
 		C_NamePlate.SetNamePlateFriendlyClickThrough(true)
 	end
-	
+
 	if (unit) then
 		local unit = unit or "target"
 		local nameplate = C_NamePlate.GetNamePlateForUnit(unit)
@@ -797,13 +796,13 @@ local function npcallback(self, event, unit)
 		else
 			self.RaidTargetIndicator:SetPoint('BOTTOM', self, "TOP", 0, config.raidmarkersize)
 		end
-		
+
 		if (config.hptext == "None" or (config.showhptexttargetonly and not UnitIsUnit(unit,"target"))) then
 			self.Curhp:Hide()
 		else
 			self.Curhp:Show()
 		end
-		
+
 		if (config.hidecasticon) then
 			self.Castbar.Icon:Hide()
 			self.Castbar.bg:Hide()
@@ -811,18 +810,17 @@ local function npcallback(self, event, unit)
 			self.Castbar.Icon:Show()
 			self.Castbar.bg:Show()
 		end
-		
-		
+
 		--IsUnitOnQuest
 		-- self.Quest:Hide()
-		-- for q = 1, GetNumQuestLogEntries() do	
+		-- for q = 1, GetNumQuestLogEntries() do
 		-- if (IsUnitOnQuest(q,unit) == 1) then
 		-- self.Quest:Show()
 		-- break
 		-- end
 		-- end
 		-- not UnitIsCharmed(unit) or
-		
+
 		--nameplate:SetScript("OnUpdate",function() return end)
 		self.Name:Show()
 		self.Power:Hide()
@@ -839,12 +837,12 @@ local function npcallback(self, event, unit)
 			--print("enemystyle"..UnitName(unit))
 			enemyStyle(self,unit)
 		end
-		
+
 		if (config.disableauras) then
 			self.Debuffs:Hide()
 		end
 	end
-	
+
 	cvar_set()
 end
 
@@ -870,7 +868,7 @@ local function style(self, unit)
 	self.styled = true
 	nameplate.ouf = self
 	--self:RegisterForClicks('AnyDown')
-	
+
 	-- Circle Alert
 	--[[
 	self.Circle = CreateFrame("frame",nil,self)
@@ -895,7 +893,7 @@ local function style(self, unit)
 			self.tex:SetTexture("Interface\\Addons\\bdNameplates\\ring.blp")
 		end
 	end
-	
+
 	self.Circle:RegisterEvent("ENCOUNTER_END")
 	self.Circle:RegisterEvent("PLAYER_TARGET_CHANGED")
 	self.Circle:SetScript("OnUpdate",function(self,event)
@@ -915,14 +913,14 @@ local function style(self, unit)
 	end)
 	self.Circle:Hide()
 	--]]
-	
+
 	self:EnableMouse(false)
-	
+
 	self.background = self:CreateTexture(nil, "BACKGROUND", nil, -7)
 	self.background:SetTexture(bdCore.media.flat)
 	self.background:SetAllPoints(self)
 	self.background:SetVertexColor(0,1,0,.3)
-	
+
 	self.unit = unit
 	self:SetScript("OnEnter", function()
 		ShowUIPanel(GameTooltip)
@@ -934,24 +932,24 @@ local function style(self, unit)
 		GameTooltip:Hide()
 	end)
 	self.hooked = true
-	
+
 	self:SetPoint("BOTTOMLEFT",nameplate,"BOTTOMLEFT", 2, 2)
 	self:SetPoint("BOTTOMRIGHT",nameplate,"BOTTOMRIGHT", -2, 2)
 	self:SetScale(scale)
 	self:SetHeight(config.height)
-	
+
 	self.Namecontainer = CreateFrame("frame",nil,self)
 	self.Name = self.Namecontainer:CreateFontString(nil)
 	self.Name:SetFont(bdCore.media.font, 14)
 	self.Name:SetShadowOffset(1,-1)
 	self:Tag(self.Name, '[name]')
-	
+
 	oUF.Tags.Events['bdncurhp'] = 'UNIT_HEALTH_FREQUENT UNIT_HEALTH UNIT_MAXHEALTH PLAYER_TARGET_CHANGED'
 	oUF.Tags.Methods['bdncurhp'] = function(unit)
 		local hp, hpMax = UnitHealth(unit), UnitHealthMax(unit)
 		local hpPercent = hp / hpMax
 		if hpMax == 0 then return end
-		
+
 		if (config.hptext == "None") then
 			return ""
 		elseif (config.hptext == "HP - %") then
@@ -961,23 +959,23 @@ local function style(self, unit)
 		elseif (config.hptext == "%") then
 			return round(hpPercent * 100,1);
 		end
-		
+
 	end
-	
+
 	oUF.Tags.Events['bdncurpower'] = 'UNIT_POWER_FREQUENT UNIT_POWER PLAYER_TARGET_CHANGED'
 	oUF.Tags.Methods['bdncurpower'] = function(unit)
 		local pp, ppMax = UnitPower(unit), UnitPowerMax(unit)
 		if not pp then return end
 		if ppMax == 0 then return end
 		local ppPercent = (pp / ppMax) * 100
-		
+
 		if (not config.showenergy) then
 			return ""
 		else
 			return math.floor(ppPercent);
 		end
 	end
-	
+
 	self.Health = CreateFrame("StatusBar", nil, self)
 	self.Health:SetStatusBarTexture(bdCore.media.smooth)
 	self.Health:SetAllPoints(self)
@@ -989,8 +987,7 @@ local function style(self, unit)
 	self.Health.colorHealth = true
 	bdCore:setBackdrop(self.Health,true)
 	self.Health:EnableMouse(false)
-	
-	
+
 	self.Power = CreateFrame("StatusBar", nil, self)
 	self.Power:SetStatusBarTexture(bdCore.media.flat)
 	self.Power:ClearAllPoints()
@@ -1005,12 +1002,12 @@ local function style(self, unit)
 	self.Power.colorClass = true
 	bdCore:setBackdrop(self.Power)
 	self.Power:Hide()
-	
+
 	-- quest indicator
 	self.QuestIndicator = self:CreateTexture(nil, 'OVERLAY')
 	self.QuestIndicator:SetSize(20, 20)
 	self.QuestIndicator:SetPoint('LEFT', self.Name, 'RIGHT', 2, 0)
-	
+
 	self.Curhp = self.Health:CreateFontString(nil,"OVERLAY")
 	self.Curhp:SetFont(bdCore.media.font, 12,"OUTLINE")
 	self.Curhp:SetJustifyH("RIGHT")
@@ -1018,7 +1015,7 @@ local function style(self, unit)
 	self.Curhp:SetAlpha(0.8)
 	self.Curhp:SetPoint("RIGHT", self.Health, "RIGHT", -4, 0)
 	self:Tag(self.Curhp, '[bdncurhp]')
-	
+
 	self.Curpower = self.Health:CreateFontString(nil,"OVERLAY")
 	self.Curpower:SetFont(bdCore.media.font, 12,"OUTLINE")
 	self.Curpower:SetJustifyH("LEFT")
@@ -1026,11 +1023,11 @@ local function style(self, unit)
 	self.Curpower:SetAlpha(0.8)
 	self.Curpower:SetPoint("LEFT", self.Health, "LEFT", 4, 0)
 	self:Tag(self.Curpower, '[bdncurpower]')
-	
+
 	bdCore:createShadow(self.Health,10)
 	self.Health.Shadow:SetBackdropColor(1, 1, 1, 1)
 	self.Health.Shadow:SetBackdropBorderColor(1, 1, 1, 0.8)
-	
+
 	self.Health:RegisterEvent("PLAYER_REGEN_DISABLED")
 	self.Health:RegisterEvent("PLAYER_REGEN_ENABLED")
 	self.Health:RegisterEvent("UNIT_THREAT_SITUATION_UPDATE")
@@ -1039,14 +1036,14 @@ local function style(self, unit)
 	self:RegisterEvent("PLAYER_TARGET_CHANGED",function(self, event)
 		npcallback(self, event, self.unit)
 	end)
-	
+
 	self.Health:SetScript("OnEvent",function()
 		threatColor(main)
 	end)
 	function self.Health:PostUpdate()
 		threatColor(main,true)
 	end
-	
+
 	-- Fixate Alert
 	self.Fixate = CreateFrame("frame",nil,self)
 	self.Fixate:SetFrameLevel(4)
@@ -1071,13 +1068,13 @@ local function style(self, unit)
 	self.Fixate.text:SetJustifyH("CENTER")
 	self.Fixate:Hide()
 	self.fixated = false;
-	
+
 	-- Absorb
 	self.TotalAbsorb = CreateFrame('StatusBar', nil, self.Health)
 	self.TotalAbsorb:SetAllPoints(self.Health)
 	self.TotalAbsorb:SetStatusBarTexture(bdCore.media.flat)
 	self.TotalAbsorb:SetStatusBarColor(.1,.1,.1,.6)
-	
+
 	-- Raid Icon
 	self.RaidTargetIndicator = self:CreateTexture(nil, "OVERLAY",nil,7)
 	self.RaidTargetIndicator:SetSize(config.raidmarkersize, config.raidmarkersize)
@@ -1088,13 +1085,13 @@ local function style(self, unit)
 	else
 		self.RaidTargetIndicator:SetPoint('BOTTOM', self, "TOP", 0, config.raidmarkersize)
 	end
-	
+
 	-- Quest indicator
 	--[[self.Quest = CreateFrame("frame", nil, self.Health)
 	self.Quest:SetSize(20,20)
 	self.Quest:SetPoint("RIGHT", self.name, "LEFT", -6, 0)
-	bdCore:setBackdrop(self.Quest)--]]	
-	
+	bdCore:setBackdrop(self.Quest)--]]
+
 	-- For friendlies
 	self.Auras = CreateFrame("Frame", nil, self)
 	self.Auras:SetPoint("BOTTOM", self, "TOP", -2, 18)
@@ -1108,7 +1105,7 @@ local function style(self, unit)
 	self.Auras['growth-x'] = "RIGHT"
 	self.Auras.CustomFilter = function(icons, unit, icon, name, rank, texture, count, dispelType, duration, expiration, caster, isStealable, nameplateShowSelf, spellID, canApply, isBossDebuff, casterIsPlayer, nameplateShowAll,timeMod, effect1, effect2, effect3)
 		local allow = false
-		
+
 		if (raidwhitelist[name] or raidwhitelist[spellID]) then
 			allow = true
 		end
@@ -1124,10 +1121,10 @@ local function style(self, unit)
 		if (config.blacklist and config.blacklist[name]) then
 			allow = false
 		end
-		
+
 		return allow
 	end
-	
+
 	self.Auras.PostUpdateIcon = function(Auras, unit, button, index)
 		local cdtext = button.cd:GetRegions()
 		bdCore:setBackdrop(button)
@@ -1136,19 +1133,19 @@ local function style(self, unit)
 		cdtext:SetJustifyH("CENTER")
 		cdtext:ClearAllPoints()
 		cdtext:SetAllPoints(button)
-		
+
 		button.count:SetFont(bdCore.media.font,12,"OUTLINE")
 		button.count:SetShadowColor(0,0,0,0)
 		button.count:SetJustifyH("RIGHT")
 		button.count:ClearAllPoints()
 		button.count:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", 2, -2)
-		
+
 		button:EnableMouse(false)
 		button.icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
 		button.cd:SetReverse(true)
 		button.cd:SetHideCountdownNumbers(false)
 	end
-	
+
 	-- For Enemies
 	self.Debuffs = CreateFrame("Frame", nil, self)
 	self.Debuffs:SetFrameLevel(0)
@@ -1163,9 +1160,9 @@ local function style(self, unit)
 	self.Debuffs['growth-y'] = "UP"
 	self.Debuffs['growth-x'] = "RIGHT"
 	self.Debuffs.CustomFilter = function(icons, unit, icon, name, rank, texture, count, dispelType, duration, expiration, caster, isStealable, nameplateShowSelf, spellID, canApply, isBossDebuff, casterIsPlayer, nameplateShowAll,timeMod, effect1, effect2, effect3)
-		
+
 		local allow = false
-		
+
 		if (nameplateShowAll or (nameplateShowSelf and caster == "player")) then
 			allow = true
 		end
@@ -1178,11 +1175,10 @@ local function style(self, unit)
 		if (config.blacklist and config.blacklist[name]) then
 			allow = false
 		end
-		
+
 		return allow
 	end
-	
-	
+
 	self.Debuffs.PostUpdateIcon = function(self, unit, button, index)
 		local cdtext = button.cd:GetRegions()
 		bdCore:setBackdrop(button)
@@ -1191,21 +1187,21 @@ local function style(self, unit)
 		cdtext:SetJustifyH("LEFT")
 		cdtext:ClearAllPoints()
 		cdtext:SetPoint("TOPLEFT",button,"TOPLEFT",-1,8)
-		
+
 		button.count:SetFont(bdCore.media.font,12,"OUTLINE")
 		button.count:SetTextColor(1,.8,.3)
 		button.count:SetShadowColor(0,0,0,0)
 		button.count:SetJustifyH("RIGHT")
 		button.count:ClearAllPoints()
 		button.count:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", 2, -1)
-		
+
 		button:EnableMouse(false)
 		button.icon:SetTexCoord(0.08, 0.9, 0.20, 0.74)
 		button:SetHeight(config.debuffsize*.6)
 		button.cd:SetReverse(true)
 		button.cd:SetHideCountdownNumbers(false)
 	end
-	
+
 	self.Castbar = CreateFrame("StatusBar", nil, self)
 	self.Castbar:SetFrameLevel(3)
 	self.Castbar:SetStatusBarTexture(bdCore.media.flat)
@@ -1213,24 +1209,24 @@ local function style(self, unit)
 	self.Castbar:SetPoint("TOPLEFT", self.Health, "BOTTOMLEFT", 0, -2)
 	self.Castbar:SetPoint("BOTTOMRIGHT", self.Health, "BOTTOMRIGHT", 0, -config.castbarheight)
 	bdCore:setBackdrop(self.Castbar)
-	
+
 	self.Castbar.Text = self.Castbar:CreateFontString(nil, "OVERLAY")
 	self.Castbar.Text:SetFont(bdCore.media.font, config.castbarheight*0.85, "OUTLINE")
 	self.Castbar.Text:SetJustifyH("RIGHT")
 	self.Castbar.Text:SetPoint("CENTER", self.Castbar, "CENTER")
-	
+
 	self.Castbar.Icon = self.Castbar:CreateTexture(nil, "OVERLAY")
 	self.Castbar.Icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
 	self.Castbar.Icon:SetDrawLayer('ARTWORK')
 	self.Castbar.Icon:SetSize(config.height+12, config.height+12)
 	self.Castbar.Icon:SetPoint("BOTTOMRIGHT",self.Castbar, "BOTTOMLEFT", -2, 0)
-	
+
 	self.Castbar.bg = self.Castbar:CreateTexture(nil, "BORDER")
 	self.Castbar.bg:SetTexture(bdCore.media.flat)
 	self.Castbar.bg:SetVertexColor(unpack(bdCore.media.border))
 	self.Castbar.bg:SetPoint("TOPLEFT", self.Castbar.Icon, "TOPLEFT", -bdCore.config.persistent.General.border, bdCore.config.persistent.General.border)
 	self.Castbar.bg:SetPoint("BOTTOMRIGHT", self.Castbar.Icon, "BOTTOMRIGHT", bdCore.config.persistent.General.border, -bdCore.config.persistent.General.border)
-	
+
 	self.Castbar.PostChannelStart = kickable
 	self.Castbar.PostChannelUpdate = kickable
 	self.Castbar.PostCastStart = kickable
@@ -1238,7 +1234,6 @@ local function style(self, unit)
 	self.Castbar.PostCastNotInterruptible = kickable
 	self.Castbar.PostCastInterruptible = kickable
 end
-
 
 bdCore:hookEvent("nameplate_update",enumerateNameplates)
 bdCore:hookEvent("bd_reconfig", enumerateNameplates)
