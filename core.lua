@@ -84,7 +84,7 @@ local defaults = {}
 	defaults[#defaults+1] = {tab = {
 		type="tab",
 		value="Sizing & Display"
-	}}
+}}
 	defaults[#defaults+1] = {friendnamealpha={
 		type="slider",
 		value=1,
@@ -93,15 +93,15 @@ local defaults = {}
 		step=0.1,
 		label="Friendly Name Opacity",
 		callback=function() enumerateNameplates() end
-	}}
+}}
 	defaults[#defaults+1] = {friendlynamehack = {
 		type = "checkbox",
 		value = false,
 		label = "Friendly Names in Raid",
 		tooltip = "This will disable friendly nameplates in raid while keeping the friendly name. Uncheck this before uninstalling bdNameplates. ",
 		callback = function() enumerateNameplates() end
-	}}
-	
+}}
+
 	defaults[#defaults+1] = {width={
 		type="slider",
 		value=200,
@@ -110,7 +110,7 @@ local defaults = {}
 		step=2,
 		label="Nameplates Width",
 		callback=function() enumerateNameplates() end
-	}}
+}}
 
 	defaults[#defaults+1] = {height={
 		type="slider",
@@ -120,7 +120,7 @@ local defaults = {}
 		step=2,
 		label="Nameplates Height",
 		callback=function() enumerateNameplates() end
-	}}
+}}
 	defaults[#defaults+1] = {verticalspacing={
 		type="slider",
 		value=1.8,
@@ -129,7 +129,7 @@ local defaults = {}
 		step=0.1,
 		label="Vertical Spacing",
 		callback=function() cvar_set() end
-	}}
+}}
 	defaults[#defaults+1] = {castbarheight={
 		type="slider",
 		value=18,
@@ -138,7 +138,7 @@ local defaults = {}
 		step=2,
 		label="Castbar Height",
 		callback=function() cvar_set() end
-	}}
+}}
 	defaults[#defaults+1] = {nameplatedistance={
 		type="slider",
 		value=50,
@@ -147,21 +147,21 @@ local defaults = {}
 		step=2,
 		label="Nameplates Draw Distance",
 		callback=function() cvar_set() end
-	}}
+}}
 	defaults[#defaults+1] = {hidecasticon = {
 		type = "checkbox",
 		value = false,
 		label = "Hide Castbar Icon",
 		callback = function() enumerateNameplates() end
-	}}
-	--[[
+}}
+--[[
 	defaults[#defaults+1] = {nameplatemotion = {
 		type = "dropdown",
 		value = 1,
 		options = {1,0},
 		label = "Stacking: 1 for stacked, 0 for overlapping",
 		callback = function() cvar_set() end
-	}}--]]
+}}--]]
 
 -------------
 -- Text
@@ -169,38 +169,38 @@ local defaults = {}
 	defaults[#defaults+1] = {tab = {
 		type="tab",
 		value="Text"
-	}}
+}}
 	defaults[#defaults+1] = {hptext = {
 		type = "dropdown",
 		value = "HP - %",
 		options = {"None","HP - %", "HP", "%"},
 		label = "Nameplate Health Text",
 		callback = function() enumerateNameplates() end
-	}}
+}}
 	defaults[#defaults+1] = {fixatealert = {
 		type = "dropdown",
 		value = "All",
 		options = {"All","Always","Personal","None"},
 		label = "Fixate Alert"
-	}}
+}}
 	defaults[#defaults+1] = {showhptexttargetonly = {
 		type = "checkbox",
 		value = false,
 		label = "Show Health Text on target only",
 		callback = function() enumerateNameplates() end
-	}}
+}}
 	defaults[#defaults+1] = {showenergy = {
 		type = "checkbox",
 		value = false,
 		label = "Show energy value on healthbar",
 		callback = function() enumerateNameplates() end
-	}}
+}}
 	defaults[#defaults+1] = {hidefriendnames = {
 		type = "checkbox",
 		value = false,
 		label = "Hide Friendly Names",
 		callback = function() enumerateNameplates() end
-	}}
+}}
 	defaults[#defaults+1] = {enemynamesize={
 		type="slider",
 		value=16,
@@ -209,7 +209,7 @@ local defaults = {}
 		step=1,
 		label="Enemy Name Font Size",
 		callback=function() enumerateNameplates() end
-	}}
+}}
 	defaults[#defaults+1] = {friendlynamesize={
 		type="slider",
 		value=16,
@@ -218,7 +218,7 @@ local defaults = {}
 		step=1,
 		label="Friendly Name Font Size",
 		callback=function() enumerateNameplates() end
-	}}
+}}
 
 	defaults[#defaults+1] = {raidmarkersize={
 		type="slider",
@@ -228,7 +228,7 @@ local defaults = {}
 		step=2,
 		label="Raid Marker Icon Size",
 		callback=function() enumerateNameplates() end
-	}}
+}}
 	defaults[#defaults+1] = {markposition = {
 		type = "dropdown",
 		value = "TOP",
@@ -236,7 +236,7 @@ local defaults = {}
 		label = "Raid Marker position",
 		tooltip = "Where raid markers should be positioned on the nameplate.",
 		callback = function() enumerateNameplates() end
-	}}
+}}
 
 -------------
 -- Colors
@@ -244,47 +244,47 @@ local defaults = {}
 	defaults[#defaults+1] = {tab = {
 		type="tab",
 		value="Colors"
-	}}
+}}
 	defaults[#defaults+1] = {kickable={
 		type="color",
 		value={.1, .4, .7, 1},
 		name="Interruptable Cast Color"
-	}}
+}}
 	defaults[#defaults+1] = {nonkickable={
 		type="color",
 		value={.7, .7, .7, 1},
 		name="Non-Interruptable Cast Color"
-	}}
+}}
 	defaults[#defaults+1] = {glowcolor={
 		type="color",
 		value={1,1,1,1},
 		name="Target Glow Color"
-	}}
+}}
 	defaults[#defaults+1] = {threatcolor={
 		type="color",
 		value={.79, .3, .21, 1},
 		name="Have Aggro Color"
-	}}
+}}
 	defaults[#defaults+1] = {nothreatcolor={
 		type="color",
 		value={0.3, 1, 0.3,1},
 		name="No Aggro Color"
-	}}
+}}
 	defaults[#defaults+1] = {threatdangercolor={
 		type="color",
 		value={1, .55, 0.3,1},
 		name="Danger Aggro Color"
-	}}
+}}
 	defaults[#defaults+1] = {executecolor={
 		type="color",
 		value={.1, .4, .7,1},
 		name="Execute Range Color"
-	}}
+}}
 	defaults[#defaults+1] = {specialcolor={
 		type="color",
 		value={.8, .4, .7,1},
 		name="Special Unit Color"
-	}}
+}}
 	defaults[#defaults+1] = {executerange = {
 		type = "slider",
 		value=20,
@@ -293,7 +293,7 @@ local defaults = {}
 		step=5,
 		label = "Execute range",
 		callback = function() enumerateNameplates() end
-	}}
+}}
 	defaults[#defaults+1] = {unselectedalpha={
 		type="slider",
 		value=0.5,
@@ -302,36 +302,36 @@ local defaults = {}
 		step=0.1,
 		label="Unselected nameplate alpha",
 		callback=function() enumerateNameplates() end
-	}}
+}}
 -------------
 -- Special Units
 -------------
 	defaults[#defaults+1] = {tab = {
 		type="tab",
 		value="Special Units"
-	}}
+}}
 	defaults[#defaults+1] = {specialunits={
 		type = "list",
 		value = specialMobs,
 		label = "Special Unit List",
 		tooltip = "Units who's name are in this list will have their healthbar colored with the 'Special Unit Color' "
-	}}
+}}
 -------------
 -- Target
 -------------
 	--[[defaults[#defaults+1] = {tab = {
 		type="tab",
 		value="Target"
-	}}
-	
+}}
 
-	
+
+
 	defaults[#defaults+1] = {showfriendlybar = {
 		type = "checkbox",
 		value = false,
 		label = "Show health bar when targeting friendly.",
 		callback = function() enumerateNameplates() end
-	}}--]]
+}}--]]
 
 -------------
 -- Your Debuffs
@@ -339,12 +339,12 @@ local defaults = {}
 	defaults[#defaults+1] = {tab = {
 		type="tab",
 		value="Your Debuffs"
-	}}
+}}
 	defaults[#defaults+1] = {automydebuff={
 		type="checkbox",
 		value=false,
 		label="Automatically track debuffs cast by you."
-	}}
+}}
 	defaults[#defaults+1] = {debuffsize={
 		type="slider",
 		value=40,
@@ -352,57 +352,57 @@ local defaults = {}
 		max=40,
 		step=2,
 		label="Debuff Size",
-	}}
+}}
 	defaults[#defaults+1] = {selfwhitelist={
 		type="list",
 		value={},
 		label="Enemy Debuffs (cast by you)",
 		tooltip="Use to show a specified aura cast by you."
-	}}
+}}
 
 -------------
 -- Anyone's Auras
 -------------
-defaults[#defaults+1] = {tab = {
-	type="tab",
-	value="All Auras"
+	defaults[#defaults+1] = {tab = {
+		type="tab",
+		value="All Auras"
 }}
-defaults[#defaults+1] = {raidbefuffs={
-	type="slider",
-	value=50,
-	min=20,
-	max=100,
-	step=2,
-	label="Raid Debuff Size",
+	defaults[#defaults+1] = {raidbefuffs={
+		type="slider",
+		value=50,
+		min=20,
+		max=100,
+		step=2,
+		label="Raid Debuff Size",
 }}
-defaults[#defaults+1] = {whitelist={
-	type="list",
-	value=defaultwhitelist,
-	label="Friendly/Enemy Auras (cast by anyone)",
-	tooltip="Use to show a specified aura cast by anyone."
+	defaults[#defaults+1] = {whitelist={
+		type="list",
+		value=defaultwhitelist,
+		label="Friendly/Enemy Auras (cast by anyone)",
+		tooltip="Use to show a specified aura cast by anyone."
 }}
 
 -------------
 -- Blacklist
 -------------
-defaults[#defaults+1] = {tab = {
-	type="tab",
-	value="Blacklist"
+	defaults[#defaults+1] = {tab = {
+		type="tab",
+		value="Blacklist"
 }}
-defaults[#defaults+1] = {disableauras={
-	type="checkbox",
-	value=false,
-	label="Don't show any auras."
+	defaults[#defaults+1] = {disableauras={
+		type="checkbox",
+		value=false,
+		label="Don't show any auras."
 }}
-defaults[#defaults+1] = {text = {
-	type="text",
-	value="Certain abilities are tracked by default, i.e. stuns / silences. You can stop these from showing up using the blacklist. "
+	defaults[#defaults+1] = {text = {
+		type="text",
+		value="Certain abilities are tracked by default, i.e. stuns / silences. You can stop these from showing up using the blacklist. "
 }}
-defaults[#defaults+1] = {blacklist={
-	type="list",
-	value={},
-	label="Aura Blacklist",
-	tooltip="Useful if you want to blacklist any auras that Blizzard tracks by default."
+	defaults[#defaults+1] = {blacklist={
+		type="list",
+		value={},
+		label="Aura Blacklist",
+		tooltip="Useful if you want to blacklist any auras that Blizzard tracks by default."
 }}
 
 
@@ -446,7 +446,7 @@ local function cvar_set()
 		['nameplateMinScaleDistance'] = 0, 
 		['nameplateLargerScale'] = 1, -- for bosses
 	}
-
+	
 	if (config.friendlynamehack) then
 		cvars['nameplateShowOnlyNames'] = 1	
 		cvars['nameplateShowDebuffsOnFriendly'] = 1
@@ -545,7 +545,7 @@ for eclass, color in next, FACTION_BAR_COLORS do
 end
 
 local function round(num, numDecimalPlaces)
-  return string.format("%." .. (numDecimalPlaces or 0) .. "f", num)
+	return string.format("%." .. (numDecimalPlaces or 0) .. "f", num)
 end
 
 
@@ -565,7 +565,7 @@ end
 local function enemyStyle(self,unit)
 	local nameplate = C_NamePlate.GetNamePlateForUnit(unit)
 	local self = nameplate.ouf
-
+	
 	self.Auras:Hide()
 	self.Debuffs:Show()
 	if (UnitIsUnit(unit,"target")) then
@@ -661,10 +661,10 @@ local function friendlyStyle(self, unit)
 	if (UnitIsUnit(unit,"target")) then
 		self:SetAlpha(1)
 		--[[if (config.showfriendlybar) then
-			self.Health:Show()
-			self.Name:ClearAllPoints()
-			self.Name:SetPoint("TOP", self, "TOP", 0, 20)
-		end	--]]
+		self.Health:Show()
+		self.Name:ClearAllPoints()
+		self.Name:SetPoint("TOP", self, "TOP", 0, 20)
+	end	--]]
 	else
 		self:SetAlpha(0.8)
 		self.Health:Hide()
@@ -696,7 +696,7 @@ local function threatColor(self, forced)
 	local threat = select(2, UnitDetailedThreatSituation("player", self.unit));
 	local targeted = select(1, UnitDetailedThreatSituation("player", self.unit));
 	local reaction = UnitReaction("player", self.unit);
-
+	
 	-- ptr lets unithealthmax be 0 all the time for some reason
 	local perc = 100;
 	if (UnitHealthMax(self.unit) ~= 0) then
@@ -704,7 +704,7 @@ local function threatColor(self, forced)
 	end
 	
 	local name = UnitName(self.unit) or "";
-
+	
 	if (UnitIsTapDenied(self.unit)) then
 		healthbar:SetStatusBarColor(.5,.5,.5)
 	elseif(combat) then 
@@ -725,14 +725,14 @@ local function threatColor(self, forced)
 	if (config.specialunits[name]) then
 		healthbar:SetStatusBarColor(unpack(config.specialcolor))
 	end
-
+	
 	--[[if (UnitName(unit) == "Ember of Taeshalach") then
-		local power = UnitPower(unit)
-		if (power >= (lastenergy + 40)) then
-			healthbar:SetStatusBarColor(unpack(config.specialcolor))
-		end
-		lastenergy = power
-	end--]]
+	local power = UnitPower(unit)
+	if (power >= (lastenergy + 40)) then
+		healthbar:SetStatusBarColor(unpack(config.specialcolor))
+	end
+	lastenergy = power
+end--]]
 	
 	self.Fixate:Hide()
 	if (config.fixatealert == "Always") then
@@ -816,10 +816,10 @@ local function npcallback(self, event, unit)
 		--IsUnitOnQuest
 		-- self.Quest:Hide()
 		-- for q = 1, GetNumQuestLogEntries() do	
-			-- if (IsUnitOnQuest(q,unit) == 1) then
-				-- self.Quest:Show()
-				-- break
-			-- end
+		-- if (IsUnitOnQuest(q,unit) == 1) then
+		-- self.Quest:Show()
+		-- break
+		-- end
 		-- end
 		-- not UnitIsCharmed(unit) or
 		
@@ -915,14 +915,14 @@ local function style(self, unit)
 	end)
 	self.Circle:Hide()
 	--]]
-
+	
 	self:EnableMouse(false)
 	
 	self.background = self:CreateTexture(nil, "BACKGROUND", nil, -7)
 	self.background:SetTexture(bdCore.media.flat)
 	self.background:SetAllPoints(self)
 	self.background:SetVertexColor(0,1,0,.3)
-
+	
 	self.unit = unit
 	self:SetScript("OnEnter", function()
 		ShowUIPanel(GameTooltip)
@@ -963,7 +963,7 @@ local function style(self, unit)
 		end
 		
 	end
-
+	
 	oUF.Tags.Events['bdncurpower'] = 'UNIT_POWER_FREQUENT UNIT_POWER PLAYER_TARGET_CHANGED'
 	oUF.Tags.Methods['bdncurpower'] = function(unit)
 		local pp, ppMax = UnitPower(unit), UnitPowerMax(unit)
@@ -977,7 +977,7 @@ local function style(self, unit)
 			return math.floor(ppPercent);
 		end
 	end
-
+	
 	self.Health = CreateFrame("StatusBar", nil, self)
 	self.Health:SetStatusBarTexture(bdCore.media.smooth)
 	self.Health:SetAllPoints(self)
@@ -989,7 +989,7 @@ local function style(self, unit)
 	self.Health.colorHealth = true
 	bdCore:setBackdrop(self.Health,true)
 	self.Health:EnableMouse(false)
-
+	
 	
 	self.Power = CreateFrame("StatusBar", nil, self)
 	self.Power:SetStatusBarTexture(bdCore.media.flat)
@@ -1005,11 +1005,11 @@ local function style(self, unit)
 	self.Power.colorClass = true
 	bdCore:setBackdrop(self.Power)
 	self.Power:Hide()
-
+	
 	-- quest indicator
 	self.QuestIndicator = self:CreateTexture(nil, 'OVERLAY')
-    self.QuestIndicator:SetSize(20, 20)
-    self.QuestIndicator:SetPoint('LEFT', self.Name, 'RIGHT', 2,  0)
+	self.QuestIndicator:SetSize(20, 20)
+	self.QuestIndicator:SetPoint('LEFT', self.Name, 'RIGHT', 2, 0)
 	
 	self.Curhp = self.Health:CreateFontString(nil,"OVERLAY")
 	self.Curhp:SetFont(bdCore.media.font, 12,"OUTLINE")
@@ -1018,7 +1018,7 @@ local function style(self, unit)
 	self.Curhp:SetAlpha(0.8)
 	self.Curhp:SetPoint("RIGHT", self.Health, "RIGHT", -4, 0)
 	self:Tag(self.Curhp, '[bdncurhp]')
-
+	
 	self.Curpower = self.Health:CreateFontString(nil,"OVERLAY")
 	self.Curpower:SetFont(bdCore.media.font, 12,"OUTLINE")
 	self.Curpower:SetJustifyH("LEFT")
@@ -1101,7 +1101,7 @@ local function style(self, unit)
 	self.Auras:SetSize((config.raidbefuffs*2)+4, config.raidbefuffs)
 	self.Auras:EnableMouse(false)
 	self.Auras.size = config.raidbefuffs
-	self.Auras.initialAnchor  = "BOTTOM"
+	self.Auras.initialAnchor = "BOTTOM"
 	self.Auras.spacing = 2
 	self.Auras.num = 20
 	self.Auras['growth-y'] = "UP"
@@ -1157,7 +1157,7 @@ local function style(self, unit)
 	self.Debuffs:SetSize(config.width, config.debuffsize)
 	self.Debuffs:EnableMouse(false)
 	self.Debuffs.size = config.debuffsize
-	self.Debuffs.initialAnchor  = "BOTTOMLEFT"
+	self.Debuffs.initialAnchor = "BOTTOMLEFT"
 	self.Debuffs.spacing = 2
 	self.Debuffs.num = 20
 	self.Debuffs['growth-y'] = "UP"
