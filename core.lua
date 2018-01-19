@@ -449,7 +449,7 @@ local function cvar_set()
 
 	if (config.friendlynamehack) then
 		cvars['nameplateShowOnlyNames'] = 1	
-		cvars['nameplateShowDebuffsOnFriendly'] = 1
+		--cvars['nameplateShowDebuffsOnFriendly'] = 1
 	end
 	
 	if (not InCombatLockdown()) then
