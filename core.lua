@@ -411,7 +411,7 @@ local config = bdCore.config.profile['Nameplates']
 local scale = UIParent:GetEffectiveScale()*1
 C_NamePlate.SetNamePlateFriendlySize((config.width * scale) + 10,0.1)
 C_NamePlate.SetNamePlateSelfSize((config.width * scale) + 10,0.1)
-C_NamePlate.SetNamePlateEnemySize((config.width * scale) + 10, (config.height * scale) + config.enemynamesize + 4)
+C_NamePlate.SetNamePlateEnemySize(config.width * scale, config.height * scale)
 
 SetCVar('nameplateMotionSpeed', .1)
 
@@ -759,7 +759,7 @@ local function npcallback(self, event, unit)
 	local scale = UIParent:GetEffectiveScale()*1
 	if (not InCombatLockdown()) then
 		C_NamePlate.SetNamePlateFriendlySize((config.width * scale) + 10,0.1)
-		C_NamePlate.SetNamePlateEnemySize((config.width * scale) + 10, (config.height * scale) + config.enemynamesize + 4)
+		C_NamePlate.SetNamePlateEnemySize(config.width * scale, (config.height + 10) * scale)
 		C_NamePlate.SetNamePlateFriendlyClickThrough(true)
 	end
 	
