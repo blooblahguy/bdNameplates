@@ -583,6 +583,7 @@ local function enemyStyle(self,unit)
 	self.Name:SetPoint("BOTTOM", self, "TOP", 0, 6)	
 	self.Castbar:SetAlpha(1)
 	self.Health:Show()
+	self.Health:SetAllPoints(self)
 end
 
 local function npcStyle(self,unit)
@@ -965,6 +966,9 @@ local function style(self, unit)
 	end
 
 	oUF.Tags.Events['bdncurpower'] = 'UNIT_POWER_FREQUENT UNIT_POWER PLAYER_TARGET_CHANGED'
+	if (bdCore.isBFA) then
+		oUF.Tags.Events['bdncurpower'] = 'UNIT_POWER_FREQUENT UNIT_POWER_UPDATE PLAYER_TARGET_CHANGED'
+	end
 	oUF.Tags.Methods['bdncurpower'] = function(unit)
 		local pp, ppMax = UnitPower(unit), UnitPowerMax(unit)
 		if not pp then return end
