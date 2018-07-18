@@ -1110,7 +1110,7 @@ local function style(self, unit)
 	self.Auras.num = 20
 	self.Auras['growth-y'] = "UP"
 	self.Auras['growth-x'] = "RIGHT"
-	self.Auras.CustomFilter = function(icons, unit, icon, name, rank, texture, count, dispelType, duration, expiration, caster, isStealable, nameplateShowSelf, spellID, canApply, isBossDebuff, casterIsPlayer, nameplateShowAll,timeMod, effect1, effect2, effect3)
+	self.Auras.CustomFilter = function(element, unit, button, name, texture, count, debuffType, duration, expiration, caster, isStealable, nameplateShowSelf, spellID, canApply, isBossDebuff, casterIsPlayer, nameplateShowAll,timeMod, effect1, effect2, effect3)
 		local allow = false
 		
 		if (raidwhitelist[name] or raidwhitelist[spellID]) then
@@ -1166,7 +1166,7 @@ local function style(self, unit)
 	self.Debuffs.num = 20
 	self.Debuffs['growth-y'] = "UP"
 	self.Debuffs['growth-x'] = "RIGHT"
-	self.Debuffs.CustomFilter = function(icons, unit, icon, name, rank, texture, count, dispelType, duration, expiration, caster, isStealable, nameplateShowSelf, spellID, canApply, isBossDebuff, casterIsPlayer, nameplateShowAll,timeMod, effect1, effect2, effect3)
+	self.Debuffs.CustomFilter = function(element, unit, button, name, texture, count, debuffType, duration, expiration, caster, isStealable, nameplateShowSelf, spellID, canApply, isBossDebuff, casterIsPlayer, nameplateShowAll,timeMod, effect1, effect2, effect3)
 		
 		local allow = false
 		
