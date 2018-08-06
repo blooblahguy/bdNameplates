@@ -63,9 +63,6 @@ local raidwhitelist = {
 	['Felclaws'] = true,
 }
 
-local modules = {}
---modules["Star Augur Etraeus"] = function()
-
 local function cvar_set() end
 local function npcallback() end
 local function enumerateNameplates()
@@ -316,6 +313,12 @@ local defaults = {}
 		label = "Special Unit List",
 		tooltip = "Units who's name are in this list will have their healthbar colored with the 'Special Unit Color' "
 	}}
+	defaults[#defaults+1] = {fixateMobs={
+		type = "list",
+		value = fixateMobs,
+		label = "Fixate Unit List",
+		tooltip = "Units who's name are in this list will have a fixate icon when they target you."
+	}}
 -------------
 -- Target
 -------------
@@ -548,7 +551,6 @@ local function round(num, numDecimalPlaces)
   return string.format("%." .. (numDecimalPlaces or 0) .. "f", num)
 end
 
-
 local function unitColor(unit)
 	if (not UnitExists(unit)) then
 		return unpack(colors.tapped)
@@ -740,7 +742,7 @@ local function threatColor(self, forced)
 		self.Fixate:Show()
 		self.Fixate.text:SetText(UnitName(self.unit.."target"))
 	end
-	if (fixateMobs[name] and UnitExists(self.unit.."target")) then
+	if (config.fixateMobs[name] and UnitExists(self.unit.."target")) then
 		if (config.fixatealert == "All") then
 			self.Fixate:Show()
 			self.Fixate.text:SetText(UnitName(self.unit.."target"))
