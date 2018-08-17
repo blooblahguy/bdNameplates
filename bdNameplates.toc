@@ -6,4 +6,5 @@
 
 config.lua
 functions.lua
+resources.lua
 core.lua
