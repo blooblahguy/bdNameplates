@@ -872,52 +872,6 @@ local function style(self, unit)
 	local main = self
 	self.styled = true
 	nameplate.ouf = self
-	--self:RegisterForClicks('AnyDown')
-	
-	-- Circle Alert
-	--[[
-	self.Circle = CreateFrame("frame",nil,self)
-	self.Circle:SetAlpha(0.8)
-	self.Circle:SetFrameLevel(1)
-	self.Circle.parent = self
-	self.Circle.tex = self.Circle:CreateTexture(nil,"OVERLAY")
-	self.Circle.tex:SetAllPoints()
-	self.Circle.tex:SetTexture("Interface\\Addons\\bdNameplates\\circle.blp")
-	self.Circle.tex:SetVertexColor(0,0,0,1)
-	self.Circle.SetYards = function(self,yards)
-		self:SetSize(50*yards,50*yards)
-		self:SetPoint("CENTER", self.parent.Name, "CENTER", 0, -30)
-	end
-	self.Circle.SetColor = function(self,...)
-		self.tex:SetVertexColor(...)
-	end
-	self.Circle.SetType = function(self,type)
-		if (type == "Circle" or type == 1) then
-			self.tex:SetTexture("Interface\\Addons\\bdNameplates\\circle.blp")
-		elseif (type == "Ring" or type == 2) then
-			self.tex:SetTexture("Interface\\Addons\\bdNameplates\\ring.blp")
-		end
-	end
-	
-	self.Circle:RegisterEvent("ENCOUNTER_END")
-	self.Circle:RegisterEvent("PLAYER_TARGET_CHANGED")
-	self.Circle:SetScript("OnUpdate",function(self,event)
-		if (event == "ENCOUNTER_END") then
-			for _, frame in pairs(C_NamePlate.GetNamePlates()) do
-				local unit = frame.unitFrame.unit
-				local ouf = frame.ouf
-				ouf.Circle:Hide()
-			end
-		else
-			if (UnitIsUnit(unit,"target")) then
-				self:SetAlpha(config.unselectedalpha)
-			else
-				self:SetAlpha(0.8)
-			end
-		end
-	end)
-	self.Circle:Hide()
-	--]]
 
 	self:EnableMouse(false)
 	
