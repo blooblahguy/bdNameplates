@@ -91,6 +91,14 @@ local defaults = {}
 		label="Friendly Name Opacity",
 		callback=function() enumerateNameplates() end
 	}}
+
+	defaults[#defaults+1] = {highlightPurge = {
+		type = "checkbox",
+		value = false,
+		label = "Highlist units who have auras that can be purged",
+		callback = function() enumerateNameplates() end
+	}}
+
 	defaults[#defaults+1] = {friendlynamehack = {
 		type = "checkbox",
 		value = false,
@@ -1068,6 +1076,10 @@ local function style(self, unit)
 	self.Auras['growth-x'] = "RIGHT"
 	self.Auras.CustomFilter = function(element, unit, button, name, texture, count, debuffType, duration, expiration, caster, isStealable, nameplateShowSelf, spellID, canApply, isBossDebuff, casterIsPlayer, nameplateShowAll,timeMod, effect1, effect2, effect3)
 		local allow = false
+
+		if (config.highlightPurge and debuffType == "Magic") then
+			
+		end
 		
 		if (raidwhitelist[name] or raidwhitelist[spellID]) then
 			allow = true
