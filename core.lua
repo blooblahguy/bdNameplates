@@ -186,7 +186,7 @@ local defaults = {}
 		type = "dropdown",
 		value = "All",
 		options = {"All","Always","Personal","None"},
-		label = "Fixate Alert"
+		label = "Fixate Alert."
 	}}
 	defaults[#defaults+1] = {showhptexttargetonly = {
 		type = "checkbox",
@@ -704,18 +704,47 @@ local function threatColor(self, forced)
 	if (UnitIsPlayer(self.unit)) then return end
 	local healthbar = self.Health
 	local combat = UnitAffectingCombat("player")
-	local threat = select(2, UnitDetailedThreatSituation("player", self.unit));
-	local targeted = select(1, UnitDetailedThreatSituation("player", self.unit));
-	local reaction = UnitReaction("player", self.unit);
+
+	local isTanking, status, threatpct, rawthreatpct, threatvalue = UnitDetailedThreatSituation("player", self.unit)
+
+	-- local threat = select(2, UnitDetailedThreatSituation("player", self.unit));
+	-- local targeted = select(1, UnitDetailedThreatSituation("player", self.unit));
+	-- local reaction = UnitReaction("player", self.unit);
 
 	-- ptr lets unithealthmax be 0 all the time for some reason
 	local perc = 100;
 	if (UnitHealthMax(self.unit) ~= 0) then
 		perc = (UnitHealth(self.unit) / UnitHealthMax(self.unit)) * 100
 	end
+
+	-- threat coloring
+	if (UnitIsTapDenied(self.unit)) then
+		-- 5 people or enemy faction have already tagged this mob
+		healthbar:SetStatusBarColor(.5,.5,.5)
+	elseif (combat) then 
+		if (status == 3) then
+			-- securely tanking
+			healthbar:SetStatusBarColor(unpack(config.threatcolor))
+
+		elseif (status == 2 or status == 1) then
+			-- near or over tank threat
+			healthbar:SetStatusBarColor(unpack(config.threatdangercolor))
+
+		elseif (rawthreatpct ~= nil) then
+			-- in combat, but not near tank threat
+			healthbar:SetStatusBarColor(unpack(config.nothreatcolor))
+
+			-- execute color alert
+			if (config.executerange and perc <= config.executerange) then
+				healthbar:SetStatusBarColor(unpack(config.executecolor))
+			end
+
+		end
+	end
 	
 	local name = UnitName(self.unit) or "";
 
+	--[[
 	if (UnitIsTapDenied(self.unit)) then
 		healthbar:SetStatusBarColor(.5,.5,.5)
 	elseif(combat) then 
@@ -732,6 +761,8 @@ local function threatColor(self, forced)
 			end
 		end
 	end
+
+	--]]
 	
 	if (config.specialunits[name]) then
 		healthbar:SetStatusBarColor(unpack(config.specialcolor))
