@@ -1,27 +1,53 @@
-﻿local oUF = bdCore.oUF
-local defaultwhitelist = {
-	['Arcane Torrent'] = true,
-	['War Stomp'] = true,
-}
+﻿local addon, bdNameplates = ...
+local oUF = bdCore.oUF
 
-local fixateMobs = {}
-fixateMobs['Tormented Fragment'] = true
-fixateMobs['Razorjaw Gladiator'] = true
-fixateMobs['Sickly Tadpole'] = true
-fixateMobs['Soul Residue'] = true
-fixateMobs['Nightmare Ichor'] = true
-fixateMobs['Atrigan'] = true
+local config = bdCore.config.profile['Nameplates']
 
-local specialMobs = {}
-specialMobs["Fel Explosives"] = true
-specialMobs["Fanatical Pyromancer"] = true
-specialMobs["Felblaze Imp"] = true
-specialMobs["Hungering Stalker"] = true
-specialMobs["Fel-Powered Purifier"] = true
-specialMobs["Fel-Infused Destructor"] = true
-specialMobs["Fel-Charged Obfuscator"] = true
-specialMobs["Ember of Taeshalach"] = true
-specialMobs["Screaming Shrike"] = true
+function bdNameplates:configCallback()
+	-- set cVars
+	local cvars = {
+		['nameplateSelfAlpha'] = 1,
+		['nameplateShowAll'] = 1,
+		['nameplateMinAlpha'] = 1,
+		['nameplateMaxAlpha'] = 1,
+		['nameplateMaxAlphaDistance'] = 0,
+		['nameplateMaxDistance'] = config.nameplatedistance+6, -- for some reason there is a 6yd diff
+		["nameplateOverlapV"] = config.verticalspacing, --0.8
+		['nameplateShowOnlyNames'] = 0,
+		['nameplateShowDebuffsOnFriendly'] = 0,
+		--['nameplatePersonalShowAlways'] = 1,
+		--['nameplateShowSelf'] = 1,
+		--["nameplateMotionSpeed"] = config.speed, --0.1
+		--["nameplateOverlapH"] = config.spacingH, --0.8
+		--['nameplateMotion'] = tonumber(config.nameplatemotion),
+		['nameplateMinScale'] = 1, 
+		['nameplateMaxScale'] = 1, 
+		['nameplateMaxScaleDistance'] = 0, 
+		['nameplateMinScaleDistance'] = 0, 
+		['nameplateLargerScale'] = 1, -- for bosses
+	}
+
+	if (config.friendlynamehack) then
+		cvars['nameplateShowOnlyNames'] = 1	
+	end
+	
+	if (not InCombatLockdown()) then
+		for k, v in pairs(cvars) do
+			local current = tonumber(GetCVar(k))
+			if (current ~= tonumber(v)) then
+				SetCVar(k, v)
+			end
+		end
+	end
+
+	-- restyle nameplates
+	for _, frame in pairs(C_NamePlate.GetNamePlates()) do
+		local unit = frame.unitFrame.unit
+		npcallback("", "", frame,unit)
+	end
+end
+
+
 
 local raidwhitelist = {
 	-- CC
@@ -63,362 +89,6 @@ local raidwhitelist = {
 	['Felclaws'] = true,
 }
 
-local function cvar_set() end
-local function npcallback() end
-local function enumerateNameplates()
-	config = bdCore.config.profile['Nameplates']
-	for _, frame in pairs(C_NamePlate.GetNamePlates()) do
-		local unit = frame.unitFrame.unit
-		npcallback("", "", frame,unit)
-	end
-end
-
-local defaults = {}
-
---------------
--- Positioning & Display
---------------
-	defaults[#defaults+1] = {tab = {
-		type="tab",
-		value="Sizing & Display"
-	}}
-	defaults[#defaults+1] = {friendnamealpha={
-		type="slider",
-		value=1,
-		min=0,
-		max=1,
-		step=0.1,
-		label="Friendly Name Opacity",
-		callback=function() enumerateNameplates() end
-	}}
-
-	defaults[#defaults+1] = {highlightPurge = {
-		type = "checkbox",
-		value = false,
-		label = "Highlist units who have auras that can be purged",
-		callback = function() enumerateNameplates() end
-	}}
-
-	defaults[#defaults+1] = {friendlynamehack = {
-		type = "checkbox",
-		value = false,
-		label = "Friendly Names in Raid",
-		tooltip = "This will disable friendly nameplates in raid while keeping the friendly name. Uncheck this before uninstalling bdNameplates. ",
-		callback = function() enumerateNameplates() end
-	}}
-	
-	defaults[#defaults+1] = {width={
-		type="slider",
-		value=200,
-		min=30,
-		max=250,
-		step=2,
-		label="Nameplates Width",
-		callback=function() enumerateNameplates() end
-	}}
-
-	defaults[#defaults+1] = {height={
-		type="slider",
-		value=20,
-		min=4,
-		max=50,
-		step=2,
-		label="Nameplates Height",
-		callback=function() enumerateNameplates() end
-	}}
-	defaults[#defaults+1] = {verticalspacing={
-		type="slider",
-		value=1.8,
-		min=0,
-		max=4,
-		step=0.1,
-		label="Vertical Spacing",
-		callback=function() cvar_set() end
-	}}
-	defaults[#defaults+1] = {castbarheight={
-		type="slider",
-		value=18,
-		min=4,
-		max=50,
-		step=2,
-		label="Castbar Height",
-		callback=function() cvar_set() end
-	}}
-	defaults[#defaults+1] = {nameplatedistance={
-		type="slider",
-		value=50,
-		min=10,
-		max=100,
-		step=2,
-		label="Nameplates Draw Distance",
-		callback=function() cvar_set() end
-	}}
-	defaults[#defaults+1] = {hidecasticon = {
-		type = "checkbox",
-		value = false,
-		label = "Hide Castbar Icon",
-		callback = function() enumerateNameplates() end
-	}}
-	--[[
-	defaults[#defaults+1] = {nameplatemotion = {
-		type = "dropdown",
-		value = 1,
-		options = {1,0},
-		label = "Stacking: 1 for stacked, 0 for overlapping",
-		callback = function() cvar_set() end
-	}}--]]
-
--------------
--- Text
--------------
-	defaults[#defaults+1] = {tab = {
-		type="tab",
-		value="Text"
-	}}
-	defaults[#defaults+1] = {hptext = {
-		type = "dropdown",
-		value = "HP - %",
-		options = {"None","HP - %", "HP", "%"},
-		label = "Nameplate Health Text",
-		callback = function() enumerateNameplates() end
-	}}
-	defaults[#defaults+1] = {fixatealert = {
-		type = "dropdown",
-		value = "All",
-		options = {"All","Always","Personal","None"},
-		label = "Fixate Alert."
-	}}
-	defaults[#defaults+1] = {showhptexttargetonly = {
-		type = "checkbox",
-		value = false,
-		label = "Show Health Text on target only",
-		callback = function() enumerateNameplates() end
-	}}
-	defaults[#defaults+1] = {showenergy = {
-		type = "checkbox",
-		value = false,
-		label = "Show energy value on healthbar",
-		callback = function() enumerateNameplates() end
-	}}
-	defaults[#defaults+1] = {hidefriendnames = {
-		type = "checkbox",
-		value = false,
-		label = "Hide Friendly Names",
-		callback = function() enumerateNameplates() end
-	}}
-	defaults[#defaults+1] = {enemynamesize={
-		type="slider",
-		value=16,
-		min=8,
-		max=24,
-		step=1,
-		label="Enemy Name Font Size",
-		callback=function() enumerateNameplates() end
-	}}
-	defaults[#defaults+1] = {friendlynamesize={
-		type="slider",
-		value=16,
-		min=8,
-		max=24,
-		step=1,
-		label="Friendly Name Font Size",
-		callback=function() enumerateNameplates() end
-	}}
-
-	defaults[#defaults+1] = {raidmarkersize={
-		type="slider",
-		value=24,
-		min=10,
-		max=50,
-		step=2,
-		label="Raid Marker Icon Size",
-		callback=function() enumerateNameplates() end
-	}}
-	defaults[#defaults+1] = {markposition = {
-		type = "dropdown",
-		value = "TOP",
-		options = {"LEFT","TOP","RIGHT"},
-		label = "Raid Marker position",
-		tooltip = "Where raid markers should be positioned on the nameplate.",
-		callback = function() enumerateNameplates() end
-	}}
-
--------------
--- Colors
--------------
-	defaults[#defaults+1] = {tab = {
-		type="tab",
-		value="Colors"
-	}}
-	defaults[#defaults+1] = {kickable={
-		type="color",
-		value={.1, .4, .7, 1},
-		name="Interruptable Cast Color"
-	}}
-	defaults[#defaults+1] = {nonkickable={
-		type="color",
-		value={.7, .7, .7, 1},
-		name="Non-Interruptable Cast Color"
-	}}
-	defaults[#defaults+1] = {glowcolor={
-		type="color",
-		value={1,1,1,1},
-		name="Target Glow Color"
-	}}
-	defaults[#defaults+1] = {threatcolor={
-		type="color",
-		value={.79, .3, .21, 1},
-		name="Have Aggro Color"
-	}}
-	defaults[#defaults+1] = {nothreatcolor={
-		type="color",
-		value={0.3, 1, 0.3,1},
-		name="No Aggro Color"
-	}}
-	defaults[#defaults+1] = {threatdangercolor={
-		type="color",
-		value={1, .55, 0.3,1},
-		name="Danger Aggro Color"
-	}}
-	defaults[#defaults+1] = {executecolor={
-		type="color",
-		value={.1, .4, .7,1},
-		name="Execute Range Color"
-	}}
-	defaults[#defaults+1] = {specialcolor={
-		type="color",
-		value={.8, .4, .7,1},
-		name="Special Unit Color"
-	}}
-	defaults[#defaults+1] = {executerange = {
-		type = "slider",
-		value=20,
-		min=0,
-		max=40,
-		step=5,
-		label = "Execute range",
-		callback = function() enumerateNameplates() end
-	}}
-	defaults[#defaults+1] = {unselectedalpha={
-		type="slider",
-		value=0.5,
-		min=0.1,
-		max=1,
-		step=0.1,
-		label="Unselected nameplate alpha",
-		callback=function() enumerateNameplates() end
-	}}
--------------
--- Special Units
--------------
-	defaults[#defaults+1] = {tab = {
-		type="tab",
-		value="Special Units"
-	}}
-	defaults[#defaults+1] = {specialunits={
-		type = "list",
-		value = specialMobs,
-		label = "Special Unit List",
-		tooltip = "Units who's name are in this list will have their healthbar colored with the 'Special Unit Color' "
-	}}
-	defaults[#defaults+1] = {fixateMobs={
-		type = "list",
-		value = fixateMobs,
-		label = "Fixate Unit List",
-		tooltip = "Units who's name are in this list will have a fixate icon when they target you."
-	}}
--------------
--- Target
--------------
-	--[[defaults[#defaults+1] = {tab = {
-		type="tab",
-		value="Target"
-	}}
-	
-
-	
-	defaults[#defaults+1] = {showfriendlybar = {
-		type = "checkbox",
-		value = false,
-		label = "Show health bar when targeting friendly.",
-		callback = function() enumerateNameplates() end
-	}}--]]
-
--------------
--- Your Debuffs
--------------
-	defaults[#defaults+1] = {tab = {
-		type="tab",
-		value="Your Debuffs"
-	}}
-	defaults[#defaults+1] = {automydebuff={
-		type="checkbox",
-		value=false,
-		label="Automatically track debuffs cast by you."
-	}}
-	defaults[#defaults+1] = {debuffsize={
-		type="slider",
-		value=40,
-		min=20,
-		max=40,
-		step=2,
-		label="Debuff Size",
-	}}
-	defaults[#defaults+1] = {selfwhitelist={
-		type="list",
-		value={},
-		label="Enemy Debuffs (cast by you)",
-		tooltip="Use to show a specified aura cast by you."
-	}}
-
--------------
--- Anyone's Auras
--------------
-defaults[#defaults+1] = {tab = {
-	type="tab",
-	value="All Auras"
-}}
-defaults[#defaults+1] = {raidbefuffs={
-	type="slider",
-	value=50,
-	min=20,
-	max=100,
-	step=2,
-	label="Raid Debuff Size",
-}}
-defaults[#defaults+1] = {whitelist={
-	type="list",
-	value=defaultwhitelist,
-	label="Friendly/Enemy Auras (cast by anyone)",
-	tooltip="Use to show a specified aura cast by anyone."
-}}
-
--------------
--- Blacklist
--------------
-defaults[#defaults+1] = {tab = {
-	type="tab",
-	value="Blacklist"
-}}
-defaults[#defaults+1] = {disableauras={
-	type="checkbox",
-	value=false,
-	label="Don't show any auras."
-}}
-defaults[#defaults+1] = {text = {
-	type="text",
-	value="Certain abilities are tracked by default, i.e. stuns / silences. You can stop these from showing up using the blacklist. "
-}}
-defaults[#defaults+1] = {blacklist={
-	type="list",
-	value={},
-	label="Aura Blacklist",
-	tooltip="Useful if you want to blacklist any auras that Blizzard tracks by default."
-}}
-
-
-bdCore:addModule("Nameplates", defaults)
-local config = bdCore.config.profile['Nameplates']
 local scale = UIParent:GetEffectiveScale()*1
 C_NamePlate.SetNamePlateFriendlySize((config.width * scale) + 10,0.1)
 C_NamePlate.SetNamePlateSelfSize((config.width * scale) + 10,0.1)
@@ -436,41 +106,7 @@ SetCVar('nameplateLargeTopInset', GetCVarDefault("nameplateLargeTopInset"))
 SetCVar('nameplateLargeBottomInset', GetCVarDefault("nameplateLargeBottomInset"))
 
 local function cvar_set()
-	local cvars = {
-		['nameplateSelfAlpha'] = 1,
-		['nameplateShowAll'] = 1,
-		['nameplateMinAlpha'] = 1,
-		['nameplateMaxAlpha'] = 1,
-		['nameplateMaxAlphaDistance'] = 0,
-		['nameplateMaxDistance'] = config.nameplatedistance+6, -- for some reason there is a 6yd diff
-		["nameplateOverlapV"] = config.verticalspacing, --0.8
-		['nameplateShowOnlyNames'] = 0,
-		['nameplateShowDebuffsOnFriendly'] = 0,
-		--['nameplatePersonalShowAlways'] = 1,
-		--['nameplateShowSelf'] = 1,
-		--["nameplateMotionSpeed"] = config.speed, --0.1
-		--["nameplateOverlapH"] = config.spacingH, --0.8
-		--['nameplateMotion'] = tonumber(config.nameplatemotion),
-		['nameplateMinScale'] = 1, 
-		['nameplateMaxScale'] = 1, 
-		['nameplateMaxScaleDistance'] = 0, 
-		['nameplateMinScaleDistance'] = 0, 
-		['nameplateLargerScale'] = 1, -- for bosses
-	}
-
-	if (config.friendlynamehack) then
-		cvars['nameplateShowOnlyNames'] = 1	
-		--cvars['nameplateShowDebuffsOnFriendly'] = 1
-	end
 	
-	if (not InCombatLockdown()) then
-		for k, v in pairs(cvars) do
-			local current = tonumber(GetCVar(k))
-			if (current ~= tonumber(v)) then
-				SetCVar(k, v)
-			end
-		end
-	end
 end
 
 local function numberize(v)
@@ -576,8 +212,9 @@ local function enemyStyle(self,unit)
 	local nameplate = C_NamePlate.GetNamePlateForUnit(unit)
 	local self = nameplate.ouf
 
-	self.Auras:Hide()
-	self.Debuffs:Show()
+	self.Auras:Show()
+	-- self.Debuffs:Show()
+
 	if (UnitIsUnit(unit,"target")) then
 		self:SetAlpha(1)
 		self.Health.Shadow:Show()
@@ -607,7 +244,7 @@ local function npcStyle(self,unit)
 	end
 	
 	self.background:Hide()
-	self.Debuffs:Hide()
+	-- self.Debuffs:Hide()
 	self.Auras:Hide()
 	self.Health:Hide()
 	
@@ -665,7 +302,7 @@ local function friendlyStyle(self, unit)
 	local self = nameplate.ouf
 	
 	--self.Power:Hide()
-	self.Debuffs:Hide()
+	-- self.Debuffs:Hide()
 	self.Auras:Show()
 	self.Health:Hide()
 	
@@ -797,7 +434,8 @@ local function threatColor(self, forced)
 end
 
 local function npcallback(self, event, unit)
-	config = bdCore.config.profile['Nameplates']
+	if (self == nil) then return end
+
 	local scale = UIParent:GetEffectiveScale()*1
 	if (not InCombatLockdown()) then
 		C_NamePlate.SetNamePlateFriendlySize((config.width * scale) + 10,0.1)
@@ -805,7 +443,7 @@ local function npcallback(self, event, unit)
 		C_NamePlate.SetNamePlateFriendlyClickThrough(true)
 	end
 	
-	if (unit) then
+	if (self and unit) then
 		local unit = unit or "target"
 		local nameplate = C_NamePlate.GetNamePlateForUnit(unit)
 		--print(nameplate.ouf)
@@ -825,13 +463,17 @@ local function npcallback(self, event, unit)
 		self.Castbar:SetPoint("BOTTOMRIGHT", self.Health, "BOTTOMRIGHT", 0, -config.castbarheight)
 		self.Castbar.Text:SetFont(bdCore.media.font, config.castbarheight*.85, "OUTLINE")
 		self.Castbar.Icon:SetSize(config.height+config.castbarheight, config.height+config.castbarheight)
-		self.Auras:SetSize((config.raidbefuffs*2)+4, config.raidbefuffs)
+
+		self.Auras:SetSize(config.width+4, config.raidbefuffs)
 		self.Auras.size = config.raidbefuffs
-		self.Debuffs:SetSize(config.width+4, config.debuffsize)
-		self.Debuffs.size = config.debuffsize
+
+		-- self.Debuffs:SetSize(config.width+4, config.debuffsize)
+		-- self.Debuffs.size = config.debuffsize
+
 		self.RaidTargetIndicator:SetSize(config.raidmarkersize, config.raidmarkersize)
 		self.RaidTargetIndicator:ClearAllPoints()
 		self.RaidTargetIndicator:SetAlpha(1)
+
 		if (config.markposition == "LEFT") then
 			self.RaidTargetIndicator:SetPoint('RIGHT', self, "LEFT", -(config.raidmarkersize/2), 0)
 		elseif (config.markposition == "RIGHT") then
@@ -883,7 +525,7 @@ local function npcallback(self, event, unit)
 		end
 		
 		if (config.disableauras) then
-			self.Debuffs:Hide()
+			self.Auras:Hide()
 		end
 	end
 	
@@ -1093,14 +735,17 @@ local function style(self, unit)
 	self.Quest:SetSize(20,20)
 	self.Quest:SetPoint("RIGHT", self.name, "LEFT", -6, 0)
 	bdCore:setBackdrop(self.Quest)--]]	
+
+	-- self.PurgeBorder = CreateFrame("frame", nil, self)
+	-- self.PurgeBorder:
 	
 	-- For friendlies
 	self.Auras = CreateFrame("Frame", nil, self)
 	self.Auras:SetPoint("BOTTOM", self, "TOP", -2, 18)
-	self.Auras:SetSize((config.raidbefuffs*2)+4, config.raidbefuffs)
+	self.Auras:SetSize(config.width, config.raidbefuffs)
 	self.Auras:EnableMouse(false)
 	self.Auras.size = config.raidbefuffs
-	self.Auras.initialAnchor  = "BOTTOM"
+	self.Auras.initialAnchor  = "BOTTOMLEFT"
 	self.Auras.spacing = 2
 	self.Auras.num = 20
 	self.Auras['growth-y'] = "UP"
@@ -1111,7 +756,10 @@ local function style(self, unit)
 		if (config.highlightPurge and debuffType == "Magic") then
 			
 		end
-		
+
+		if (nameplateShowAll or (nameplateShowSelf and caster == "player")) then
+			allow = true
+		end
 		if (raidwhitelist[name] or raidwhitelist[spellID]) then
 			allow = true
 		end
@@ -1141,19 +789,21 @@ local function style(self, unit)
 		cdtext:SetAllPoints(button)
 		
 		button.count:SetFont(bdCore.media.font,12,"OUTLINE")
+		button.count:SetTextColor(1,.8,.3)
 		button.count:SetShadowColor(0,0,0,0)
 		button.count:SetJustifyH("RIGHT")
 		button.count:ClearAllPoints()
 		button.count:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", 2, -2)
 		
 		button:EnableMouse(false)
-		button.icon:SetTexCoord(0.1, 0.9, 0.1, 0.9)
+		button.icon:SetTexCoord(0.08, 0.9, 0.20, 0.74)
+		button:SetHeight(config.raidbefuffs*.6)
 		button.cd:SetReverse(true)
 		button.cd:SetHideCountdownNumbers(false)
 	end
 	
 	-- For Enemies
-	self.Debuffs = CreateFrame("Frame", nil, self)
+	--[[self.Debuffs = CreateFrame("Frame", nil, self)
 	self.Debuffs:SetFrameLevel(0)
 	self.Debuffs:ClearAllPoints()
 	self.Debuffs:SetPoint("BOTTOMLEFT", self, "TOPLEFT", 0, 24)
@@ -1208,7 +858,8 @@ local function style(self, unit)
 		button.cd:SetReverse(true)
 		button.cd:SetHideCountdownNumbers(false)
 	end
-	
+	--]]
+
 	self.Castbar = CreateFrame("StatusBar", nil, self)
 	self.Castbar:SetFrameLevel(3)
 	self.Castbar:SetStatusBarTexture(bdCore.media.flat)
