@@ -736,12 +736,19 @@ local function style(self, unit)
 	self.Quest:SetPoint("RIGHT", self.name, "LEFT", -6, 0)
 	bdCore:setBackdrop(self.Quest)--]]	
 
-	-- self.PurgeBorder = CreateFrame("frame", nil, self)
-	-- self.PurgeBorder:
+	self.PurgeBorder = CreateFrame("frame", nil, self)
+	self.PurgeBorder:SetPoint("TOPLEFT", self, "TOPLEFT", -1, 1)
+	self.PurgeBorder:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", 1, -1)
+	self.PurgeBorder:SetBackdrop({edgeFile = bdCore.media.flat, edgeSize = 2})
+	self.PurgeBorder:SetBackdropBorderColor(unpack(bdCore.media.blue))
+	self.PurgeBorder:SetFrameLevel(27)
+	self.PurgeBorder:Hide()
 	
 	-- For friendlies
 	self.Auras = CreateFrame("Frame", nil, self)
-	self.Auras:SetPoint("BOTTOM", self, "TOP", -2, 18)
+	self.Auras:SetFrameLevel(0)
+	self.Auras:ClearAllPoints()
+	self.Auras:SetPoint("BOTTOMLEFT", self, "TOPLEFT", 0, 24)
 	self.Auras:SetSize(config.width, config.raidbefuffs)
 	self.Auras:EnableMouse(false)
 	self.Auras.size = config.raidbefuffs
@@ -753,9 +760,7 @@ local function style(self, unit)
 	self.Auras.CustomFilter = function(element, unit, button, name, texture, count, debuffType, duration, expiration, caster, isStealable, nameplateShowSelf, spellID, canApply, isBossDebuff, casterIsPlayer, nameplateShowAll,timeMod, effect1, effect2, effect3)
 		local allow = false
 
-		if (config.highlightPurge and debuffType == "Magic") then
-			
-		end
+		self.PurgeBorder:Hide()
 
 		if (nameplateShowAll or (nameplateShowSelf and caster == "player")) then
 			allow = true
@@ -779,7 +784,7 @@ local function style(self, unit)
 		return allow
 	end
 	
-	self.Auras.PostUpdateIcon = function(Auras, unit, button, index)
+	self.Auras.PostUpdateIcon = function(self, unit, button, index, position, duration, expiration, debuffType, isStealable)
 		local cdtext = button.cd:GetRegions()
 		bdCore:setBackdrop(button)
 		cdtext:SetFont(bdCore.media.font,14,"OUTLINE")
@@ -800,6 +805,10 @@ local function style(self, unit)
 		button:SetHeight(config.raidbefuffs*.6)
 		button.cd:SetReverse(true)
 		button.cd:SetHideCountdownNumbers(false)
+
+		if (config.highlightPurge and debuffType == "Magic") then
+			self.PurgeBorder:Show()
+		end
 	end
 	
 	-- For Enemies
