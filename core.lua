@@ -3,6 +3,8 @@ local oUF = bdCore.oUF
 
 local config = bdCore.config.profile['Nameplates']
 
+local function npcallback() end
+
 function bdNameplates:configCallback()
 	-- set cVars
 	local cvars = {
