@@ -765,7 +765,7 @@ local function style(self, unit)
 	self.Auras.CustomFilter = function(element, unit, button, name, texture, count, debuffType, duration, expiration, caster, isStealable, nameplateShowSelf, spellID, canApply, isBossDebuff, casterIsPlayer, nameplateShowAll,timeMod, effect1, effect2, effect3)
 		local allow = false
 
-		self.PurgeBorder:Hide()
+		main.PurgeBorder:Hide()
 
 		if (nameplateShowAll or (nameplateShowSelf and caster == "player")) then
 			allow = true
@@ -812,7 +812,7 @@ local function style(self, unit)
 		button.cd:SetHideCountdownNumbers(false)
 
 		if (config.highlightPurge and debuffType == "Magic") then
-			self.PurgeBorder:Show()
+			main.PurgeBorder:Show()
 		end
 	end
 	
