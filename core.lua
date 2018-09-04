@@ -556,7 +556,7 @@ local function style(self, unit)
 	self.styled = true
 	nameplate.ouf = self
 
-	-- self:EnableMouse(false)
+	self:EnableMouse(false)
 
 	-- Setup frame resource for rogue, monks, paladins, mmaybe more one day
 	bdNameplates:resourceBuilder(self, unit)
