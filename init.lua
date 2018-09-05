@@ -176,7 +176,14 @@ defaults[#defaults+1] = {friendlynamesize={
 	label="Friendly Name Font Size",
 	callback=function() bdNameplates:configCallback() end
 }}
-
+defaults[#defaults+1] = {markposition = {
+	type = "dropdown",
+	value = "TOP",
+	options = {"LEFT","TOP","RIGHT"},
+	label = "Raid Marker position",
+	tooltip = "Where raid markers should be positioned on the nameplate.",
+	callback = function() bdNameplates:configCallback() end
+}}
 defaults[#defaults+1] = {raidmarkersize={
 	type="slider",
 	value=24,
@@ -185,14 +192,6 @@ defaults[#defaults+1] = {raidmarkersize={
 	step=2,
 	label="Raid Marker Icon Size",
 	callback=function() bdNameplates:configCallback() end
-}}
-defaults[#defaults+1] = {markposition = {
-	type = "dropdown",
-	value = "TOP",
-	options = {"LEFT","TOP","RIGHT"},
-	label = "Raid Marker position",
-	tooltip = "Where raid markers should be positioned on the nameplate.",
-	callback = function() bdNameplates:configCallback() end
 }}
 
 -------------
