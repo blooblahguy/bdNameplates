@@ -44,6 +44,22 @@ defaults[#defaults+1] = {friendnamealpha={
 	callback=function() bdNameplates:configCallback() end
 }}
 
+defaults[#defaults+1] = {trackResources = {
+	type = "checkbox",
+	value = true,
+	label = "Display class resources on nameplates.",
+	callback = function() bdNameplates:configCallback() end
+}}
+defaults[#defaults+1] = {resourceHeight={
+	type="slider",
+	value=12,
+	min=2,
+	max=50,
+	step=2,
+	label="Resource height",
+	callback=function() bdNameplates:configCallback() end
+}}
+
 defaults[#defaults+1] = {highlightPurge = {
 	type = "checkbox",
 	value = false,

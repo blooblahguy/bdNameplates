@@ -557,9 +557,6 @@ local function style(self, unit)
 	nameplate.ouf = self
 
 	self:EnableMouse(false)
-
-	-- Setup frame resource for rogue, monks, paladins, mmaybe more one day
-	bdNameplates:resourceBuilder(self, unit)
 	
 	self.background = self:CreateTexture(nil, "BACKGROUND", nil, -7)
 	self.background:SetTexture(bdCore.media.flat)
@@ -635,6 +632,9 @@ local function style(self, unit)
 	self.Health.colorHealth = true
 	bdCore:setBackdrop(self.Health,true)
 	self.Health:EnableMouse(false)
+
+	-- Setup frame resource for rogue, monks, paladins, mmaybe more one day
+	bdNameplates:resourceBuilder(self.Health, unit)
 
 	
 	self.Power = CreateFrame("StatusBar", nil, self)

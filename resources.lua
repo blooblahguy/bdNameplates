@@ -3,6 +3,7 @@ local addon, bdNameplates = ...
 local config = bdCore.config.profile['Nameplates']
 
 function bdNameplates:resourceBuilder(frame, unit)
+	-- print("here")
 	local unitClass = select(2, UnitClass("player"))
 	local maxWidth = frame:GetWidth()
 
@@ -10,6 +11,7 @@ function bdNameplates:resourceBuilder(frame, unit)
 	frame.ClassPower = {}
 	for index = 1, 10 do
         local bar = CreateFrame('StatusBar', nil, frame)
+		bar:SetStatusBarTexture(bdCore.media.flat)
         frame.ClassPower[index] = Bar
     end
 
@@ -21,22 +23,29 @@ function bdNameplates:resourceBuilder(frame, unit)
 				local bar = frame.ClassPower[i]
 				bar:Show()
 				if (i > max) then
-					bar:Hide()
-				end
-
-				bar:SetSize(maxWidth / max, config.resourceHeight)
-				bar:SetPoint('TOPLEFT', frame, 'BOTTOMLEFT', (index - 1) * bar:GetWidth(), 0)
+					-- bar:Hide()
+				end				
 			end
+			
+		end
+
+		for i = 1, #frame.ClassPower do
+			local bar = frame.ClassPower[i]
+			bar:SetSize(maxWidth / max, config.resourceHeight)
+			bar:SetPoint('BOTTOMLEFT', frame, 'TOPLEFT', (index - 1) * bar:GetWidth(), 2)
 		end
 	end
 	frame.ClassPower:SizeResources(0, 10, true)
 
 	-- Any time resources update, run this function
-	function frame.ClassPower:PostUpdate(cur, max, hasMaxChanged, powerType)
+	frame.ClassPower.PostUpdate = function(self, cur, max, hasMaxChanged, powerType)
+		print("here")
 		if (not config.trackResources) then
 			frame.ClassPower:Hide()
 			return
 		end
+		frame.ClassPower:Show()
+		print("here")
 
 		-- hide, resize, and reposition
 		frame.ClassPower:SizeResources(cure, max, hasMaxChanged, powerType)
