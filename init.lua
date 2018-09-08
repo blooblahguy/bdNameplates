@@ -44,6 +44,14 @@ defaults[#defaults+1] = {friendnamealpha={
 	callback=function() bdNameplates:configCallback() end
 }}
 
+defaults[#defaults+1] = {friendlyplates={
+	type = "checkbox",
+	value = false,
+	label = "Show Friendly Health Plates",
+	tooltip = "Enable this to show friendly health plates",
+	callback = function() bdNameplates:configCallback() end
+}}
+
 defaults[#defaults+1] = {trackResources = {
 	type = "checkbox",
 	value = true,
