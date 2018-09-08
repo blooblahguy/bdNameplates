@@ -306,7 +306,11 @@ local function friendlyStyle(self, unit)
 	--self.Power:Hide()
 	-- self.Debuffs:Hide()
 	self.Auras:Show()
-	self.Health:Hide()
+	if (config.friendlyplates) then
+		self.Health:Show()
+	else
+		self.Health:Hide()
+	end
 	
 	if (UnitIsUnit(unit,"target")) then
 		self:SetAlpha(1)
@@ -317,9 +321,13 @@ local function friendlyStyle(self, unit)
 		end	--]]
 	else
 		self:SetAlpha(0.8)
-		self.Health:Hide()
 		self.Name:ClearAllPoints()
 		self.Name:SetPoint("TOP", self, "TOP", 0, 6)
+		if (config.friendlyplates) then
+			self.Health:Show()
+		else
+			self.Health:Hide()
+		end
 	end
 	
 	if (UnitIsUnit(unit,"pet")) then
