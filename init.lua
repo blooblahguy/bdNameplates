@@ -26,6 +26,7 @@ specialMobs["Screaming Shrike"] = true
 
 local specialSpells = {}
 specialSpells["Decaying Flesh"] = true
+specialSpells["Critial Mass"] = true
 
 local defaults = {}
 
