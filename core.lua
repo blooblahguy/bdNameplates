@@ -233,6 +233,23 @@ local function enemyStyle(self,unit)
 	self.Castbar:SetAlpha(1)
 	self.Health:Show()
 	self.Health:SetAllPoints(self)
+
+	if (config.hideEnemyNames == "Always Show") then
+		self.Name:Show()
+	elseif (config.hideEnemyNames == "Always Hide") then
+		self.Name:Hide()
+	elseif (config.hideEnemyNames == "Only Target") then
+		self.Name:Hide()
+		if (UnitIsUnit(unit,"target")) then
+			self.Name:Show()
+		end
+	elseif (config.hideEnemyNames == "Hide in Arena") then
+		local inInstance, instanceType = IsInInstance();
+		self.Name:Show()
+		if (inInstance and instanceType == "arena") then
+			self.Name:Hide()
+		end
+	end
 end
 
 local function npcStyle(self,unit)
