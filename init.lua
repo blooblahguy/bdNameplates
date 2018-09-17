@@ -24,6 +24,8 @@ specialMobs["Fel-Charged Obfuscator"] = true
 specialMobs["Ember of Taeshalach"] = true
 specialMobs["Screaming Shrike"] = true
 
+local specialSpells = {}
+specialSpells["Decaying Flesh"] = true
 
 local defaults = {}
 
@@ -293,6 +295,12 @@ defaults[#defaults+1] = {fixateMobs={
 	value = fixateMobs,
 	label = "Fixate Unit List",
 	tooltip = "Units who's name are in this list will have a fixate icon when they target you."
+}}
+defaults[#defaults+1] = {specialSpells ={
+	type = "list",
+	value = specialSpells,
+	label = "Special Spell List",
+	tooltip = "Units who have an aura in this list will be colored with 'Special Unit Color'."
 }}
 -------------
 -- Target

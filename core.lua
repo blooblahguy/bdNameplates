@@ -263,6 +263,7 @@ local function playerStyle(self,unit)
 	
 	self.Name:Hide()
 	self.Power:Show()
+	self.Auras:Show()
 	self.background:Hide()
 	self.Health:ClearAllPoints()
 	self.Health:SetPoint("TOP", self, "BOTTOM", 0, -30)
@@ -405,6 +406,15 @@ local function threatColor(self, forced)
 	
 	if (config.specialunits[name]) then
 		healthbar:SetStatusBarColor(unpack(config.specialcolor))
+	end
+
+	local allow = false
+	for name, v in pairs(config.specialSpells) do
+		if (AuraUtil.FindAuraByName(name, self.unit) or AuraUtil.FindAuraByName(name, self.unit, "HARMFUL")) then
+			allow = true
+			healthbar:SetStatusBarColor(unpack(config.specialcolor))
+			break
+		end
 	end
 
 	--[[if (UnitName(unit) == "Ember of Taeshalach") then
@@ -785,7 +795,7 @@ local function style(self, unit)
 		if (config.blacklist and config.blacklist[name]) then
 			allow = false
 		end
-		
+
 		return allow
 	end
 	
