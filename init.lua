@@ -171,6 +171,13 @@ defaults[#defaults+1] = {showenergy = {
 	label = "Show energy value on healthbar",
 	callback = function() bdNameplates:configCallback() end
 }}
+defaults[#defaults+1] = {hideEnemyNames = {
+	type = "dropdown",
+	value = "Always Show",
+	options = {"Always Show", "Always Hide", "Only Target", "Hide in Arena"},
+	label = "Hide Enemy Names",
+	callback = function() bdNameplates:configCallback() end
+}}
 defaults[#defaults+1] = {hidefriendnames = {
 	type = "checkbox",
 	value = false,
