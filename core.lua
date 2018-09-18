@@ -45,7 +45,7 @@ function bdNameplates:configCallback()
 	-- restyle nameplates
 	for _, frame in pairs(C_NamePlate.GetNamePlates()) do
 		local unit = frame.unitFrame.unit
-		nameplateCallback("", "", frame,unit)
+		nameplateCallback(frame.ouf, "", frame,unit)
 	end
 end
 
@@ -142,31 +142,32 @@ talentdetect:SetScript("OnEvent",function()
 	end
 end)
 --]]
-local function getcolor(unit)
-	local reaction = UnitReaction(unit, "player") or 5
+-- local function getcolor(unit)
+-- 	local reaction = UnitReaction(unit, "player") or 5
 	
-	if UnitIsPlayer(unit) then
-		local class = select(2, UnitClass(unit))
-		local color = RAID_CLASS_COLORS[class]
-		return color.r, color.g, color.b
-	elseif UnitCanAttack("player", unit) then
-		if UnitIsDead(unit) then
-			return 136/255, 136/255, 136/255
-		else
-			if reaction<4 then
-				return 1, 68/255, 68/255
-			elseif reaction==4 then
-				return 1, 1, 68/255
-			end
-		end
-	else
-		if reaction<4 then
-			return 48/255, 113/255, 191/255
-		else
-			return 1, 1, 1
-		end
-	end
-end
+-- 	if UnitIsPlayer(unit) then
+-- 		local class = select(2, UnitClass(unit))
+-- 		local color = RAID_CLASS_COLORS[class]
+-- 		return color.r, color.g, color.b
+-- 	elseif UnitCanAttack("player", unit) then
+-- 		if UnitIsDead(unit) then
+-- 			return 136/255, 136/255, 136/255
+-- 		else
+-- 			if reaction<4 then
+-- 				return 1, 68/255, 68/255
+-- 			elseif reaction==4 then
+-- 				return 1, 1, 68/255
+-- 			end
+-- 		end
+-- 	else
+-- 		if reaction<4 then
+-- 			return 48/255, 113/255, 191/255
+-- 		else
+-- 			return 1, 1, 1
+-- 		end
+-- 	end
+-- end
+
 
 local colors = {}
 colors.tapped = {.6,.6,.6}
@@ -186,7 +187,8 @@ for eclass, color in next, FACTION_BAR_COLORS do
 end
 
 local function round(num, numDecimalPlaces)
-  return string.format("%." .. (numDecimalPlaces or 0) .. "f", num)
+	local mult = 10^(numDecimalPlaces or 0)
+	return math.floor(num * mult + 0.5) / mult
 end
 
 local function unitColor(unit)
@@ -203,18 +205,12 @@ local function unitColor(unit)
 end
 
 local function enemyStyle(self,unit)
-	local nameplate = C_NamePlate.GetNamePlateForUnit(unit)
-	local self = nameplate.ouf
-
 	self.Auras:Show()
-	-- self.Debuffs:Show()
+	self.Health:Show()
 
 	if (UnitIsUnit(unit,"target")) then
-		self:SetAlpha(1)
 		self.Health.Shadow:Show()
 		self.Health.Shadow:SetBackdropBorderColor(unpack(config.glowcolor))
-	else
-		self:SetAlpha(config.unselectedalpha)
 	end
 	
 	self.Name:SetTextColor(1,1,1)
@@ -223,7 +219,6 @@ local function enemyStyle(self,unit)
 	self.Name:SetShadowColor(0,0,0)
 	self.Name:SetPoint("BOTTOM", self, "TOP", 0, 6)	
 	self.Castbar:SetAlpha(1)
-	self.Health:Show()
 	self.Health:SetAllPoints(self)
 
 	if (config.hideEnemyNames == "Always Show") then
@@ -245,17 +240,8 @@ local function enemyStyle(self,unit)
 end
 
 local function npcStyle(self,unit)
-	local nameplate = C_NamePlate.GetNamePlateForUnit(unit)
-	local self = nameplate.ouf
-	
-	if (UnitIsUnit(unit,"target")) then
-		self:SetAlpha(1)
-	else
-		self:SetAlpha(0.8)
-	end
-	
 	self.background:Hide()
-	-- self.Debuffs:Hide()
+
 	self.Auras:Hide()
 	self.Health:Hide()
 	
@@ -264,16 +250,15 @@ local function npcStyle(self,unit)
 	self.Name:SetTextColor(unitColor(unit))
 	self.Name:ClearAllPoints()
 	self.Name:SetPoint("TOP", self, "TOP", 0, 10)	
+
 	self.Castbar:SetAlpha(0)
 end
 local function playerStyle(self,unit)
-	local nameplate = C_NamePlate.GetNamePlateForUnit(unit)
-	local self = nameplate.ouf
-	
-	self.Name:Hide()
 	self.Power:Show()
 	self.Auras:Show()
+
 	self.background:Hide()
+
 	self.Health:ClearAllPoints()
 	self.Health:SetPoint("TOP", self, "BOTTOM", 0, -30)
 	self.Health:SetSize(config.width, config.height)
@@ -310,24 +295,10 @@ end
 
 -- Style your friends
 local function friendlyStyle(self, unit)
-	local nameplate = C_NamePlate.GetNamePlateForUnit(unit)
-	local self = nameplate.ouf
-	
-	--self.Power:Hide()
-	-- self.Debuffs:Hide()
 	self.Auras:Show()
 	self.Health:Hide()
 	
-	if (UnitIsUnit(unit,"target")) then
-		self:SetAlpha(1)
-		--[[if (config.showfriendlybar) then
-			self.Health:Show()
-			self.Name:ClearAllPoints()
-			self.Name:SetPoint("TOP", self, "TOP", 0, 20)
-		end	--]]
-	else
-		self:SetAlpha(0.8)
-		self.Health:Hide()
+	if (not UnitIsUnit(unit,"target")) then
 		self.Name:ClearAllPoints()
 		self.Name:SetPoint("TOP", self, "TOP", 0, 6)
 	end
@@ -341,6 +312,7 @@ local function friendlyStyle(self, unit)
 	self.Name:SetTextColor(unitColor(unit))
 	self.Name:SetFont(bdCore.media.font, config.friendlynamesize, "OUTLINE")
 	self.Name:SetShadowColor(0,0,0,0)
+	
 	self.Castbar:SetAlpha(0)
 	
 	if (config.hidefriendnames and not UnitIsUnit(unit,"target")) then
@@ -348,11 +320,101 @@ local function friendlyStyle(self, unit)
 	end
 end
 
-local lastenergy = 0
+local function nameplateCallback(self, event, unit)
+	-- set the scale of the nameplates
+	local scale = UIParent:GetEffectiveScale()*1
+	if (not InCombatLockdown()) then
+		C_NamePlate.SetNamePlateFriendlySize((config.width * scale) + 10,0.1)
+		C_NamePlate.SetNamePlateEnemySize(config.width * scale, (config.height + 10) * scale)
+		C_NamePlate.SetNamePlateFriendlyClickThrough(true)
+	end
+	
+	-- make sure we have the things we want
+	if (not self or not unit) then return end
+	
+	
+	local nameplate = C_NamePlate.GetNamePlateForUnit(unit)
+	local reaction = UnitReaction("player",unit)
+
+	---------------------
+	-- let's hide things first, and then we'll show / size / position for specific elements
+	-- this is more verbose and possible slightly lower performance, but more readable and extendable
+	---------------------
+	self.Namecontainer:SetAlpha(1)
+	self:EnableMouse(false)
+	self.Health:EnableMouse(false)
+	self.Auras:Hide()
+	self.Name:Hide()
+	self.Health.Shadow:Hide()
+	self.Curhp:Hide()
+	self.Castbar.Icon:Hide()
+	self.Castbar.bg:Hide()
+	self.Power:Hide()
+
+	---------------------
+	-- configurations
+	---------------------
+	self:SetHeight(config.height)
+
+	self.Curhp:SetFont(bdCore.media.font, config.height*.85,"OUTLINE")
+	self.Curpower:SetFont(bdCore.media.font, config.height*.85,"OUTLINE")
+
+	self.Castbar:SetPoint("BOTTOMRIGHT", self.Health, "BOTTOMRIGHT", 0, -config.castbarheight)
+	self.Castbar.Text:SetFont(bdCore.media.font, config.castbarheight*.85, "OUTLINE")
+	self.Castbar.Icon:SetSize(config.height+config.castbarheight, config.height+config.castbarheight)
+	if (not config.hidecasticon) then
+		self.Castbar.Icon:Show()
+		self.Castbar.bg:Show()
+	end
+
+	self.Auras:SetSize(config.width+4, config.raidbefuffs)
+	self.Auras.size = config.raidbefuffs
+
+	self.RaidTargetIndicator:SetSize(config.raidmarkersize, config.raidmarkersize)
+	self.RaidTargetIndicator:ClearAllPoints()
+	if (config.markposition == "LEFT") then
+		self.RaidTargetIndicator:SetPoint('RIGHT', self, "LEFT", -(config.raidmarkersize/2), 0)
+	elseif (config.markposition == "RIGHT") then
+		self.RaidTargetIndicator:SetPoint('LEFT', self, "RIGHT", config.raidmarkersize/2, 0)
+	else
+		self.RaidTargetIndicator:SetPoint('BOTTOM', self, "TOP", 0, config.raidmarkersize)
+	end
+
+	if (not config.hptext == "None" and not (config.showhptexttargetonly and not UnitIsUnit(unit,"target"))) then
+		self.Curhp:Show()
+	end
+
+	-------------------------
+	-- Style by unit type
+	-------------------------
+	if (UnitIsUnit(unit,"player")) then
+		playerStyle(self, unit)
+	elseif (UnitIsPVPSanctuary(unit) or (UnitIsPlayer(unit) and UnitIsFriend("player",unit) and reaction and reaction >= 5)) then
+		friendlyStyle(self, unit)
+	elseif (not UnitIsPlayer(unit) and (reaction and reaction >= 5) or ufaction == "Neutral") then
+		npcStyle(self, unit)
+	else
+		enemyStyle(self, unit)
+	end
+	
+	-------------------------
+	-- overwrite special units
+	-------------------------
+	if (config.disableauras) then
+		self.Auras:Hide()
+	end
+	if (UnitIsUnit("target", unit)) then
+		self:SetAlpha(1)
+	else
+		self:SetAlpha(config.unselectedalpha)
+	end
+end
+
 local function threatColor(self, forced)
 	-- we don't threat color the player
 	if (UnitIsPlayer(self.unit)) then return end
 
+	-- check priority health overrides first
 	if (self.forceSpecial) then
 		self.Health:SetStatusBarColor(unpack(config.specialcolor))
 	end
@@ -361,8 +423,6 @@ local function threatColor(self, forced)
 	elseif (self.forceEnrage) then
 		self.Health.border:SetVertexColor(unpack(config.enrageColor))
 	end
-
-	print(self.forceSpecial, self.forcePurge, self.forceEnrage)
 
 	-- these things have been forced, don't proceed with more logic
 	if (self.forceSpecial or self.forcePurge or self.forceEnrage) then return end
@@ -405,6 +465,7 @@ local function threatColor(self, forced)
 		end
 	end
 	
+	-- show "fixates" or whitelisted mob's targets
 	self.Fixate:Hide()
 	if (config.fixatealert == "Always") then
 		self.Fixate:Show()
@@ -419,103 +480,6 @@ local function threatColor(self, forced)
 			self.Fixate.text:SetText(UnitName(self.unit.."target"))
 		end
 	end
-	
-	-- i don' thtink we need this anymore
-	if (not forced and healthbar.ForceUpdate) then
-		--healthbar:ForceUpdate()
-	end
-end
-
-local function nameplateCallback(self, event, unit)
-	-- set the scale of the nameplates
-	local scale = UIParent:GetEffectiveScale()*1
-	if (not InCombatLockdown()) then
-		C_NamePlate.SetNamePlateFriendlySize((config.width * scale) + 10,0.1)
-		C_NamePlate.SetNamePlateEnemySize(config.width * scale, (config.height + 10) * scale)
-		C_NamePlate.SetNamePlateFriendlyClickThrough(true)
-	end
-	
-	-- make sure we have the things we want
-	if (not self or not unit) then return end
-	
-	local unit = unit or "target"
-	local nameplate = C_NamePlate.GetNamePlateForUnit(unit)
-	local reaction = UnitReaction("player",unit)
-
-	-- let's hide things first, and then we'll show / size / position for specific elements
-
-	self.Health.Shadow:Hide()
-	self:EnableMouse(false)
-	self.Health:EnableMouse(false)
-	self.Name:Show()
-	self.Namecontainer:SetAlpha(1)
-	-- Update configurations
-	self:SetHeight(config.height)
-	self.Curhp:SetFont(bdCore.media.font, config.height*.85,"OUTLINE")
-	self.Curpower:SetFont(bdCore.media.font, config.height*.85,"OUTLINE")
-	self.Castbar:SetPoint("BOTTOMRIGHT", self.Health, "BOTTOMRIGHT", 0, -config.castbarheight)
-	self.Castbar.Text:SetFont(bdCore.media.font, config.castbarheight*.85, "OUTLINE")
-	self.Castbar.Icon:SetSize(config.height+config.castbarheight, config.height+config.castbarheight)
-
-	self.Auras:SetSize(config.width+4, config.raidbefuffs)
-	self.Auras.size = config.raidbefuffs
-
-	-- self.Debuffs:SetSize(config.width+4, config.debuffsize)
-	-- self.Debuffs.size = config.debuffsize
-
-	self.RaidTargetIndicator:SetSize(config.raidmarkersize, config.raidmarkersize)
-	self.RaidTargetIndicator:ClearAllPoints()
-	self.RaidTargetIndicator:SetAlpha(1)
-
-	if (config.markposition == "LEFT") then
-		self.RaidTargetIndicator:SetPoint('RIGHT', self, "LEFT", -(config.raidmarkersize/2), 0)
-	elseif (config.markposition == "RIGHT") then
-		self.RaidTargetIndicator:SetPoint('LEFT', self, "RIGHT", config.raidmarkersize/2, 0)
-	else
-		self.RaidTargetIndicator:SetPoint('BOTTOM', self, "TOP", 0, config.raidmarkersize)
-	end
-	
-	if (config.hptext == "None" or (config.showhptexttargetonly and not UnitIsUnit(unit,"target"))) then
-		self.Curhp:Hide()
-	else
-		self.Curhp:Show()
-	end
-	
-	if (config.hidecasticon) then
-		self.Castbar.Icon:Hide()
-		self.Castbar.bg:Hide()
-	else
-		self.Castbar.Icon:Show()
-		self.Castbar.bg:Show()
-	end
-
-	
-	--IsUnitOnQuest actually scan quest log since blizzard doesn't provide htis
-	-- self.Quest:Hide()
-	-- for q = 1, GetNumQuestLogEntries() do	
-		-- if (IsUnitOnQuest(q,unit) == 1) then
-			-- self.Quest:Show()
-			-- break
-		-- end
-	-- end
-	-- not UnitIsCharmed(unit) or
-	
-	self.Name:Show()
-	self.Power:Hide()
-
-	if (UnitIsUnit(unit,"player")) then
-		playerStyle(self,unit)
-	elseif (UnitIsPVPSanctuary(unit) or (UnitIsPlayer(unit) and UnitIsFriend("player",unit) and reaction and reaction >= 5)) then
-		friendlyStyle(self, unit)
-	elseif (not UnitIsPlayer(unit) and (reaction and reaction >= 5) or ufaction == "Neutral") then
-		npcStyle(self, unit)
-	else
-		enemyStyle(self,unit)
-	end
-	
-	if (config.disableauras) then
-		self.Auras:Hide()
-	end
 end
 
 local function kickable(self)
@@ -528,11 +492,10 @@ local function kickable(self)
 	end
 end
 
-local function round(num, numDecimalPlaces)
-	local mult = 10^(numDecimalPlaces or 0)
-	return math.floor(num * mult + 0.5) / mult
-end
 
+------------------------------
+-- Nameplate Initiation
+------------------------------
 local function style(self, unit)
 	local scale = UIParent:GetEffectiveScale()*1
 	local nameplate = C_NamePlate.GetNamePlateForUnit(unit)
@@ -901,11 +864,10 @@ local function style(self, unit)
 	self.Castbar.PostCastInterruptible = kickable
 end
 
-
-bdCore:hookEvent("nameplate_update",enumerateNameplates)
-bdCore:hookEvent("bd_reconfig", enumerateNameplates)
-
-local tchange = CreateFrame("frame",nil,UIParent)
 oUF:RegisterStyle("bdNameplates", style) --styleName: String, styleFunc: Function
 oUF:SetActiveStyle("bdNameplates")
 oUF:SpawnNamePlates("bdNameplates", nameplateCallback)
+
+-- config callbacks
+bdCore:hookEvent("nameplate_update",bdNameplates.configCallback)
+bdCore:hookEvent("bd_reconfig", bdNameplates.configCallback)
