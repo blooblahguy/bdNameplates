@@ -362,6 +362,8 @@ local function threatColor(self, forced)
 		self.Health.border:SetVertexColor(unpack(config.enrageColor))
 	end
 
+	print(self.forceSpecial, self.forcePurge, self.forceEnrage)
+
 	-- these things have been forced, don't proceed with more logic
 	if (self.forceSpecial or self.forcePurge or self.forceEnrage) then return end
 	
@@ -420,7 +422,7 @@ local function threatColor(self, forced)
 	
 	-- i don' thtink we need this anymore
 	if (not forced and healthbar.ForceUpdate) then
-		-- healthbar:ForceUpdate()
+		--healthbar:ForceUpdate()
 	end
 end
 
@@ -822,7 +824,7 @@ local function style(self, unit)
 			local skipSpecial = false
 			local skipPurge = false
 			local skipEnrage = false
-			if (#self.specialSpells == 0) then
+			if (#config.specialSpells == 0) then
 				skipSpecial = true
 			end
 			if (not config.highlightPurge) then
