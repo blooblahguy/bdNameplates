@@ -368,7 +368,7 @@ local function threatColor(self, forced)
 	if (self.forceSpecial or self.forcePurge or self.forceEnrage) then return end
 	
 	-- reset border color if so
-	self.Health:SetStatusBarColor(unpack(bdCore.media.border))
+	self.Health.border:SetVertexColor(unpack(bdCore.media.border))
 
 	local healthbar = self.Health
 	local combat = UnitAffectingCombat("player")
