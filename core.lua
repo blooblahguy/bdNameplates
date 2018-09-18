@@ -207,6 +207,7 @@ end
 local function enemyStyle(self,unit)
 	self.Auras:Show()
 	self.Health:Show()
+	self.Name:Show()
 
 	if (UnitIsUnit(unit,"target")) then
 		self.Health.Shadow:Show()
@@ -241,9 +242,10 @@ end
 
 local function npcStyle(self,unit)
 	self.background:Hide()
-
 	self.Auras:Hide()
 	self.Health:Hide()
+
+	self.Name:Show()
 	
 	self.Name:SetFont(bdCore.media.font, config.friendlynamesize, "OUTLINE")
 	self.Name:SetShadowColor(0,0,0,0)
