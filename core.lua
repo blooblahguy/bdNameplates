@@ -298,7 +298,8 @@ end
 -- Style your friends
 local function friendlyStyle(self, unit)
 	self.Auras:Show()
-
+	self.Name:Hide()
+	
 	if (config.friendlyplates) then
 		self.Health:Show()
 	else
@@ -387,7 +388,9 @@ local function nameplateCallback(self, event, unit)
 		self.RaidTargetIndicator:SetPoint('BOTTOM', self, "TOP", 0, config.raidmarkersize)
 	end
 
-	if (not config.hptext == "None" and not (config.showhptexttargetonly and not UnitIsUnit(unit,"target"))) then
+	if (config.hptext == "None" or (config.showhptexttargetonly and not UnitIsUnit(unit,"target"))) then
+		self.Curhp:Hide()
+	else
 		self.Curhp:Show()
 	end
 
