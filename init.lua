@@ -65,10 +65,20 @@ defaults[#defaults+1] = {resourceHeight={
 
 defaults[#defaults+1] = {highlightPurge = {
 	type = "checkbox",
-	value = false,
+	value = true,
 	label = "Highlist units who have auras that can be purged",
 	callback = function() bdNameplates:configCallback() end
 }}
+
+defaults[#defaults+1] = {highlightEnrage = {
+	type = "checkbox",
+	value = false,
+	label = "Highlist units who have an enrage effect.",
+	callback = function() bdNameplates:configCallback() end
+}}
+
+
+
 
 defaults[#defaults+1] = {friendlynamehack = {
 	type = "checkbox",
@@ -266,6 +276,16 @@ defaults[#defaults+1] = {specialcolor={
 	type="color",
 	value={.8, .4, .7,1},
 	name="Special Unit Color"
+}}
+defaults[#defaults+1] = {purgeColor={
+	type = "color",
+	value = bdCore.media.blue,
+	name = "Special Unit Color"
+}}
+defaults[#defaults+1] = {enrageColor={
+	type = "color",
+	value = bdCore.media.red,
+	name = "Special Unit Color"
 }}
 defaults[#defaults+1] = {executerange = {
 	type = "slider",
