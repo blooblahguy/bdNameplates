@@ -107,9 +107,6 @@ SetCVar('nameplateOtherBottomInset', GetCVarDefault("nameplateOtherBottomInset")
 SetCVar('nameplateLargeTopInset', GetCVarDefault("nameplateLargeTopInset"))
 SetCVar('nameplateLargeBottomInset', GetCVarDefault("nameplateLargeBottomInset"))
 
-local function cvar_set()
-	
-end
 
 local function numberize(v)
 	if v <= 9999 then return v end
@@ -124,11 +121,6 @@ local function numberize(v)
 		return value
 	end
 end
-
-local addon = CreateFrame("frame")
-addon:RegisterEvent("CVAR_UPDATE")
-addon:RegisterEvent("PLAYER_ENTERING_WORLD")
-addon:SetScript("OnEvent",cvar_set)
 
 --[[
 local executerange = 20
@@ -527,7 +519,6 @@ local function npcallback(self, event, unit)
 		end
 	end
 	
-	cvar_set()
 end
 
 local function kickable(self)
@@ -675,7 +666,7 @@ local function style(self, unit)
 	
 	self.Health:RegisterEvent("PLAYER_REGEN_DISABLED")
 	self.Health:RegisterEvent("PLAYER_REGEN_ENABLED")
-	self.Health:RegisterEvent("UNIT_THREAT_SITUATION_UPDATE")
+	-- self.Health:RegisterEvent("UNIT_THREAT_SITUATION_UPDATE")
 	self.Health:RegisterEvent("UNIT_THREAT_LIST_UPDATE")
 	self.Health:RegisterEvent("UNIT_TARGET")
 	self:RegisterEvent("PLAYER_TARGET_CHANGED",function(self, event)
@@ -737,13 +728,13 @@ local function style(self, unit)
 	self.Quest:SetPoint("RIGHT", self.name, "LEFT", -6, 0)
 	bdCore:setBackdrop(self.Quest)--]]	
 
-	self.PurgeBorder = CreateFrame("frame", nil, self)
-	self.PurgeBorder:SetPoint("TOPLEFT", self, "TOPLEFT", -1, 1)
-	self.PurgeBorder:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", 1, -1)
-	self.PurgeBorder:SetBackdrop({edgeFile = bdCore.media.flat, edgeSize = 2})
-	self.PurgeBorder:SetBackdropBorderColor(unpack(bdCore.media.blue))
-	self.PurgeBorder:SetFrameLevel(27)
-	self.PurgeBorder:Hide()
+	-- self.PurgeBorder = CreateFrame("frame", nil, self)
+	-- self.PurgeBorder:SetPoint("TOPLEFT", self, "TOPLEFT", -1, 1)
+	-- self.PurgeBorder:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", 1, -1)
+	-- self.PurgeBorder:SetBackdrop({edgeFile = bdCore.media.flat, edgeSize = 2})
+	-- self.PurgeBorder:SetBackdropBorderColor(unpack(bdCore.media.blue))
+	-- self.PurgeBorder:SetFrameLevel(27)
+	-- self.PurgeBorder:Hide()
 	
 	-- For friendlies
 	self.Auras = CreateFrame("Frame", nil, self)
@@ -761,32 +752,40 @@ local function style(self, unit)
 	self.Auras.CustomFilter = function(element, unit, button, name, texture, count, debuffType, duration, expiration, caster, isStealable, nameplateShowSelf, spellID, canApply, isBossDebuff, casterIsPlayer, nameplateShowAll,timeMod, effect1, effect2, effect3)
 		local allow = false
 
-		main.PurgeBorder:Hide()
+		-- main.PurgeBorder:Hide()
+
+		-- blacklist is priority
+		if (config.blacklist and config.blacklist[name]) then
+			return false
+		end
 
 		if (nameplateShowAll or (nameplateShowSelf and caster == "player")) then
 			allow = true
 		end
-		if (raidwhitelist[name] or raidwhitelist[spellID]) then
+		if (not allow and (raidwhitelist[name] or raidwhitelist[spellID])) then
 			allow = true
 		end
-		if (config.whitelist and config.whitelist[name]) then
+		if (not allow and (config.whitelist and config.whitelist[name])) then
 			allow = true
 		end
-		if (config.selfwhitelist and (config.selfwhitelist[name] and caster == "player")) then
+		if (not allow and config.selfwhitelist and (config.selfwhitelist[name] and caster == "player")) then
 			allow = true
 		end
-		if (config.automydebuff and caster == "player") then
+		if (not allow and (config.automydebuff and caster == "player")) then
 			allow = true
 		end
-		if (config.blacklist and config.blacklist[name]) then
-			allow = false
-		end
+		
 
 		return allow
 	end
 	
 	self.Auras.PostUpdateIcon = function(self, unit, button, index, position, duration, expiration, debuffType, isStealable)
 		local cdtext = button.cd:GetRegions()
+		button:EnableMouse(false)
+		button:SetHeight(config.raidbefuffs*.6)
+
+		if (button.skinned) then return end
+
 		bdCore:setBackdrop(button)
 		cdtext:SetFont(bdCore.media.font,14,"OUTLINE")
 		cdtext:SetShadowColor(0,0,0,0)
@@ -801,15 +800,15 @@ local function style(self, unit)
 		button.count:ClearAllPoints()
 		button.count:SetPoint("BOTTOMRIGHT", button, "BOTTOMRIGHT", 2, -2)
 		
-		button:EnableMouse(false)
 		button.icon:SetTexCoord(0.08, 0.9, 0.20, 0.74)
-		button:SetHeight(config.raidbefuffs*.6)
+		
 		button.cd:SetReverse(true)
 		button.cd:SetHideCountdownNumbers(false)
 
-		if (config.highlightPurge and debuffType == "Magic") then
-			main.PurgeBorder:Show()
-		end
+		-- if (config.highlightPurge and debuffType == "Magic") then
+		-- 	main.PurgeBorder:Show()
+		-- end
+		button.skinned = true
 	end
 
 	-- Special Spells
@@ -817,15 +816,18 @@ local function style(self, unit)
 	self.SpellMonitor = CreateFrame("frame", nil, self)
 	self.SpellMonitor:SetScript("OnUpdate", function(spellmontor, elapsed)
 		total = total + elapsed
-		if (total > 0.1) then
+		if (total > 0.15) then
 			self.forceSpecial = false
-			for name, v in pairs(config.specialSpells) do
-				if (AuraUtil.FindAuraByName(name, self.unit) or AuraUtil.FindAuraByName(name, self.unit, "HARMFUL")) then
+			for i = 1, 40 do
+				local buff = UnitAura(self.unit, i, "HELPFUL")
+				local debuff = UnitAura(self.unit, i, "HARMFUL")
+
+				if (config.specialSpells[buff] or config.specialSpells[debuff]) then
 					self.forceSpecial = true
-					self.Health:SetStatusBarColor(unpack(config.specialcolor))
 					break
 				end
 			end
+
 			local name = UnitName(self.unit) or "";
 			if (config.specialunits[name]) then
 				self.forceSpecial = true
