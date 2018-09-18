@@ -87,6 +87,13 @@ defaults[#defaults+1] = {friendlynamehack = {
 	tooltip = "This will disable friendly nameplates in raid while keeping the friendly name. Uncheck this before uninstalling bdNameplates. ",
 	callback = function() bdNameplates:configCallback() end
 }}
+defaults[#defaults+1] = {friendlyplates = {
+	type = "checkbox",
+	value = false,
+	label = "Show friendly nameplate healthbars",
+	tooltip = "Normally we hide friendly healthbars and just show names, this will let you show both. ",
+	callback = function() bdNameplates:configCallback() end
+}}
 
 defaults[#defaults+1] = {width={
 	type="slider",

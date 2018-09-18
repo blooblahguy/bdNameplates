@@ -298,8 +298,13 @@ end
 -- Style your friends
 local function friendlyStyle(self, unit)
 	self.Auras:Show()
-	self.Health:Hide()
-	
+
+	if (config.friendlyplates) then
+		self.Health:Show()
+	else
+		self.Health:Hide()
+	end
+
 	if (not UnitIsUnit(unit,"target")) then
 		self.Name:ClearAllPoints()
 		self.Name:SetPoint("TOP", self, "TOP", 0, 6)
