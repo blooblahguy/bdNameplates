@@ -398,40 +398,9 @@ local function threatColor(self, forced)
 
 		end
 	end
-	
-	local name = UnitName(self.unit) or "";
 
-	--[[
-	if (UnitIsTapDenied(self.unit)) then
-		healthbar:SetStatusBarColor(.5,.5,.5)
-	elseif(combat) then 
-		if(threat and threat >= 1) then
-			if(threat == 3) then
-				healthbar:SetStatusBarColor(unpack(config.threatcolor))
-			elseif (threat == 2 or threat == 1 or targeted) then
-				healthbar:SetStatusBarColor(unpack(config.threatdangercolor))
-			end
-		else
-			healthbar:SetStatusBarColor(unpack(config.nothreatcolor))
-			if (config.executerange and perc <= config.executerange) then
-				healthbar:SetStatusBarColor(unpack(config.executecolor))
-			end
-		end
-	end
-
-	--]]
-	
-	if (config.specialunits[name]) then
+	if (self.forceSpecial) then
 		healthbar:SetStatusBarColor(unpack(config.specialcolor))
-	end
-
-	local allow = false
-	for name, v in pairs(config.specialSpells) do
-		if (AuraUtil.FindAuraByName(name, self.unit) or AuraUtil.FindAuraByName(name, self.unit, "HARMFUL")) then
-			allow = true
-			healthbar:SetStatusBarColor(unpack(config.specialcolor))
-			break
-		end
 	end
 
 	--[[if (UnitName(unit) == "Ember of Taeshalach") then
@@ -524,7 +493,7 @@ local function npcallback(self, event, unit)
 			self.Castbar.Icon:Show()
 			self.Castbar.bg:Show()
 		end
-		
+
 		
 		--IsUnitOnQuest
 		-- self.Quest:Hide()
@@ -842,6 +811,28 @@ local function style(self, unit)
 			main.PurgeBorder:Show()
 		end
 	end
+
+	-- Special Spells
+	local total = 0
+	self.SpellMonitor = CreateFrame("frame", nil, self)
+	self.SpellMonitor:SetScript("OnUpdate", function(spellmontor, elapsed)
+		total = total + elapsed
+		if (total > 0.1) then
+			self.forceSpecial = false
+			for name, v in pairs(config.specialSpells) do
+				if (AuraUtil.FindAuraByName(name, self.unit) or AuraUtil.FindAuraByName(name, self.unit, "HARMFUL")) then
+					self.forceSpecial = true
+					self.Health:SetStatusBarColor(unpack(config.specialcolor))
+					break
+				end
+			end
+			local name = UnitName(self.unit) or "";
+			if (config.specialunits[name]) then
+				self.forceSpecial = true
+			end
+		end
+	end)
+	
 	
 	-- For Enemies
 	--[[self.Debuffs = CreateFrame("Frame", nil, self)
