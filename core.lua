@@ -298,7 +298,7 @@ end
 -- Style your friends
 local function friendlyStyle(self, unit)
 	self.Auras:Show()
-	self.Name:Hide()
+	self.Name:Show()
 	
 	if (config.friendlyplates) then
 		self.Health:Show()
