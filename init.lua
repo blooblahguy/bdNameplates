@@ -73,7 +73,7 @@ defaults[#defaults+1] = {highlightPurge = {
 defaults[#defaults+1] = {highlightEnrage = {
 	type = "checkbox",
 	value = false,
-	label = "Highlist units who have an enrage effect.",
+	label = "Auto whitelist enrage auras on units.",
 	callback = function() bdNameplates:configCallback() end
 }}
 

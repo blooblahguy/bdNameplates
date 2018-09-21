@@ -329,6 +329,7 @@ local function friendlyStyle(self, unit)
 end
 
 local function nameplateCallback(self, event, unit)
+	unit = unit or target
 	-- set the scale of the nameplates
 	local scale = UIParent:GetEffectiveScale()*1
 	if (not InCombatLockdown()) then
@@ -342,7 +343,7 @@ local function nameplateCallback(self, event, unit)
 	
 	
 	local nameplate = C_NamePlate.GetNamePlateForUnit(unit)
-	local reaction = UnitReaction("player",unit)
+	local reaction = UnitReaction("player", unit)
 
 	---------------------
 	-- let's hide things first, and then we'll show / size / position for specific elements
@@ -352,6 +353,7 @@ local function nameplateCallback(self, event, unit)
 	self:EnableMouse(false)
 	self.Health:EnableMouse(false)
 	self.Auras:Hide()
+	self.Auras.showStealableBuffs = config.highlightPurge
 	self.Name:Hide()
 	self.Health.Shadow:Hide()
 	self.Curhp:Hide()
@@ -418,34 +420,35 @@ local function nameplateCallback(self, event, unit)
 	else
 		self:SetAlpha(config.unselectedalpha)
 	end
+
+	-- special unit
+	if (config.specialunits[UnitName(unit)]) then
+		self.specialUnit = true
+	else
+		self.specialUnit = false
+	end
 end
 
-local function threatColor(self, forced)
-	-- we don't threat color the player
-	if (UnitIsPlayer(self.unit)) then return end
+local function threatColor(self, event, unit, forced)
 
 	-- check priority health overrides first
-	if (self.forceSpecial) then
+	if (self.specialExpiration > GetTime() or self.specialUnit) then
 		self.Health:SetStatusBarColor(unpack(config.specialcolor))
-	end
-	if (self.forcePurge) then
-		self.Health.border:SetVertexColor(unpack(config.purgeColor))
-	elseif (self.forceEnrage) then
-		self.Health.border:SetVertexColor(unpack(config.enrageColor))
 	end
 
 	-- these things have been forced, don't proceed with more logic
 	if (self.forceSpecial or self.forcePurge or self.forceEnrage) then return end
 	
-	-- reset border color if so
-	self.Health.border:SetVertexColor(unpack(bdCore.media.border))
+	-- we don't recolor players
+	if (UnitIsPlayer(unit)) then return end
 
 	local healthbar = self.Health
 	local combat = UnitAffectingCombat("player")
-	local isTanking, status, threatpct, rawthreatpct, threatvalue = UnitDetailedThreatSituation("player", self.unit)
+	-- local isTanking, status, threatpct, rawthreatpct, threatvalue = UnitDetailedThreatSituation("player", unit)
+	local status = UnitThreatSituation("player", unit)
 
 	-- threat coloring
-	if (UnitIsTapDenied(self.unit)) then
+	if (UnitIsTapDenied(unit)) then
 		-- 5 people or enemy faction have already tagged this mob
 		healthbar:SetStatusBarColor(.5,.5,.5)
 	elseif (combat) then 
@@ -457,15 +460,15 @@ local function threatColor(self, forced)
 			-- near or over tank threat
 			healthbar:SetStatusBarColor(unpack(config.threatdangercolor))
 
-		elseif (rawthreatpct ~= nil) then
-			-- in combat, but not near tank threat
+		elseif (status ~= nil) then
+			-- on threat table, but not near tank threat
 			healthbar:SetStatusBarColor(unpack(config.nothreatcolor))
 
 			-- execute color alert
 			if (config.executerange) then
 				local perc = 100;
-				if (UnitHealthMax(self.unit) ~= 0) then
-					perc = (UnitHealth(self.unit) / UnitHealthMax(self.unit)) * 100
+				if (UnitHealthMax(unit) ~= 0) then
+					perc = (UnitHealth(unit) / UnitHealthMax(unit)) * 100
 				end
 
 				if (perc <= config.executerange) then
@@ -474,22 +477,7 @@ local function threatColor(self, forced)
 			end
 		end
 	end
-	
-	-- show "fixates" or whitelisted mob's targets
-	self.Fixate:Hide()
-	if (config.fixatealert == "Always") then
-		self.Fixate:Show()
-		self.Fixate.text:SetText(UnitName(self.unit.."target"))
-	end
-	if (config.fixateMobs[UnitName(self.unit)] and UnitExists(self.unit.."target")) then
-		if (config.fixatealert == "All") then
-			self.Fixate:Show()
-			self.Fixate.text:SetText(UnitName(self.unit.."target"))
-		elseif (config.fixatealert == "Personal" and UnitIsUnit(self.unit.."target","player")) then
-			self.Fixate:Show()
-			self.Fixate.text:SetText(UnitName(self.unit.."target"))
-		end
-	end
+
 end
 
 local function kickable(self)
@@ -502,6 +490,60 @@ local function kickable(self)
 	end
 end
 
+local total = 0
+local threshhold = 0.5
+local function specialUpdate(self, elapsed)
+	total = total + elapsed
+	local t = GetTime();
+	if (self.specialExpiration > 0 and t > self.specialExpiration) then
+		self.forceSpecial = false
+		self.specialExpiration = 0
+	end
+	if (self.specialExpiration > 0 and total > threshold) then
+		total = 0
+	
+		-- do we want to run this script at all?
+		self.forceSpecial = false
+		if (#config.specialSpells == 0) then
+			return
+		end
+
+		-- for i = 1, 40 do
+		-- 	local buff, icon, count, debuffType, duration, expirationTime, unitCaster, canStealOrPurge, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod = UnitAura(self.unit, i, "HELPFUL")
+		-- 	local debuff = UnitAura(self.unit, i, "HARMFUL")
+
+		-- 	if (config.specialSpells[buff] or config.specialSpells[debuff]) then
+		-- 		self.forceSpecial = true
+		-- 		skipSpecial = true
+		-- 	end
+
+
+		-- 	-- if we found these things then there is no reason to continue
+		-- 	if (skipSpecial and skipPurge and skipEnrage) then break end
+		-- end
+	end
+end
+
+local function fixateUpdate(self, event, unit)
+	-- show "fixates" or whitelisted mob's targets
+	self.Circle:Hide()
+	if (config.fixatealert == "Always") then
+		self.Fixate:Show()
+		self.Fixate.text:SetText(UnitName(unit.."target"))
+	elseif (config.fixatealert == "All") then
+		self.Fixate:Show()
+		self.Fixate.text:SetText(UnitName(unit.."target"))
+	elseif (config.fixatealert == "Personal" and UnitIsUnit(unit.."target","player")) then
+		self.Fixate:Show()
+		self.Fixate.text:SetText(UnitName(unit.."target"))
+		self.Circle:Show()
+		self.Circle:SetYards(8)
+		self.Circle:SetColor(.8,0,0,1,0.5)
+		self.Circle:SetType(2)
+	else
+		self.Fixate:Hide()
+	end
+end
 
 ------------------------------
 -- Nameplate Initiation
@@ -607,9 +649,9 @@ local function style(self, unit)
 	self.Power:Hide()
 
 	-- quest indicator
-	self.QuestIndicator = self:CreateTexture(nil, 'OVERLAY')
-    self.QuestIndicator:SetSize(20, 20)
-    self.QuestIndicator:SetPoint('LEFT', self.Name, 'RIGHT', 2,  0)
+	-- self.QuestIndicator = self:CreateTexture(nil, 'OVERLAY')
+    -- self.QuestIndicator:SetSize(20, 20)
+    -- self.QuestIndicator:SetPoint('LEFT', self.Name, 'RIGHT', 2,  0)
 	
 	self.Curhp = self.Health:CreateFontString(nil,"OVERLAY")
 	self.Curhp:SetFont(bdCore.media.font, 12,"OUTLINE")
@@ -631,21 +673,65 @@ local function style(self, unit)
 	self.Health.Shadow:SetBackdropColor(1, 1, 1, 1)
 	self.Health.Shadow:SetBackdropBorderColor(1, 1, 1, 0.8)
 	
-	self.Health:RegisterEvent("PLAYER_REGEN_DISABLED")
-	self.Health:RegisterEvent("PLAYER_REGEN_ENABLED")
-	self.Health:RegisterEvent("UNIT_THREAT_LIST_UPDATE")
-	self.Health:RegisterEvent("UNIT_TARGET")
-	self:RegisterEvent("PLAYER_TARGET_CHANGED",function(self, event)
-		nameplateCallback(self, event, self.unit)
-	end)
 	
-	self.Health:SetScript("OnEvent",function()
-		threatColor(main)
-	end)
+	-- self.Health:RegisterEvent("UNIT_THREAT_SITUATION_UPDATE")
+	-- self.Health:RegisterEvent("UNIT_THREAT_LIST_UPDATE")
+	-- self.Health:RegisterEvent("UNIT_TARGET")
+
+	-- On target change
+	self:RegisterEvent("PLAYER_TARGET_CHANGED", nameplateCallback)
+
+	-- Threatplates / combat in-out
+	self:RegisterEvent("PLAYER_REGEN_DISABLED", threatColor)
+	self:RegisterEvent("PLAYER_REGEN_ENABLED", threatColor)
+	self:RegisterEvent("UNIT_THREAT_SITUATION_UPDATE", threatColor)
 	self.Health.PostUpdate = function(element, unit, cur, max)
-		threatColor(main, true)
+		threatColor(self, "", unit, true)
+	end
+
+	-- Fixate Alert
+	self:RegisterEvent("UNIT_TARGET", fixateUpdate)
+
+	
+	-- Circle/Ring Alert
+	self.Circle = CreateFrame("frame", nil, self)
+	self.Circle:SetAlpha(0.8)
+	self.Circle:SetFrameLevel(1)
+	self.Circle.parent = self
+	self.Circle.tex = self.Circle:CreateTexture(nil,"OVERLAY")
+	self.Circle.tex:SetAllPoints()
+	self.Circle.tex:SetTexture("Interface\\Addons\\bdNameplates\\circle.blp")
+	self.Circle.tex:SetVertexColor(0,0,0,1)
+	self.Circle.SetYards = function(self,yards)
+		self:SetSize(50*yards,50*yards)
+		self:SetPoint("CENTER", self.parent.Name, "CENTER", 0, -30)
+	end
+	self.Circle.SetColor = function(self,...)
+		self.tex:SetVertexColor(...)
+	end
+	self.Circle.SetType = function(self,type)
+		if (type == "Circle" or type == 1) then
+			self.tex:SetTexture("Interface\\Addons\\bdNameplates\\circle.blp")
+		elseif (type == "Ring" or type == 2) then
+			self.tex:SetTexture("Interface\\Addons\\bdNameplates\\ring.blp")
+		end
 	end
 	
+	self.Circle:RegisterEvent("ENCOUNTER_END")
+	self.Circle:RegisterEvent("PLAYER_TARGET_CHANGED")
+	self.Circle:SetScript("OnUpdate", function(self, event)
+		if (event == "ENCOUNTER_END") then
+			self.Circle:Hide()
+		else
+			if (UnitIsUnit(unit,"target")) then
+				self:SetAlpha(config.unselectedalpha)
+			else
+				self:SetAlpha(0.8)
+			end
+		end
+	end)
+	self.Circle:Hide()
+
 	-- Fixate Alert
 	self.Fixate = CreateFrame("frame",nil,self)
 	self.Fixate:SetFrameLevel(4)
@@ -669,8 +755,12 @@ local function style(self, unit)
 	self.Fixate.text:SetAllPoints(self.Fixate)
 	self.Fixate.text:SetJustifyH("CENTER")
 	self.Fixate:Hide()
-	self.fixated = false;
-	
+
+	-- spell monitoring
+	self.SpellMonitor = CreateFrame("frame", nil, self)
+	self.SpellMonitor.owner = self
+	self.SpellMonitor:SetScript("OnUpdate", specialUpdate)
+
 	-- Absorb
 	self.TotalAbsorb = CreateFrame('StatusBar', nil, self.Health)
 	self.TotalAbsorb:SetAllPoints(self.Health)
@@ -712,11 +802,32 @@ local function style(self, unit)
 	self.Auras:EnableMouse(false)
 	self.Auras.size = config.raidbefuffs
 	self.Auras.initialAnchor  = "BOTTOMLEFT"
+	self.Auras.showStealableBuffs = config.highlightPurge
+	self.Auras.disableMouse = true
 	self.Auras.spacing = 2
 	self.Auras.num = 20
 	self.Auras['growth-y'] = "UP"
 	self.Auras['growth-x'] = "RIGHT"
+
+	self.specialExpiration = 0
+	self.enrageExpiration = 0
 	self.Auras.CustomFilter = function(element, unit, button, name, texture, count, debuffType, duration, expiration, caster, isStealable, nameplateShowSelf, spellID, canApply, isBossDebuff, casterIsPlayer, nameplateShowAll,timeMod, effect1, effect2, effect3)
+
+		-- this is a specialspell
+		if (config.specialSpells[name] and expiration > self.specialExpiration) then
+			self.specialExpiration = expiration
+			return true
+		end
+
+		-- purgable spell, whitelist it
+		if (config.highlightPurge and isStealable) then
+			return true
+		end
+
+		-- this is an enrage
+		if (config.highlightEnrage and debuffType == "") then
+			return true
+		end
 
 		-- blacklist is priority
 		if (config.blacklist and config.blacklist[name]) then
@@ -781,65 +892,6 @@ local function style(self, unit)
 		button.skinned = true
 	end
 
-	-- All of our spell monitoring happens in here, for performance reasons
-	local total = 0
-	local threshold = 0.15
-	self.SpellMonitor = CreateFrame("frame", nil, self)
-	self.SpellMonitor:SetScript("OnUpdate", function(spellmontor, elapsed)
-		total = total + elapsed
-		if (total > threshold) then
-			total = 0
-			self.forceSpecial = false
-			self.forcePurge = false
-			self.forceEnrage = false
-
-			-- do we want to run this script at all?
-			local skipSpecial = false
-			local skipPurge = false
-			local skipEnrage = false
-			if (#config.specialSpells == 0) then
-				skipSpecial = true
-			end
-			if (not config.highlightPurge) then
-				skipPurge = true
-			end
-			if (not config.highlightEnrage) then
-				skipEnrage = true
-			end
-
-			-- special unit
-			if (config.specialunits[UnitName(self.unit)]) then
-				self.forceSpecial = true
-				skipSpecial = true
-			end
-
-			-- we don't need to run this script yet
-			if (skipSpecial and skipPurge and skipEnrage) then return end
-
-			for i = 1, 40 do
-				local buff, icon, count, debuffType, duration, expirationTime, unitCaster, canStealOrPurge, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, isCastByPlayer, nameplateShowAll, timeMod = UnitAura(self.unit, i, "HELPFUL")
-				local debuff = UnitAura(self.unit, i, "HARMFUL")
-
-				if (not self.forceSpecial and (config.specialSpells[buff] or config.specialSpells[debuff])) then
-					self.forceSpecial = true
-					skipSpecial = true
-				end
-
-				if (not self.forcePurge and (config.highlightPurge and debuffType == "Magic")) then
-					self.forcePurge = true
-					skipPurge = true
-				end
-
-				if (not self.forceEnrage and (config.highlightEnrage and debuffType == "")) then
-					self.forceEnrage = true
-					skipEnrage = true
-				end
-
-				-- if we found these things then there is no reason to continue
-				if (skipSpecial and skipPurge and skipEnrage) then break end
-			end
-		end
-	end)
 
 	self.Castbar = CreateFrame("StatusBar", nil, self)
 	self.Castbar:SetFrameLevel(3)
@@ -872,6 +924,8 @@ local function style(self, unit)
 	self.Castbar.PostCastDelayed = kickable
 	self.Castbar.PostCastNotInterruptible = kickable
 	self.Castbar.PostCastInterruptible = kickable
+
+	self.Castbar.timeToHold = 1
 end
 
 oUF:RegisterStyle("bdNameplates", style) --styleName: String, styleFunc: Function
