@@ -2,7 +2,8 @@ local addon, bdNameplates = ...
 local config = bdCore.config.profile['Nameplates']
 
 -- v1 done
-function bdNamplates:friendlyStyle(self, event, unit)
+function bdNameplates:friendlyStyle(self, event, unit)
+	self.Name:SetTextColor(bdNameplates:unitColor(unit))
 	if (self.currentStyle and self.currentStyle == "friendly") then return end
 
 	-- auras
@@ -14,7 +15,6 @@ function bdNamplates:friendlyStyle(self, event, unit)
 	else
 		self.Name:Show()
 		self.Name:SetAlpha(config.friendnamealpha)
-		self.Name:SetTextColor(bdNameplates:unitColor(unit))
 	end
 
 	-- castbars

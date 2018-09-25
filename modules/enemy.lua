@@ -1,7 +1,7 @@
 local addon, bdNameplates = ...
 local config = bdCore.config.profile['Nameplates']
 
-function bdNamplates:enemyStyle(self, event, unit)
+function bdNameplates:enemyStyle(self, event, unit)
 	if (self.currentStyle and self.currentStyle == "enemy") then return end
 
 	-- auras
@@ -9,6 +9,7 @@ function bdNamplates:enemyStyle(self, event, unit)
 
 	-- names
 	self.Name:Show()
+	self.Name:SetTextColor(1,1,1)
 	if (config.hideEnemyNames == "Always Hide") then
 		self.Name:Hide()
 	elseif (config.hideEnemyNames == "Only Target") then

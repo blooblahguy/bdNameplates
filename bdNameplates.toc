@@ -8,10 +8,10 @@ auras.lua
 init.lua
 functions.lua
 
-resources/enemy.lua
-resources/friendly.lua
-resources/npc.lua
-resources/personal.lua
-resources/resource.lua
+modules\enemy.lua
+modules\friendly.lua
+modules\npc.lua
+modules\personal.lua
+modules\resources.lua
 
 core.lua

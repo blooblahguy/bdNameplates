@@ -2,7 +2,7 @@ local addon, bdNameplates = ...
 local config = bdCore.config.profile['Nameplates']
 
 -- v1 done
-function bdNamplates:personalStyle(self, event, unit)
+function bdNameplates:personalStyle(self, event, unit)
 	if (self.currentStyle and self.currentStyle == "personal") then return end
 
 	-- castbar

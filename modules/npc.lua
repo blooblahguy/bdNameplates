@@ -2,7 +2,8 @@ local addon, bdNameplates = ...
 local config = bdCore.config.profile['Nameplates']
 
 -- v1 done
-function bdNamplates:npcStyle(self, event, unit)
+function bdNameplates:npcStyle(self, event, unit)
+	self.Name:SetTextColor(bdNameplates:unitColor(unit))
 	if (self.currentStyle and self.currentStyle == "npc") then return end
 
 	-- castbar

@@ -5,22 +5,22 @@ local config = bdCore.config.profile['Nameplates']
 -- Fonts we use
 bdNameplates.font = CreateFont("BDN_FONT")
 bdNameplates.font:SetFont(bdCore.media.font, 15)
-bdNameplates.font:SetShadowColor(0, 0, 0, 0)
+bdNameplates.font:SetShadowColor(0, 0, 0)
 bdNameplates.font:SetShadowOffset(1, -1)
 
 bdNameplates.font_friendly = CreateFont("BDN_FONT_FRIENDLY")
 bdNameplates.font_friendly:SetFont(bdCore.media.font, config.friendlynamesize)
-bdNameplates.font_friendly:SetShadowColor(0, 0, 0, 0)
+bdNameplates.font_friendly:SetShadowColor(0, 0, 0)
 bdNameplates.font_friendly:SetShadowOffset(1, -1)
 
 bdNameplates.font_small = CreateFont("BDN_FONT_SMALL")
 bdNameplates.font_small:SetFont(bdCore.media.font, 13)
-bdNameplates.font_small:SetShadowColor(0, 0, 0, 0)
+bdNameplates.font_small:SetShadowColor(0, 0, 0)
 bdNameplates.font_small:SetShadowOffset(1, -1)
 
 bdNameplates.font_castbar = CreateFont("BDN_FONT_CASTBAR")
 bdNameplates.font_castbar:SetFont(bdCore.media.font, config.castbarheight*0.85)
-bdNameplates.font_castbar:SetShadowColor(0, 0, 0, 0)
+bdNameplates.font_castbar:SetShadowColor(0, 0, 0)
 bdNameplates.font_castbar:SetShadowOffset(1, -1)
 
 -- Scale of the UI here
@@ -90,26 +90,32 @@ function bdNameplates:configCallback()
 end
 bdNameplates:configCallback()
 
+local threat_called = 0
+function nameplateColor(self, event, unit)
+	if(not unit or self.unit ~= unit) then return end
+	if (event == "NAME_PLATE_UNIT_REMOVED") then return end
+	if (event == "OnShow") then return end
+	if (event == "OnUpdate") then return end
 
-function threatColor(self, event, unit, max)
-	if (max) then 
-		-- post health update call
-		unit = event 
-		event = "HEALTH_POST_UPDATE"
-	end
-
-	if (not unit or not unit ~= self.unit or not unit == 'player' or UnitIsUnit('player', unit) or UnitIsFriend('player', unit)) then return end
-
-	self:Hide() -- hide before changing position, changing styles etc, massive fps bonus
+	
+	local status = UnitThreatSituation("player", unit)
+	local combat = UnitAffectingCombat("player")
 
 	local healthbar = self.Health
-	local combat = UnitAffectingCombat("player")
-	local status = UnitThreatSituation("player", unit)
+	local cur, max = UnitHealth(unit), UnitHealthMax(unit)
+	healthbar.disconnected = not UnitIsConnected(unit)
+	healthbar:SetMinMaxValues(0, max)
 
-	if (UnitIsTapDenied(unit)) then
-		-- 5 people or enemy faction have already tagged this mob
-		healthbar:SetStatusBarColor(.5,.5,.5)
-	elseif (combat) then 
+	if(healthbar.disconnected) then
+		healthbar:SetValue(max)
+	else
+		healthbar:SetValue(cur)
+	end
+
+
+	if (unit == 'player' or UnitIsUnit('player', unit) or UnitIsFriend('player', unit) or status == nil) then
+		self.Health:SetStatusBarColor(bdNameplates:unitColor(unit))
+	elseif (combat and not UnitIsTapDenied(unit) and (event == "UNIT_THREAT_LIST_UPDATE" or event == "NAME_PLATE_UNIT_ADDED")) then
 		if (status == 3) then
 			-- securely tanking
 			healthbar:SetStatusBarColor(unpack(config.threatcolor))
@@ -120,19 +126,17 @@ function threatColor(self, event, unit, max)
 			-- on threat table, but not near tank threat
 			healthbar:SetStatusBarColor(unpack(config.nothreatcolor))
 		end
-	end
 
-	self:Show() -- show after changing position, changing styles etc, massive fps bonus
+	end
 end
 
 function nameplateCallback(self, event, unit)
-	self:Hide() -- hide before changing position, changing styles etc, massive fps bonus
-
 	-- Force cvars/settings
 	nameplateSize()
 
 	if (not self) then return end
 	unit = unit or self.unit
+	local reaction = UnitReaction("player", unit)
 
 	--==========================================
 	-- Configuration Updates First
@@ -158,13 +162,13 @@ function nameplateCallback(self, event, unit)
 	-- Style by unit type
 	--==========================================
 	if (UnitIsUnit(unit,"player")) then
-		bdnamePlates:personalStyle(self, event, unit)
+		bdNameplates:personalStyle(self, event, unit)
 	elseif (UnitIsPVPSanctuary(unit) or (UnitIsPlayer(unit) and UnitIsFriend("player",unit) and reaction and reaction >= 5)) then
-		bdnamePlates:friendlyStyle(self, event, unit)
+		bdNameplates:friendlyStyle(self, event, unit)
 	elseif (not UnitIsPlayer(unit) and (reaction and reaction >= 5) or ufaction == "Neutral") then
-		bdnamePlates:npcStyle(self, event, unit)
+		bdNameplates:npcStyle(self, event, unit)
 	else
-		bdnamePlates:enemyStyle(self, event, unit)
+		bdNameplates:enemyStyle(self, event, unit)
 	end
 
 	--==========================================
@@ -192,28 +196,19 @@ function nameplateCallback(self, event, unit)
 		self.specialUnit = false
 	end
 
-	self:Show() -- show after changing position, changing styles etc, massive fps bonus
 end
 
 function nameplateCreate(self, unit)
-	self:Hide() -- hide before changing position, changing styles etc, massive fps bonus
+	--self:Hide() -- hide before changing position, changing styles etc, massive fps bonus
 
 	self.nameplate = C_NamePlate.GetNamePlateForUnit(unit)
 	self.scale = bdNameplates.scale
 	self.unit = unit
 	
 	self:SetPoint("CENTER", self.nameplate, "CENTER", 0, 0)
+	self:SetSize(config.width, config.height)
 	self:SetScale(self.scale)
 	self:EnableMouse(false)
-
-	-- targeting callback
-	self:RegisterEvent("PLAYER_TARGET_CHANGED", nameplateCallback)
-
-	-- coloring callbacks
-	self:RegisterEvent("PLAYER_REGEN_DISABLED", threatColor)
-	self:RegisterEvent("PLAYER_REGEN_ENABLED", threatColor)
-	self:RegisterEvent("UNIT_THREAT_LIST_UPDATE", threatColor)
-	self.Health.PostUpdate = threatColor
 
 	--==========================================
 	-- HEALTHBAR
@@ -230,6 +225,20 @@ function nameplateCreate(self, unit)
 	bdCore:setBackdrop(self.Health)
 	self.Health.Shadow:SetBackdropColor(1, 1, 1, 1)
 	self.Health.Shadow:SetBackdropBorderColor(1, 1, 1, 0.8)
+
+	--==========================================
+	-- CALLBACKS
+	--==========================================
+	-- targeting callback
+	self:RegisterEvent("PLAYER_TARGET_CHANGED", nameplateCallback)
+
+	-- coloring callbacks
+	-- self:RegisterEvent("PLAYER_REGEN_ENABLED", self.Health.ForceUpdate)
+	-- self:RegisterEvent("PLAYER_REGEN_DISABLED", self.Health.ForceUpdate)
+	self:RegisterEvent("UNIT_THREAT_LIST_UPDATE", nameplateColor)
+	self.Health.Override = nameplateColor
+	-- self.Health.UpdateColor = nameplateColor
+	
 
 	--==========================================
 	-- POWERBAR
@@ -400,7 +409,7 @@ function nameplateCreate(self, unit)
 	self.Castbar.bg:SetPoint("BOTTOMRIGHT", self.Castbar.Icon, "BOTTOMRIGHT", bdCore.config.persistent.General.border, -bdCore.config.persistent.General.border)
 
 	-- Change color if cast is kickable or not
-	self.Castbar.kickable = function()
+	self.Castbar.kickable = function(self)
 		if (not self:IsShown()) then return end
 		if (self.notInterruptible) then
 			self.Icon:SetDesaturated(1)
@@ -415,7 +424,7 @@ function nameplateCreate(self, unit)
 	self.Castbar.PostCastNotInterruptible = self.Castbar.kickable
 	self.Castbar.PostCastInterruptible = self.Castbar.kickable
 
-	self:Show() -- show after changing position, changing styles etc, massive fps bonus
+	--self:Show() -- show after changing position, changing styles etc, massive fps bonus
 end
 
 oUF:RegisterStyle("bdNameplates", nameplateCreate)
