@@ -19,7 +19,7 @@ function bdNameplates:personalStyle(self, event, unit)
 
 	-- healthbar
 	self.Health:Show()
-	if (config.hptext == "None" or (config.showhptexttargetonly and not UnitIsUnit(unit, "target"))) then
+	if (config.hptext == "None" or config.showhptexttargetonly) then
 		self.Curhp:Hide()
 	else
 		self.Curhp:Show()

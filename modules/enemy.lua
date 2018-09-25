@@ -36,24 +36,10 @@ function bdNameplates:enemyStyle(self, event, unit)
 	end
 
 	-- healthbar
-	if (config.friendlyplates) then
-		self.Health:Show()
-	else
-		self.Health:Hide()
-	end
+	self.Health:Show()
 
 	-- power
 	self.Power:Hide()
-
-	self.Auras:Show()
-	self.Health:Show()
-	
-
-	self:EnableElement("Castbar")
-
-	if (config.hidefriendnames and not UnitIsUnit(unit,"target")) then
-		self.Name:Hide()
-	end
 
 	self.currentStyle = "enemy"
 end

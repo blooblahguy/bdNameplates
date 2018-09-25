@@ -2,6 +2,13 @@
 local oUF = bdCore.oUF
 local config = bdCore.config.profile['Nameplates']
 
+-- Features to reimplement
+-- Fixate alerts
+-- Circle module
+-- Special Units
+-- Special Spells
+-- Absorbs
+
 -- Fonts we use
 bdNameplates.font = CreateFont("BDN_FONT")
 bdNameplates.font:SetFont(bdCore.media.font, 15)
@@ -90,8 +97,15 @@ function bdNameplates:configCallback()
 end
 bdNameplates:configCallback()
 
-local threat_called = 0
-function nameplateColor(self, event, unit)
+--==========================================
+-- HEALTH UPDATER
+--- Calls on 
+---- more than it ought to by default
+---- NAME_PLATE_UNIT_ADDED
+---- UNIT_THREAT_LIST_UPDATE
+---- UNIT_HEALTH_FREQUENT
+--==========================================
+function nameplateUpdateHealth(self, event, unit)
 	if(not unit or self.unit ~= unit) then return end
 	if (event == "NAME_PLATE_UNIT_REMOVED") then return end
 	if (event == "OnShow") then return end
@@ -126,10 +140,17 @@ function nameplateColor(self, event, unit)
 			-- on threat table, but not near tank threat
 			healthbar:SetStatusBarColor(unpack(config.nothreatcolor))
 		end
-
 	end
+
 end
 
+--==========================================
+-- MAIN CALLBACK
+--- Calls on 
+---- NAME_PLATE_UNIT_ADDED
+---- NAME_PLATE_UNIT_REMOVED
+---- PLAYER_TARGET_CHANGED
+--==========================================
 function nameplateCallback(self, event, unit)
 	-- Force cvars/settings
 	nameplateSize()
@@ -198,9 +219,11 @@ function nameplateCallback(self, event, unit)
 
 end
 
+--==========================================
+-- NAMEPLATE CREATE
+--- Calls when a new nameplate frame gets created
+--==========================================
 function nameplateCreate(self, unit)
-	--self:Hide() -- hide before changing position, changing styles etc, massive fps bonus
-
 	self.nameplate = C_NamePlate.GetNamePlateForUnit(unit)
 	self.scale = bdNameplates.scale
 	self.unit = unit
@@ -233,13 +256,9 @@ function nameplateCreate(self, unit)
 	self:RegisterEvent("PLAYER_TARGET_CHANGED", nameplateCallback)
 
 	-- coloring callbacks
-	-- self:RegisterEvent("PLAYER_REGEN_ENABLED", self.Health.ForceUpdate)
-	-- self:RegisterEvent("PLAYER_REGEN_DISABLED", self.Health.ForceUpdate)
-	self:RegisterEvent("UNIT_THREAT_LIST_UPDATE", nameplateColor)
-	self.Health.Override = nameplateColor
-	-- self.Health.UpdateColor = nameplateColor
+	self:RegisterEvent("UNIT_THREAT_LIST_UPDATE", nameplateUpdateHealth)
+	self.Health.Override = nameplateUpdateHealth
 	
-
 	--==========================================
 	-- POWERBAR
 	--==========================================
@@ -357,9 +376,16 @@ function nameplateCreate(self, unit)
 	
 	self.Auras.PostUpdateIcon = function(self, unit, button, index, position, duration, expiration, debuffType, isStealable)
 		button:SetHeight(config.raidbefuffs*.6)
+		bdCore:setBackdrop(button)
+		if (config.highlightPurge and isStealable)
+			button.border:SetVertexColor(.16, .5, .81, 1)
+		else
+			button.border:SetVertexColor(unpack(bdCore.media.border))
+		end
+
 		if (button.skinned) then return end
 
-		bdCore:setBackdrop(button)
+		
 		local cdtext = button.cd:GetRegions()
 		cdtext:SetFontObject("BDN_FONT_SMALL") 
 		cdtext:SetJustifyH("CENTER")
@@ -387,7 +413,7 @@ function nameplateCreate(self, unit)
 	self.Castbar.timeToHold = 1
 	self.Castbar:SetFrameLevel(3)
 	self.Castbar:SetStatusBarTexture(bdCore.media.flat)
-	self.Castbar:SetStatusBarColor(.1, .1, .1, 1)
+	self.Castbar:SetStatusBarColor(.1, .4, .7, 1)
 	self.Castbar:SetPoint("TOPLEFT", self.Health, "BOTTOMLEFT", 0, -2)
 	self.Castbar:SetPoint("BOTTOMRIGHT", self.Health, "BOTTOMRIGHT", 0, -config.castbarheight)
 	bdCore:setBackdrop(self.Castbar)
@@ -409,8 +435,7 @@ function nameplateCreate(self, unit)
 	self.Castbar.bg:SetPoint("BOTTOMRIGHT", self.Castbar.Icon, "BOTTOMRIGHT", bdCore.config.persistent.General.border, -bdCore.config.persistent.General.border)
 
 	-- Change color if cast is kickable or not
-	self.Castbar.kickable = function(self)
-		if (not self:IsShown()) then return end
+	function self.Castbar:kickable(self, unit, name)
 		if (self.notInterruptible) then
 			self.Icon:SetDesaturated(1)
 			self:SetStatusBarColor(unpack(config.nonkickable))
@@ -423,8 +448,6 @@ function nameplateCreate(self, unit)
 	self.Castbar.PostCastStart = self.Castbar.kickable
 	self.Castbar.PostCastNotInterruptible = self.Castbar.kickable
 	self.Castbar.PostCastInterruptible = self.Castbar.kickable
-
-	--self:Show() -- show after changing position, changing styles etc, massive fps bonus
 end
 
 oUF:RegisterStyle("bdNameplates", nameplateCreate)
