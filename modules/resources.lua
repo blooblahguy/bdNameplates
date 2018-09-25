@@ -1,5 +1,4 @@
 local addon, bdNameplates = ...
-
 local config = bdCore.config.profile['Nameplates']
 
 function bdNameplates:resourceBuilder(frame, unit)

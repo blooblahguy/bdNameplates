@@ -4,7 +4,14 @@
 ## LoadOnDemand: 0
 ## Dependencies: bdCore
 
+auras.lua
 init.lua
 functions.lua
-resources.lua
+
+resources/enemy.lua
+resources/friendly.lua
+resources/npc.lua
+resources/personal.lua
+resources/resource.lua
+
 core.lua
