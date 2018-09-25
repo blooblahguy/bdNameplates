@@ -328,8 +328,35 @@ local function friendlyStyle(self, unit)
 	end
 end
 
+local function fixateUpdate(self, event, unit)
+	if (self.unit == unit) then
+		local target = unit.."target"
+
+		self.Circle:Hide()
+		self.Fixate:Hide()
+		
+		if (UnitExists(target) and UnitIsPlayer(target)) then
+			if (config.fixatealert ~= "None" and config.showFixateCircle and UnitIsUnit(target, "player")) then
+				self.Circle:Show()
+				self.Circle:SetYards(4)
+				self.Circle:SetColor(.8,0,0,1,0.5)
+				self.Circle:SetType(2)
+			end
+
+			if (config.fixatealert == "Always" or config.fixatealert == "All") then
+				self.Fixate:Show()
+				self.Fixate.text:SetText(UnitName(target))
+			elseif (config.fixatealert == "Personal" and UnitIsUnit(target, "player")) then
+				self.Fixate:Show()
+				self.Fixate.text:SetText(UnitName(target))
+			end
+		end
+	end
+end
+
 local function nameplateCallback(self, event, unit)
-	unit = unit or target
+	-- print(self, event, self.unit)
+	unit = unit or self.unit
 	-- set the scale of the nameplates
 	local scale = UIParent:GetEffectiveScale()*1
 	if (not InCombatLockdown()) then
@@ -360,6 +387,7 @@ local function nameplateCallback(self, event, unit)
 	self.Castbar.Icon:Hide()
 	self.Castbar.bg:Hide()
 	self.Power:Hide()
+	fixateUpdate(self, event, unit)
 
 	---------------------
 	-- configurations
@@ -431,20 +459,21 @@ end
 
 local function threatColor(self, event, unit, forced)
 
+	if (UnitIsPlayer(unit)) then return end
+	if (unit == nil) then return end
+	
 	-- check priority health overrides first
-	if (self.specialExpiration > GetTime() or self.specialUnit) then
-		self.Health:SetStatusBarColor(unpack(config.specialcolor))
-	end
+	-- if (self.specialExpiration > GetTime() or self.specialUnit) then
+	-- 	self.Health:SetStatusBarColor(unpack(config.specialcolor))
+	-- end
 
 	-- these things have been forced, don't proceed with more logic
-	if (self.forceSpecial or self.forcePurge or self.forceEnrage) then return end
+	-- if (self.forceSpecial or self.forcePurge or self.forceEnrage) then return end
 	
 	-- we don't recolor players
-	if (UnitIsPlayer(unit)) then return end
 
 	local healthbar = self.Health
 	local combat = UnitAffectingCombat("player")
-	-- local isTanking, status, threatpct, rawthreatpct, threatvalue = UnitDetailedThreatSituation("player", unit)
 	local status = UnitThreatSituation("player", unit)
 
 	-- threat coloring
@@ -477,7 +506,6 @@ local function threatColor(self, event, unit, forced)
 			end
 		end
 	end
-
 end
 
 local function kickable(self)
@@ -524,26 +552,7 @@ local function specialUpdate(self, elapsed)
 	end
 end
 
-local function fixateUpdate(self, event, unit)
-	-- show "fixates" or whitelisted mob's targets
-	self.Circle:Hide()
-	if (config.fixatealert == "Always") then
-		self.Fixate:Show()
-		self.Fixate.text:SetText(UnitName(unit.."target"))
-	elseif (config.fixatealert == "All") then
-		self.Fixate:Show()
-		self.Fixate.text:SetText(UnitName(unit.."target"))
-	elseif (config.fixatealert == "Personal" and UnitIsUnit(unit.."target","player")) then
-		self.Fixate:Show()
-		self.Fixate.text:SetText(UnitName(unit.."target"))
-		self.Circle:Show()
-		self.Circle:SetYards(8)
-		self.Circle:SetColor(.8,0,0,1,0.5)
-		self.Circle:SetType(2)
-	else
-		self.Fixate:Hide()
-	end
-end
+
 
 ------------------------------
 -- Nameplate Initiation
@@ -685,14 +694,14 @@ local function style(self, unit)
 	self:RegisterEvent("PLAYER_REGEN_DISABLED", threatColor)
 	self:RegisterEvent("PLAYER_REGEN_ENABLED", threatColor)
 	self:RegisterEvent("UNIT_THREAT_SITUATION_UPDATE", threatColor)
+	self:RegisterEvent("UNIT_TARGET", threatColor, false)
+
+	self:RegisterEvent("UNIT_TARGET", fixateUpdate, false)
+
 	self.Health.PostUpdate = function(element, unit, cur, max)
-		threatColor(self, "", unit, true)
+		threatColor(self, "", self.unit)
 	end
 
-	-- Fixate Alert
-	self:RegisterEvent("UNIT_TARGET", fixateUpdate)
-
-	
 	-- Circle/Ring Alert
 	self.Circle = CreateFrame("frame", nil, self)
 	self.Circle:SetAlpha(0.8)
@@ -703,7 +712,7 @@ local function style(self, unit)
 	self.Circle.tex:SetTexture("Interface\\Addons\\bdNameplates\\circle.blp")
 	self.Circle.tex:SetVertexColor(0,0,0,1)
 	self.Circle.SetYards = function(self,yards)
-		self:SetSize(50*yards,50*yards)
+		self:SetSize(40*yards,40*yards)
 		self:SetPoint("CENTER", self.parent.Name, "CENTER", 0, -30)
 	end
 	self.Circle.SetColor = function(self,...)
@@ -731,6 +740,7 @@ local function style(self, unit)
 		end
 	end)
 	self.Circle:Hide()
+	
 
 	-- Fixate Alert
 	self.Fixate = CreateFrame("frame",nil,self)
@@ -757,9 +767,9 @@ local function style(self, unit)
 	self.Fixate:Hide()
 
 	-- spell monitoring
-	self.SpellMonitor = CreateFrame("frame", nil, self)
-	self.SpellMonitor.owner = self
-	self.SpellMonitor:SetScript("OnUpdate", specialUpdate)
+	-- self.SpellMonitor = CreateFrame("frame", nil, self)
+	-- self.SpellMonitor.owner = self
+	-- self.SpellMonitor:SetScript("OnUpdate", specialUpdate)
 
 	-- Absorb
 	self.TotalAbsorb = CreateFrame('StatusBar', nil, self.Health)
@@ -814,10 +824,10 @@ local function style(self, unit)
 	self.Auras.CustomFilter = function(element, unit, button, name, texture, count, debuffType, duration, expiration, caster, isStealable, nameplateShowSelf, spellID, canApply, isBossDebuff, casterIsPlayer, nameplateShowAll,timeMod, effect1, effect2, effect3)
 
 		-- this is a specialspell
-		if (config.specialSpells[name] and expiration > self.specialExpiration) then
-			self.specialExpiration = expiration
-			return true
-		end
+		-- if (config.specialSpells[name] and expiration > self.specialExpiration) then
+		-- 	self.specialExpiration = expiration
+		-- 	return true
+		-- end
 
 		-- purgable spell, whitelist it
 		if (config.highlightPurge and isStealable) then

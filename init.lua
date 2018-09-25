@@ -172,9 +172,15 @@ defaults[#defaults+1] = {hptext = {
 }}
 defaults[#defaults+1] = {fixatealert = {
 	type = "dropdown",
-	value = "All",
-	options = {"All","Always","Personal","None"},
+	value = "Personal",
+	options = {"Always","Personal","None"},
 	label = "Fixate Alert."
+}}
+defaults[#defaults+1] = {showFixateCircle = {
+	type = "checkbox",
+	value = true,
+	label = "Show Fixate Circle",
+	callback = function() bdNameplates:configCallback() end
 }}
 defaults[#defaults+1] = {showhptexttargetonly = {
 	type = "checkbox",
