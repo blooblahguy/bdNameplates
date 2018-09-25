@@ -328,6 +328,63 @@ local function friendlyStyle(self, unit)
 	end
 end
 
+local function threatColor(self, event, unit)
+	if (unit == nil) then return end
+
+	-- local cur, max = UnitHealth(unit), UnitHealthMax(unit)
+	self.Health:UpdateColor(self.unit, min, max)
+
+	if (UnitIsUnit(self.unit,unit)) then
+
+		if (UnitIsPlayer(unit)) then return end
+		
+		-- check priority health overrides first
+		-- if (self.specialExpiration > GetTime() or self.specialUnit) then
+		-- 	self.Health:SetStatusBarColor(unpack(config.specialcolor))
+		-- end
+
+		-- these things have been forced, don't proceed with more logic
+		-- if (self.forceSpecial or self.forcePurge or self.forceEnrage) then return end
+		
+		-- we don't recolor players
+
+		local healthbar = self.Health
+		local combat = UnitAffectingCombat("player")
+		local status = UnitThreatSituation("player", unit)
+
+		-- threat coloring
+		if (UnitIsTapDenied(unit)) then
+			-- 5 people or enemy faction have already tagged this mob
+			healthbar:SetStatusBarColor(.5,.5,.5)
+		elseif (combat) then 
+			if (status == 3) then
+				-- securely tanking
+				healthbar:SetStatusBarColor(unpack(config.threatcolor))
+
+			elseif (status == 2 or status == 1) then
+				-- near or over tank threat
+				healthbar:SetStatusBarColor(unpack(config.threatdangercolor))
+
+			elseif (status ~= nil) then
+				-- on threat table, but not near tank threat
+				healthbar:SetStatusBarColor(unpack(config.nothreatcolor))
+
+				-- execute color alert
+				if (config.executerange) then
+					local perc = 100;
+					if (UnitHealthMax(unit) ~= 0) then
+						perc = (UnitHealth(unit) / UnitHealthMax(unit)) * 100
+					end
+
+					if (perc <= config.executerange) then
+						healthbar:SetStatusBarColor(unpack(config.executecolor))
+					end
+				end
+			end
+		end
+	end
+end
+
 local function fixateUpdate(self, event, unit)
 	if (self.unit == unit) then
 		local target = unit.."target"
@@ -355,8 +412,7 @@ local function fixateUpdate(self, event, unit)
 end
 
 local function nameplateCallback(self, event, unit)
-	-- print(self, event, self.unit)
-	unit = unit or self.unit
+	
 	-- set the scale of the nameplates
 	local scale = UIParent:GetEffectiveScale()*1
 	if (not InCombatLockdown()) then
@@ -368,6 +424,9 @@ local function nameplateCallback(self, event, unit)
 	-- make sure we have the things we want
 	if (not self or not unit) then return end
 	
+	-- force feature updates
+	fixateUpdate(self, event, unit)
+	threatColor(self, event, unit)
 	
 	local nameplate = C_NamePlate.GetNamePlateForUnit(unit)
 	local reaction = UnitReaction("player", unit)
@@ -387,7 +446,6 @@ local function nameplateCallback(self, event, unit)
 	self.Castbar.Icon:Hide()
 	self.Castbar.bg:Hide()
 	self.Power:Hide()
-	fixateUpdate(self, event, unit)
 
 	---------------------
 	-- configurations
@@ -454,57 +512,6 @@ local function nameplateCallback(self, event, unit)
 		self.specialUnit = true
 	else
 		self.specialUnit = false
-	end
-end
-
-local function threatColor(self, event, unit, forced)
-
-	if (UnitIsPlayer(unit)) then return end
-	if (unit == nil) then return end
-	
-	-- check priority health overrides first
-	-- if (self.specialExpiration > GetTime() or self.specialUnit) then
-	-- 	self.Health:SetStatusBarColor(unpack(config.specialcolor))
-	-- end
-
-	-- these things have been forced, don't proceed with more logic
-	-- if (self.forceSpecial or self.forcePurge or self.forceEnrage) then return end
-	
-	-- we don't recolor players
-
-	local healthbar = self.Health
-	local combat = UnitAffectingCombat("player")
-	local status = UnitThreatSituation("player", unit)
-
-	-- threat coloring
-	if (UnitIsTapDenied(unit)) then
-		-- 5 people or enemy faction have already tagged this mob
-		healthbar:SetStatusBarColor(.5,.5,.5)
-	elseif (combat) then 
-		if (status == 3) then
-			-- securely tanking
-			healthbar:SetStatusBarColor(unpack(config.threatcolor))
-
-		elseif (status == 2 or status == 1) then
-			-- near or over tank threat
-			healthbar:SetStatusBarColor(unpack(config.threatdangercolor))
-
-		elseif (status ~= nil) then
-			-- on threat table, but not near tank threat
-			healthbar:SetStatusBarColor(unpack(config.nothreatcolor))
-
-			-- execute color alert
-			if (config.executerange) then
-				local perc = 100;
-				if (UnitHealthMax(unit) ~= 0) then
-					perc = (UnitHealth(unit) / UnitHealthMax(unit)) * 100
-				end
-
-				if (perc <= config.executerange) then
-					healthbar:SetStatusBarColor(unpack(config.executecolor))
-				end
-			end
-		end
 	end
 end
 
@@ -693,14 +700,18 @@ local function style(self, unit)
 	-- Threatplates / combat in-out
 	self:RegisterEvent("PLAYER_REGEN_DISABLED", threatColor)
 	self:RegisterEvent("PLAYER_REGEN_ENABLED", threatColor)
-	self:RegisterEvent("UNIT_THREAT_SITUATION_UPDATE", threatColor)
-	self:RegisterEvent("UNIT_TARGET", threatColor, false)
+	self:RegisterEvent("UNIT_THREAT_LIST_UPDATE", threatColor, false)
+	-- self:RegisterEvent("UNIT_TARGET", threatColor, false)
+	self.Health.PostUpdate = function(element, unit, cur, max)
+		threatColor(self, "", self.unit)
+
+		self.Health.Override = bdCore.noop
+		self.Health.PostUpdate = bdCore.noop
+	end
 
 	self:RegisterEvent("UNIT_TARGET", fixateUpdate, false)
 
-	self.Health.PostUpdate = function(element, unit, cur, max)
-		threatColor(self, "", self.unit)
-	end
+
 
 	-- Circle/Ring Alert
 	self.Circle = CreateFrame("frame", nil, self)
@@ -943,5 +954,5 @@ oUF:SetActiveStyle("bdNameplates")
 oUF:SpawnNamePlates("bdNameplates", nameplateCallback)
 
 -- config callbacks
-bdCore:hookEvent("nameplate_update",bdNameplates.configCallback)
-bdCore:hookEvent("bd_reconfig", bdNameplates.configCallback)
+-- bdCore:hookEvent("nameplate_update",bdNameplates.configCallback)
+-- bdCore:hookEvent("bd_reconfig", bdNameplates.configCallback)
