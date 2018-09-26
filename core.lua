@@ -138,7 +138,7 @@ local function nameplateUpdateHealth(self, event, unit)
 
 	local tapDenied = UnitIsTapDenied(unit)
 	local isPlayer = UnitIsPlayer(unit) and select(2, UnitClass(unit)) or false
-	local reaction = UnitReaction(unit)
+	local reaction = UnitReaction("player", unit)
 	local status = UnitThreatSituation("player", unit)
 	if (unit == "player" or UnitIsUnit("player", unit) or UnitIsFriend("player", unit)) then
 		status = nil

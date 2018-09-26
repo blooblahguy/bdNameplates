@@ -23,7 +23,7 @@ for eclass, color in next, FACTION_BAR_COLORS do
 	end
 end
 
-bdNameplates.unitColor = memoize(self, tapDenied, isPlayer, reaction, status)
+bdNameplates.unitColor = memoize(function(self, tapDenied, isPlayer, reaction, status)
 	if (status ~= nil) then
 		if (status == 3) then
 			-- securely tanking
