@@ -377,7 +377,7 @@ function nameplateCreate(self, unit)
 	self.Auras.PostUpdateIcon = function(self, unit, button, index, position, duration, expiration, debuffType, isStealable)
 		button:SetHeight(config.raidbefuffs*.6)
 		bdCore:setBackdrop(button)
-		if (config.highlightPurge and isStealable)
+		if (config.highlightPurge and isStealable) then
 			button.border:SetVertexColor(.16, .5, .81, 1)
 		else
 			button.border:SetVertexColor(unpack(bdCore.media.border))
