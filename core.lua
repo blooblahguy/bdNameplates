@@ -1,10 +1,24 @@
 ﻿local addon, bdNameplates = ...
+local bdCore = bdCore
 local oUF = bdCore.oUF
 local config = bdCore.config.profile['Nameplates']
+local borderSize = bdCore.config.persistent.General.border
 
+--[[
+	performance notes for myself
+	-lua is a funny language, localizing variables function calls is a big performance increase
+	-local variables are accessed MUCH faster (anywhere from 30-300% faster)
+	-table resizing is really expensive, try to create tables at the correct size. better still, instantiate table structures with a local table template var
+	-tables don't get their size unset when they are set to nil, collect garbage at good times or only use correctly-sized tables
+	-string concatenation through s = s + s2 is fucking terrible, instead store strings into table keys and use table.concat
+	-table lists (keyless) are smaller and faster than associative tables
+	-string.match is faster than string.find
+	-look into cooroutines for some tasks
+	-would be great if wow team could implement jit, though i don't think x64 supports it yet? (need to check)
+--]]
 local unpack, UnitPlayerControlled, UnitIsTapDenied, UnitIsPlayer, UnitClass, UnitReaction = unpack, UnitPlayerControlled, UnitIsTapDenied, UnitIsPlayer, UnitClass, UnitReaction
 local GetCVar, SetCVar, UnitThreatSituation, UnitAffectingCombat, UnitHealth, UnitHealthMax = GetCVar, SetCVar, UnitThreatSituation, UnitAffectingCombat, UnitHealth, UnitHealthMax
-local UnitIsUnit, UnitIsPlayer, UnitIsFriend, UnitIsPVPSanctuary, UnitName = UnitIsUnit, UnitIsPlayer, UnitIsFriend, UnitIsPVPSanctuary, UnitName
+local UnitIsUnit, UnitIsPlayer, UnitIsFriend, UnitIsPVPSanctuary, UnitName, C_NamePlate = UnitIsUnit, UnitIsPlayer, UnitIsFriend, UnitIsPVPSanctuary, UnitName, C_NamePlate
 
 -- Features to reimplement
 -- Fixate alerts
@@ -92,9 +106,7 @@ function bdNameplates:configCallback()
 	-- loop through and set CVARS
 	if (not InCombatLockdown()) then
 		for k, v in pairs(cvars) do
-			if (GetCVar(k) ~= v) then
-				SetCVar(k, v)
-			end
+			SetCVar(k, v)
 		end
 	end
 
@@ -110,7 +122,7 @@ bdNameplates:configCallback()
 ---- UNIT_HEALTH_FREQUENT
 --==========================================
 
-function nameplateUpdateHealth(self, event, unit)
+local function nameplateUpdateHealth(self, event, unit)
 	if(not unit or self.unit ~= unit) then return end
 	if (event == "NAME_PLATE_UNIT_REMOVED") then return end
 	if (event == "OnShow") then return end
@@ -127,7 +139,7 @@ function nameplateUpdateHealth(self, event, unit)
 
 	if (unit == 'player' or UnitIsUnit('player', unit) or UnitIsFriend('player', unit) or status == nil) then
 		self.Health:SetStatusBarColor(bdNameplates:unitColor(unit))
-	elseif (combat and not UnitIsTapDenied(unit) and (event == "UNIT_THREAT_LIST_UPDATE" or event == "NAME_PLATE_UNIT_ADDED")) then
+	elseif (status and not UnitIsTapDenied(unit) and not UnitIsPlayer(unit) (event == "UNIT_THREAT_LIST_UPDATE" or event == "NAME_PLATE_UNIT_ADDED")) then
 		if (status == 3) then
 			-- securely tanking
 			healthbar:SetStatusBarColor(unpack(config.threatcolor))
@@ -149,7 +161,7 @@ end
 ---- NAME_PLATE_UNIT_REMOVED
 ---- PLAYER_TARGET_CHANGED
 --==========================================
-function nameplateCallback(self, event, unit)
+local function nameplateCallback(self, event, unit)
 	-- Force cvars/settings
 	nameplateSize()
 
@@ -221,7 +233,7 @@ end
 -- NAMEPLATE CREATE
 --- Calls when a new nameplate frame gets created
 --==========================================
-function nameplateCreate(self, unit)
+local function nameplateCreate(self, unit)
 	self.nameplate = C_NamePlate.GetNamePlateForUnit(unit)
 	self.scale = bdNameplates.scale
 	self.unit = unit
@@ -382,7 +394,6 @@ function nameplateCreate(self, unit)
 		end
 
 		if (button.skinned) then return end
-
 		
 		local cdtext = button.cd:GetRegions()
 		cdtext:SetFontObject("BDN_FONT_SMALL") 
@@ -408,7 +419,6 @@ function nameplateCreate(self, unit)
 	-- CASTBARS
 	--==========================================
 	self.Castbar = CreateFrame("StatusBar", nil, self)
-	self.Castbar.timeToHold = 1
 	self.Castbar:SetFrameLevel(3)
 	self.Castbar:SetStatusBarTexture(bdCore.media.flat)
 	self.Castbar:SetStatusBarColor(.1, .4, .7, 1)
@@ -429,8 +439,8 @@ function nameplateCreate(self, unit)
 	self.Castbar.bg = self.Castbar:CreateTexture(nil, "BORDER")
 	self.Castbar.bg:SetTexture(bdCore.media.flat)
 	self.Castbar.bg:SetVertexColor(unpack(bdCore.media.border))
-	self.Castbar.bg:SetPoint("TOPLEFT", self.Castbar.Icon, "TOPLEFT", -bdCore.config.persistent.General.border, bdCore.config.persistent.General.border)
-	self.Castbar.bg:SetPoint("BOTTOMRIGHT", self.Castbar.Icon, "BOTTOMRIGHT", bdCore.config.persistent.General.border, -bdCore.config.persistent.General.border)
+	self.Castbar.bg:SetPoint("TOPLEFT", self.Castbar.Icon, "TOPLEFT", -borderSize, borderSize)
+	self.Castbar.bg:SetPoint("BOTTOMRIGHT", self.Castbar.Icon, "BOTTOMRIGHT", borderSize, -borderSize)
 
 	-- Change color if cast is kickable or not
 	function self.Castbar:kickable(unit, name)
@@ -451,3 +461,14 @@ end
 oUF:RegisterStyle("bdNameplates", nameplateCreate)
 oUF:SetActiveStyle("bdNameplates")
 oUF:SpawnNamePlates("bdNameplates", nameplateCallback)
+
+
+-- disable blizzard nameplates now
+-- turns out that the code that fires the events we need is embedded in the wow engine, these nameplates do nothing but eat resources while they are loaded, even if they are hidden and the nameplatedriver has no events
+local addonDisabler = CreateFrame("frame", nil)
+addonDisabler:RegisterEvent("ADDON_LOADED")
+addonDisabler:SetScript("OnEvent", function(self, event, addon)
+	if (IsAddOnLoaded("Blizzard_Nameplates")) then
+		DisableAddOn("Blizzard_Nameplates")
+	end
+end)
