@@ -253,11 +253,6 @@ end
 --- Calls when a new nameplate frame gets created
 --==========================================
 local function nameplateCreate(self, unit)
-	-- now that we've hooked into things, disable this
-	if (IsAddOnLoaded("Blizzard_Nameplates")) then
-		-- DisableAddOn("Blizzard_Nameplates")
-	end
-
 	self.nameplate = C_NamePlate.GetNamePlateForUnit(unit)
 	self.scale = bdNameplates.scale
 	self.unit = unit
