@@ -24,7 +24,8 @@ for eclass, color in next, FACTION_BAR_COLORS do
 	end
 end
 
-bdNameplates.unitColor = memoize(function(self, tapDenied, isPlayer, reaction, status)
+local function colorSave(tapDenied, isPlayer, reaction, status)
+	print(tapDenied, isPlayer, reaction, status)
 	if (status ~= nil) then
 		if (status == 3) then
 			-- securely tanking
@@ -45,7 +46,8 @@ bdNameplates.unitColor = memoize(function(self, tapDenied, isPlayer, reaction, s
 			return colors.reaction[reaction]
 		end
 	end
-end)
+end
+bdNameplates.unitColor = memoize(colorSave)
 
 function bdNameplates:numberize(v)
 	if v <= 9999 then return v end
