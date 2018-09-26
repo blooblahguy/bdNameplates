@@ -255,7 +255,7 @@ end
 local function nameplateCreate(self, unit)
 	-- now that we've hooked into things, disable this
 	if (IsAddOnLoaded("Blizzard_Nameplates")) then
-		DisableAddOn("Blizzard_Nameplates")
+		-- DisableAddOn("Blizzard_Nameplates")
 	end
 
 	self.nameplate = C_NamePlate.GetNamePlateForUnit(unit)
@@ -486,6 +486,8 @@ local function nameplateCreate(self, unit)
 	self.Castbar.PostCastNotInterruptible = self.Castbar.kickable
 	self.Castbar.PostCastInterruptible = self.Castbar.kickable
 end
+
+LoadAddOn("Blizzard_Nameplates")
 
 oUF:RegisterStyle("bdNameplates", nameplateCreate)
 oUF:SetActiveStyle("bdNameplates")
