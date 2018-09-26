@@ -2,6 +2,7 @@ local addon, bdNameplates = ...
 
 local unpack, UnitPlayerControlled, UnitIsTapDenied, UnitIsPlayer, UnitClass, UnitReaction, format, floor = unpack, UnitPlayerControlled, UnitIsTapDenied, UnitIsPlayer, UnitClass, UnitReaction, string.format, math.floor
 
+local colorCache = {}
 local colors = {}
 colors.tapped = {.6,.6,.6}
 colors.offline = {.6,.6,.6}
@@ -22,13 +23,26 @@ for eclass, color in next, FACTION_BAR_COLORS do
 	end
 end
 
-function bdNameplates:unitColor(unit)
-	if(not UnitPlayerControlled(unit) and UnitIsTapDenied(unit)) then
-		return unpack(colors.tapped)
-	elseif UnitIsPlayer(unit) then
-		return unpack(colors.class[select(2, UnitClass(unit))])
+bdNameplates.unitColor = memoize(self, tapDenied, isPlayer, reaction, status)
+	if (status ~= nil) then
+		if (status == 3) then
+			-- securely tanking
+			return config.threatcolor
+		elseif (status == 2 or status == 1) then
+			-- near or over tank threat
+			return config.threatdangercolor
+		else
+			-- on threat table, but not near tank threat
+			return config.nothreatcolor
+		end
 	else
-		return unpack(colors.reaction[UnitReaction(unit, 'player')])
+		if isPlayer then
+			return colors.class[class]
+		elseif (tapDenied) then
+			return colors.tapped
+		else
+			return colors.reaction[reaction]
+		end
 	end
 end
 

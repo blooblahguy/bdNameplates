@@ -124,34 +124,53 @@ bdNameplates:configCallback()
 ---- UNIT_THREAT_LIST_UPDATE
 ---- UNIT_HEALTH_FREQUENT
 --==========================================
-
+local colorCache = {}
 local function nameplateUpdateHealth(self, event, unit)
 	if(not unit or self.unit ~= unit) then return end
 	if (event == "NAME_PLATE_UNIT_REMOVED") then return end
 	if (event == "OnShow") then return end
 	if (event == "OnUpdate") then return end
 
-	local status = UnitThreatSituation("player", unit)
-
 	local healthbar = self.Health
 	local cur, max = UnitHealth(unit), UnitHealthMax(unit)
 	healthbar:SetMinMaxValues(0, max)
 	healthbar:SetValue(cur)
 
-	if (unit == 'player' or UnitIsUnit('player', unit) or UnitIsFriend('player', unit) or status == nil) then
-		self.Health:SetStatusBarColor(bdNameplates:unitColor(unit))
-	elseif (status ~= nil and not UnitIsTapDenied(unit) and not UnitIsPlayer(unit) and (event == "UNIT_THREAT_LIST_UPDATE" or event == "NAME_PLATE_UNIT_ADDED")) then
-		if (status == 3) then
-			-- securely tanking
-			healthbar:SetStatusBarColor(unpack(config.threatcolor))
-		elseif (status == 2 or status == 1) then
-			-- near or over tank threat
-			healthbar:SetStatusBarColor(unpack(config.threatdangercolor))
-		else
-			-- on threat table, but not near tank threat
-			healthbar:SetStatusBarColor(unpack(config.nothreatcolor))
-		end
+	local tapDenied = UnitIsTapDenied(unit)
+	local isPlayer = UnitIsPlayer(unit) and select(2, UnitClass(unit)) or false
+	local reaction = UnitReaction(unit)
+	local status = UnitThreatSituation("player", unit)
+	if (unit == "player" or UnitIsUnit("player", unit) or UnitIsFriend("player", unit)) then
+		status = nil
 	end
+
+	local colors = bdNameplates:unitColor(tapDenied, isPlayer, reaction, status)
+	healthbar:SetStatusBarColor(unpack(colors))
+
+-- 	function bdNameplates:unitColor(unit)
+-- 	if(not UnitPlayerControlled(unit) and UnitIsTapDenied(unit)) then
+-- 		return unpack(colors.tapped)
+-- 	elseif UnitIsPlayer(unit) then
+-- 		return unpack(colors.class[select(2, UnitClass(unit))])
+-- 	else
+-- 		return unpack(colors.reaction[UnitReaction(unit, 'player')])
+-- 	end
+-- end
+
+-- 	if (unit == 'player' or UnitIsUnit('player', unit) or UnitIsFriend('player', unit) or status == nil) then
+-- 		self.Health:SetStatusBarColor(bdNameplates:unitColor(unit))
+-- 	elseif (status ~= nil and not UnitIsTapDenied(unit) and not UnitIsPlayer(unit) and (event == "UNIT_THREAT_LIST_UPDATE" or event == "NAME_PLATE_UNIT_ADDED")) then
+-- 		if (status == 3) then
+-- 			-- securely tanking
+-- 			healthbar:SetStatusBarColor(unpack(config.threatcolor))
+-- 		elseif (status == 2 or status == 1) then
+-- 			-- near or over tank threat
+-- 			healthbar:SetStatusBarColor(unpack(config.threatdangercolor))
+-- 		else
+-- 			-- on threat table, but not near tank threat
+-- 			healthbar:SetStatusBarColor(unpack(config.nothreatcolor))
+-- 		end
+-- 	end
 
 end
 

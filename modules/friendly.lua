@@ -3,7 +3,13 @@ local config = bdCore.config.profile['Nameplates']
 
 -- v1 done
 function bdNameplates:friendlyStyle(self, event, unit)
-	self.Name:SetTextColor(bdNameplates:unitColor(unit))
+	local tapDenied = UnitIsTapDenied(unit)
+	local isPlayer = UnitIsPlayer(unit) and select(2, UnitClass(unit)) or false
+	local reaction = UnitReaction(unit)
+
+	local colors = bdNameplates:unitColor(tapDenied, isPlayer, reaction)
+	self.Name:SetTextColor(unpack(colors))
+
 	if (self.currentStyle and self.currentStyle == "friendly") then return end
 
 	-- auras
