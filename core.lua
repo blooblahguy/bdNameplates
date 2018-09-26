@@ -487,8 +487,6 @@ local function nameplateCreate(self, unit)
 	self.Castbar.PostCastInterruptible = self.Castbar.kickable
 end
 
-LoadAddOn("Blizzard_Nameplates")
-
 oUF:RegisterStyle("bdNameplates", nameplateCreate)
 oUF:SetActiveStyle("bdNameplates")
 oUF:SpawnNamePlates("bdNameplates", nameplateCallback)
