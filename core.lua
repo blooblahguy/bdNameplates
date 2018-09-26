@@ -34,9 +34,6 @@ bdNameplates.font_castbar:SetShadowOffset(1, -1)
 local screenWidth, screenHeight = GetPhysicalScreenSize()
 bdNameplates.scale = min(1.15, 768/screenHeight)
 
-local threat_called = 0
-local health_called = 0
-
 -- Scale the default nameplate parameters - note this doesn't seem to do anything on load, so investigating
 local function nameplateSize()
 	if (not InCombatLockdown()) then
@@ -45,16 +42,6 @@ local function nameplateSize()
 		C_NamePlate.SetNamePlateSelfSize(config.width * bdNameplates.scale, config.height * bdNameplates.scale)
 		C_NamePlate.SetNamePlateFriendlyClickThrough(true)
 		C_NamePlate.SetNamePlateSelfClickThrough(true)
-
-		
-		if (threat_called > 0) then
-			print("threat_called", threat_called)
-			print("health_called", health_called)
-
-
-			threat_called = 0
-			health_called = 0
-		end
 	end
 end
 bdNameplates.eventer = CreateFrame("frame", nil)
@@ -131,20 +118,12 @@ function nameplateUpdateHealth(self, event, unit)
 
 	local healthbar = self.Health
 	local cur, max = UnitHealth(unit), UnitHealthMax(unit)
-	healthbar.disconnected = not UnitIsConnected(unit)
 	healthbar:SetMinMaxValues(0, max)
-
-	if(healthbar.disconnected) then
-		healthbar:SetValue(max)
-	else
-		healthbar:SetValue(cur)
-	end
+	healthbar:SetValue(cur)
 
 	if (unit == 'player' or UnitIsUnit('player', unit) or UnitIsFriend('player', unit) or status == nil) then
-		health_called = threat_called + 1
 		self.Health:SetStatusBarColor(bdNameplates:unitColor(unit))
 	elseif (combat and not UnitIsTapDenied(unit) and (event == "UNIT_THREAT_LIST_UPDATE" or event == "NAME_PLATE_UNIT_ADDED")) then
-		threat_called = threat_called + 1
 		if (status == 3) then
 			-- securely tanking
 			healthbar:SetStatusBarColor(unpack(config.threatcolor))

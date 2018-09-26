@@ -21,7 +21,7 @@ for eclass, color in next, FACTION_BAR_COLORS do
 end
 
 function bdNameplates:unitColor(unit)
-	if(not UnitIsConnected(unit) or not UnitExists(unit) or (not UnitPlayerControlled(unit) and UnitIsTapDenied(unit))) then
+	if(not UnitPlayerControlled(unit) and UnitIsTapDenied(unit)) then
 		return unpack(colors.tapped)
 	elseif UnitIsPlayer(unit) then
 		return unpack(colors.class[select(2, UnitClass(unit))])
