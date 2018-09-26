@@ -435,7 +435,7 @@ function nameplateCreate(self, unit)
 	self.Castbar.bg:SetPoint("BOTTOMRIGHT", self.Castbar.Icon, "BOTTOMRIGHT", bdCore.config.persistent.General.border, -bdCore.config.persistent.General.border)
 
 	-- Change color if cast is kickable or not
-	function self.Castbar:kickable(self, unit, name)
+	function self.Castbar:kickable(unit, name)
 		if (self.notInterruptible) then
 			self.Icon:SetDesaturated(1)
 			self:SetStatusBarColor(unpack(config.nonkickable))

@@ -1,5 +1,7 @@
 local addon, bdNameplates = ...
 
+function bdNameplates:configCallback() end
+
 -- populate configuration lists
 local defaultwhitelist = {}
 defaultwhitelist['Arcane Torrent'] = true
