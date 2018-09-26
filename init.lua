@@ -1,5 +1,7 @@
 local addon, bdNameplates = ...
 
+bdNameplates.cache = {}
+
 function bdNameplates:configCallback() end
 
 -- populate configuration lists

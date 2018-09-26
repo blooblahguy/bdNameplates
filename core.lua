@@ -16,9 +16,12 @@ local borderSize = bdCore.config.persistent.General.border
 	-look into cooroutines for some tasks
 	-would be great if wow team could implement jit, though i don't think x64 supports it yet? (need to check)
 --]]
-local unpack, UnitPlayerControlled, UnitIsTapDenied, UnitIsPlayer, UnitClass, UnitReaction = unpack, UnitPlayerControlled, UnitIsTapDenied, UnitIsPlayer, UnitClass, UnitReaction
-local GetCVar, SetCVar, UnitThreatSituation, UnitAffectingCombat, UnitHealth, UnitHealthMax = GetCVar, SetCVar, UnitThreatSituation, UnitAffectingCombat, UnitHealth, UnitHealthMax
-local UnitIsUnit, UnitIsPlayer, UnitIsFriend, UnitIsPVPSanctuary, UnitName, C_NamePlate = UnitIsUnit, UnitIsPlayer, UnitIsFriend, UnitIsPVPSanctuary, UnitName, C_NamePlate
+
+-- lua functions
+local unpack, floor = unpack, math.floor
+
+-- blizz functions
+local GetCVar, SetCVar, UnitThreatSituation, UnitAffectingCombat, UnitHealth, UnitHealthMax, UnitPlayerControlled, UnitIsTapDenied, UnitIsPlayer, UnitClass, UnitReaction, UnitIsUnit, UnitIsPlayer, UnitIsFriend, UnitIsPVPSanctuary, UnitName, C_NamePlate, UnitGUID = GetCVar, SetCVar, UnitThreatSituation, UnitAffectingCombat, UnitHealth, UnitHealthMax, UnitPlayerControlled, UnitIsTapDenied, UnitIsPlayer, UnitClass, UnitReaction, UnitIsUnit, UnitIsPlayer, UnitIsFriend, UnitIsPVPSanctuary, UnitName, C_NamePlate, UnitGUID
 
 -- Features to reimplement
 -- Fixate alerts
@@ -128,9 +131,7 @@ local function nameplateUpdateHealth(self, event, unit)
 	if (event == "OnShow") then return end
 	if (event == "OnUpdate") then return end
 
-	
 	local status = UnitThreatSituation("player", unit)
-	local combat = UnitAffectingCombat("player")
 
 	local healthbar = self.Health
 	local cur, max = UnitHealth(unit), UnitHealthMax(unit)
@@ -139,20 +140,37 @@ local function nameplateUpdateHealth(self, event, unit)
 
 	if (unit == 'player' or UnitIsUnit('player', unit) or UnitIsFriend('player', unit) or status == nil) then
 		self.Health:SetStatusBarColor(bdNameplates:unitColor(unit))
-	elseif (status and not UnitIsTapDenied(unit) and not UnitIsPlayer(unit) (event == "UNIT_THREAT_LIST_UPDATE" or event == "NAME_PLATE_UNIT_ADDED")) then
+	elseif (status ~= nil and not UnitIsTapDenied(unit) and not UnitIsPlayer(unit) and (event == "UNIT_THREAT_LIST_UPDATE" or event == "NAME_PLATE_UNIT_ADDED")) then
 		if (status == 3) then
 			-- securely tanking
 			healthbar:SetStatusBarColor(unpack(config.threatcolor))
 		elseif (status == 2 or status == 1) then
 			-- near or over tank threat
 			healthbar:SetStatusBarColor(unpack(config.threatdangercolor))
-		elseif (status ~= nil) then
+		else
 			-- on threat table, but not near tank threat
 			healthbar:SetStatusBarColor(unpack(config.nothreatcolor))
 		end
 	end
 
 end
+
+
+-- idk if we'll use this yet, but basically we can theoretically cache units to see if units have changed but kept the same id
+local function unitID(unitUID)
+	return memoize(function(unitUID)
+		return select(1, strsplit(":", unitUID))
+	end)
+end
+local function unitUID(unit)
+	local GUID = UnitGUID(unit)
+	return memoize(function(unit, GUID)
+		local uid = {unit, GUID}
+		return table.concat(uid,":")
+	end)
+end
+local memo_unitCache = memoize(unitCache)
+
 
 --==========================================
 -- MAIN CALLBACK
@@ -162,6 +180,7 @@ end
 ---- PLAYER_TARGET_CHANGED
 --==========================================
 local function nameplateCallback(self, event, unit)
+	local unitcache = memo_unitCache(unit, UnitGUID(unit))
 	-- Force cvars/settings
 	nameplateSize()
 
@@ -297,18 +316,20 @@ local function nameplateCreate(self, unit)
 	self.Curhp:SetJustifyH("RIGHT")
 	self.Curhp:SetAlpha(0.8)
 	self.Curhp:SetPoint("RIGHT", self.Health, "RIGHT", -4, 0)
+	local function calcName(config.hptext, )
 	oUF.Tags.Events['bdncurhp'] = 'UNIT_HEALTH'
 	oUF.Tags.Methods['bdncurhp'] = function(unit)
 		if (config.hptext == "None") then return '' end
 		local hp, hpMax = UnitHealth(unit), UnitHealthMax(unit)
-		local hpPercent = hp / hpMax
+		local hpPercent = bdNameplates:round(hp / hpMax * 100,1)
+		hp = bdNameplates:numberize(hp)
 		
 		if (config.hptext == "HP - %") then
-			return bdNameplates:numberize(hp).." - "..bdNameplates:round(hpPercent * 100,1);
+			return table.concat({hp, hpPercent}, " - ")
 		elseif (config.hptext == "HP") then
-			return bdNameplates:numberize(hp);
+			return hp
 		elseif (config.hptext == "%") then
-			return bdNameplates:round(hpPercent * 100,1);
+			return hpPercent
 		end
 	end
 	self:Tag(self.Curhp, '[bdncurhp]')
@@ -320,14 +341,15 @@ local function nameplateCreate(self, unit)
 	self.Curpower:SetJustifyH("LEFT")
 	self.Curpower:SetAlpha(0.8)
 	self.Curpower:SetPoint("LEFT", self.Health, "LEFT", 4, 0)
+	local pp, ppMax, ppPercent
 	oUF.Tags.Events['bdncurpower'] = 'UNIT_POWER_UPDATE'
 	oUF.Tags.Methods['bdncurpower'] = function(unit)
 		if (not config.showenergy) then return '' end
-		local pp, ppMax = UnitPower(unit), UnitPowerMax(unit)
+		pp, ppMax, ppPercent = UnitPower(unit), UnitPowerMax(unit), 0
 		if (pp == 0 or ppMax == 0) then return '' end
+		ppPercent = (pp / ppMax) * 100
 
-		local ppPercent = (pp / ppMax) * 100
-		return math.floor(ppPercent);
+		return floor(ppPercent);
 	end
 	self:Tag(self.Curpower, '[bdncurpower]')
 
@@ -362,26 +384,28 @@ local function nameplateCreate(self, unit)
 
 	self.specialExpiration = 0
 	self.enrageExpiration = 0
-	self.Auras.CustomFilter = function(element, unit, button, name, texture, count, debuffType, duration, expiration, caster, isStealable, nameplateShowSelf, spellID, canApply, isBossDebuff, casterIsPlayer, nameplateShowAll,timeMod, effect1, effect2, effect3)
+	self.Auras.CustomFilter = function(element, unit, button, name, texture, count, debuffType, duration, expiration, caster, isStealable, nameplateShowSelf, spellID, canApply, isBossDebuff, casterIsPlayer, nameplateShowAll, timeMod, effect1, effect2, effect3)
 
-		-- blacklist is priority
-		if (config.blacklist and config.blacklist[name]) then return false end
-		-- purgable spell, whitelist it
-		if (config.highlightPurge and isStealable) then return true end
-		-- this is an enrage
-		if (config.highlightEnrage and debuffType == "") then return true end
-		-- if we've whitelisted this inside of bdCore defaults
-		if (bdNameplates.forcedWhitelist[name]) then return true end
-		-- if the user has whitelisted this
-		if (config.whitelist and config.whitelist[name]) then return true end
-		-- automatically display buffs cast by the player in config
-		if (config.automydebuff and caster == "player") then return true end
-		-- show if blizzard decided that it was a self-show or all-show aira 
-		if (nameplateShowAll or (nameplateShowSelf and caster == "player")) then return true end
-		-- if this is whitelisted for their own casts
-		if (config.selfwhitelist and (config.selfwhitelist[name] and caster == "player")) then return true end
+		return memoize(function(name, caster, debuffType, isStealable, nameplateShowSelf, nameplateShowAll)
+			-- blacklist is priority
+			if (config.blacklist and config.blacklist[name]) then return false end
+			-- purgable spell, whitelist it
+			if (config.highlightPurge and isStealable) then return true end
+			-- this is an enrage
+			if (config.highlightEnrage and debuffType == "") then return true end
+			-- if we've whitelisted this inside of bdCore defaults
+			if (bdNameplates.forcedWhitelist[name]) then return true end
+			-- if the user has whitelisted this
+			if (config.whitelist and config.whitelist[name]) then return true end
+			-- automatically display buffs cast by the player in config
+			if (config.automydebuff and caster == "player") then return true end
+			-- show if blizzard decided that it was a self-show or all-show aira 
+			if (nameplateShowAll or (nameplateShowSelf and caster == "player")) then return true end
+			-- if this is whitelisted for their own casts
+			if (config.selfwhitelist and (config.selfwhitelist[name] and caster == "player")) then return true end
 
-		return false
+			return false
+		end, bdNameplates.cache)
 	end
 	
 	self.Auras.PostUpdateIcon = function(self, unit, button, index, position, duration, expiration, debuffType, isStealable)
