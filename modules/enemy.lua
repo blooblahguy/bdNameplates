@@ -3,7 +3,7 @@ local config = bdCore.config.profile['Nameplates']
 
 function bdNameplates:enemyStyle(self, event, unit)
 	if (self.currentStyle and self.currentStyle == "enemy") then return end
-
+	
 	-- auras
 	self.Auras:Show()
 

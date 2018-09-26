@@ -2,6 +2,10 @@
 local oUF = bdCore.oUF
 local config = bdCore.config.profile['Nameplates']
 
+local unpack, UnitPlayerControlled, UnitIsTapDenied, UnitIsPlayer, UnitClass, UnitReaction = unpack, UnitPlayerControlled, UnitIsTapDenied, UnitIsPlayer, UnitClass, UnitReaction
+local GetCVar, SetCVar, UnitThreatSituation, UnitAffectingCombat, UnitHealth, UnitHealthMax = GetCVar, SetCVar, UnitThreatSituation, UnitAffectingCombat, UnitHealth, UnitHealthMax
+local UnitIsUnit, UnitIsPlayer, UnitIsFriend, UnitIsPVPSanctuary, UnitName = UnitIsUnit, UnitIsPlayer, UnitIsFriend, UnitIsPVPSanctuary, UnitName
+
 -- Features to reimplement
 -- Fixate alerts
 -- Circle module
