@@ -253,6 +253,11 @@ end
 --- Calls when a new nameplate frame gets created
 --==========================================
 local function nameplateCreate(self, unit)
+	-- now that we've hooked into things, disable this
+	if (IsAddOnLoaded("Blizzard_Nameplates")) then
+		DisableAddOn("Blizzard_Nameplates")
+	end
+
 	self.nameplate = C_NamePlate.GetNamePlateForUnit(unit)
 	self.scale = bdNameplates.scale
 	self.unit = unit
@@ -485,14 +490,3 @@ end
 oUF:RegisterStyle("bdNameplates", nameplateCreate)
 oUF:SetActiveStyle("bdNameplates")
 oUF:SpawnNamePlates("bdNameplates", nameplateCallback)
-
-
--- disable blizzard nameplates now
--- turns out that the code that fires the events we need is embedded in the wow engine, these nameplates do nothing but eat resources while they are loaded, even if they are hidden and the nameplatedriver has no events
-local addonDisabler = CreateFrame("frame", nil)
-addonDisabler:RegisterEvent("ADDON_LOADED")
-addonDisabler:SetScript("OnEvent", function(self, event, addon)
-	if (IsAddOnLoaded("Blizzard_Nameplates")) then
-		DisableAddOn("Blizzard_Nameplates")
-	end
-end)
