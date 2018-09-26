@@ -25,7 +25,6 @@ for eclass, color in next, FACTION_BAR_COLORS do
 end
 
 local function colorSave(self, tapDenied, isPlayer, reaction, status)
-	print(tapDenied, isPlayer, reaction, status)
 	if (status ~= nil) then
 		if (status == 3) then
 			-- securely tanking
