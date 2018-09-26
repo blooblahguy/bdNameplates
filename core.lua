@@ -169,7 +169,7 @@ local function unitUID(unit)
 		return table.concat(uid,":")
 	end)
 end
-local memo_unitCache = memoize(unitCache)
+
 
 
 --==========================================
@@ -180,7 +180,7 @@ local memo_unitCache = memoize(unitCache)
 ---- PLAYER_TARGET_CHANGED
 --==========================================
 local function nameplateCallback(self, event, unit)
-	local unitcache = memo_unitCache(unit, UnitGUID(unit))
+
 	-- Force cvars/settings
 	nameplateSize()
 
@@ -316,7 +316,7 @@ local function nameplateCreate(self, unit)
 	self.Curhp:SetJustifyH("RIGHT")
 	self.Curhp:SetAlpha(0.8)
 	self.Curhp:SetPoint("RIGHT", self.Health, "RIGHT", -4, 0)
-	
+
 	oUF.Tags.Events['bdncurhp'] = 'UNIT_HEALTH'
 	oUF.Tags.Methods['bdncurhp'] = function(unit)
 		if (config.hptext == "None") then return '' end
