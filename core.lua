@@ -316,7 +316,7 @@ local function nameplateCreate(self, unit)
 	self.Curhp:SetJustifyH("RIGHT")
 	self.Curhp:SetAlpha(0.8)
 	self.Curhp:SetPoint("RIGHT", self.Health, "RIGHT", -4, 0)
-	local function calcName(config.hptext, )
+	
 	oUF.Tags.Events['bdncurhp'] = 'UNIT_HEALTH'
 	oUF.Tags.Methods['bdncurhp'] = function(unit)
 		if (config.hptext == "None") then return '' end
