@@ -11,7 +11,7 @@ local config = bdCore.config.profile['Nameplates']
 
 -- Fonts we use
 bdNameplates.font = CreateFont("BDN_FONT")
-bdNameplates.font:SetFont(bdCore.media.font, 15)
+bdNameplates.font:SetFont(bdCore.media.font, config.enemynamesize)
 bdNameplates.font:SetShadowColor(0, 0, 0)
 bdNameplates.font:SetShadowOffset(1, -1)
 
@@ -61,7 +61,7 @@ function bdNameplates:configCallback()
 	nameplateSize()
 
 	-- update font sizes
-	bdNameplates.font:SetFont(bdCore.media.font, 15)
+	bdNameplates.font:SetFont(bdCore.media.font, config.enemynamesize)
 	bdNameplates.font_small:SetFont(bdCore.media.font, config.height * 0.85)
 	bdNameplates.font_castbar:SetFont(bdCore.media.font, config.castbarheight*0.85)
 	bdNameplates.font_friendly:SetFont(bdCore.media.font, config.friendlynamesize)
