@@ -44,7 +44,7 @@ bdNameplates.unitColor = memoize(self, tapDenied, isPlayer, reaction, status)
 			return colors.reaction[reaction]
 		end
 	end
-end
+end)
 
 function bdNameplates:numberize(v)
 	if v <= 9999 then return v end
