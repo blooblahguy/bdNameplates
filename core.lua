@@ -243,10 +243,10 @@ local function nameplateCallback(self, event, unit)
 	-- cast icon
 	if (config.hidecasticon) then
 		self.Castbar.Icon:Hide()
-		self.Castbar.bg:Hide()
+		self.Castbar.Icon.bg:Hide()
 	else
 		self.Castbar.Icon:Show()
-		self.Castbar.bg:Show()
+		self.Castbar.Icon.bg:Show()
 	end
 	-- disabled auras
 	if (config.disableauras) then
