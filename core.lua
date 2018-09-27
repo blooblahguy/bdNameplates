@@ -56,14 +56,17 @@ local screenWidth, screenHeight = GetPhysicalScreenSize()
 bdNameplates.scale = min(1.15, 768/screenHeight)
 
 -- Scale the default nameplate parameters - note this doesn't seem to do anything on load, so investigating
-local function nameplateSize()
-	if (not InCombatLockdown()) then
-		C_NamePlate.SetNamePlateFriendlySize(config.width * bdNameplates.scale, 0.1)
-		C_NamePlate.SetNamePlateEnemySize(config.width * bdNameplates.scale, config.height * bdNameplates.scale)
-		C_NamePlate.SetNamePlateSelfSize(config.width * bdNameplates.scale, config.height * bdNameplates.scale)
-		C_NamePlate.SetNamePlateFriendlyClickThrough(true)
-		C_NamePlate.SetNamePlateSelfClickThrough(true)
+local function nameplateSize(self)
+	if (not InCombatLockdown()) then return end
+	if (self) then
+		self:SetSize(config.width, config.height)
 	end
+
+	C_NamePlate.SetNamePlateFriendlySize(config.width * bdNameplates.scale, 0.1)
+	C_NamePlate.SetNamePlateEnemySize(config.width * bdNameplates.scale, config.height * bdNameplates.scale)
+	C_NamePlate.SetNamePlateSelfSize(config.width * bdNameplates.scale, config.height * bdNameplates.scale)
+	C_NamePlate.SetNamePlateFriendlyClickThrough(true)
+	C_NamePlate.SetNamePlateSelfClickThrough(true)
 end
 bdNameplates.eventer = CreateFrame("frame", nil)
 bdNameplates.eventer:RegisterEvent("PLAYER_REGEN_ENABLED", nameplateSize)
@@ -201,7 +204,7 @@ end
 local function nameplateCallback(self, event, unit)
 
 	-- Force cvars/settings
-	nameplateSize()
+	nameplateSize(self)
 
 	if (not self) then return end
 	unit = unit or self.unit
