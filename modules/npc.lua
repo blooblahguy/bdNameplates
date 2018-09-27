@@ -3,7 +3,10 @@ local config = bdCore.config.profile['Nameplates']
 
 -- v1 done
 function bdNameplates:npcStyle(self, event, unit)
-	self.Name:SetTextColor(bdNameplates:unitColor(unit))
+	local reaction = UnitReaction("player", unit) or false
+	local colors = bdNameplates:unitColor(false, false, reaction, false)
+	self.Name:SetTextColor(unpack(colors))
+
 	if (self.currentStyle and self.currentStyle == "npc") then return end
 
 	-- castbar

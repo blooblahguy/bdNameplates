@@ -1,4 +1,5 @@
 ﻿local addon, bdNameplates = ...
+bdNameplates.cache = {}
 local bdCore = bdCore
 local oUF = bdCore.oUF
 local config = bdCore.config.profile['Nameplates']
@@ -136,12 +137,12 @@ local function nameplateUpdateHealth(self, event, unit)
 	healthbar:SetMinMaxValues(0, max)
 	healthbar:SetValue(cur)
 
-	local tapDenied = UnitIsTapDenied(unit)
+	local tapDenied = UnitIsTapDenied(unit) or false
 	local isPlayer = UnitIsPlayer(unit) and select(2, UnitClass(unit)) or false
-	local reaction = UnitReaction("player", unit)
+	local reaction = UnitReaction("player", unit) or false
 	local status = UnitThreatSituation("player", unit)
-	if (unit == "player" or UnitIsUnit("player", unit) or UnitIsFriend("player", unit)) then
-		status = nil
+	if (status == nil) then
+		status = false
 	end
 
 	local colors = bdNameplates:unitColor(tapDenied, isPlayer, reaction, status)
@@ -176,18 +177,18 @@ end
 
 
 -- idk if we'll use this yet, but basically we can theoretically cache units to see if units have changed but kept the same id
-local function unitID(unitUID)
-	return memoize(function(unitUID)
-		return select(1, strsplit(":", unitUID))
-	end)
-end
-local function unitUID(unit)
-	local GUID = UnitGUID(unit)
-	return memoize(function(unit, GUID)
-		local uid = {unit, GUID}
-		return table.concat(uid,":")
-	end)
-end
+-- local function unitID(unitUID)
+	-- return memoize(function(unitUID)
+		-- return select(1, strsplit(":", unitUID))
+	-- end)
+-- end
+-- local function unitUID(unit)
+	-- local GUID = UnitGUID(unit)
+	-- return memoize(function(unit, GUID)
+		-- local uid = {unit, GUID}
+		-- return table.concat(uid,":")
+	-- end)
+-- end
 
 
 
@@ -271,6 +272,28 @@ end
 -- NAMEPLATE CREATE
 --- Calls when a new nameplate frame gets created
 --==========================================
+local function auraFilter(self, name, caster, debuffType, isStealable, nameplateShowSelf, nameplateShowAll)
+	-- blacklist is priority
+	if (config.blacklist and config.blacklist[name]) then return false end
+	-- purgable spell, whitelist it
+	if (config.highlightPurge and isStealable) then return true end
+	-- this is an enrage
+	if (config.highlightEnrage and debuffType == "") then return true end
+	-- if we've whitelisted this inside of bdCore defaults
+	if (bdNameplates.forcedWhitelist[name]) then return true end
+	-- if the user has whitelisted this
+	if (config.whitelist and config.whitelist[name]) then return true end
+	-- automatically display buffs cast by the player in config
+	if (config.automydebuff and caster == "player") then return true end
+	-- show if blizzard decided that it was a self-show or all-show aira 
+	if (nameplateShowAll or (nameplateShowSelf and caster == "player")) then return true end
+	-- if this is whitelisted for their own casts
+	if (config.selfwhitelist and (config.selfwhitelist[name] and caster == "player")) then return true end
+
+	return false
+end
+bdNameplates.auraFilter = memoize(auraFilter, bdNameplates.cache)
+
 local function nameplateCreate(self, unit)
 	self.nameplate = C_NamePlate.GetNamePlateForUnit(unit)
 	self.scale = bdNameplates.scale
@@ -403,28 +426,17 @@ local function nameplateCreate(self, unit)
 
 	self.specialExpiration = 0
 	self.enrageExpiration = 0
+	
+	
+
 	self.Auras.CustomFilter = function(element, unit, button, name, texture, count, debuffType, duration, expiration, caster, isStealable, nameplateShowSelf, spellID, canApply, isBossDebuff, casterIsPlayer, nameplateShowAll, timeMod, effect1, effect2, effect3)
+		debuffType = debuffType or false
+		caster = caster or false
+		isStealable = isStealable or false
+		nameplateShowSelf = nameplateShowSelf or false
+		nameplateShowAll = nameplateShowAll or false
 
-		return memoize(function(name, caster, debuffType, isStealable, nameplateShowSelf, nameplateShowAll)
-			-- blacklist is priority
-			if (config.blacklist and config.blacklist[name]) then return false end
-			-- purgable spell, whitelist it
-			if (config.highlightPurge and isStealable) then return true end
-			-- this is an enrage
-			if (config.highlightEnrage and debuffType == "") then return true end
-			-- if we've whitelisted this inside of bdCore defaults
-			if (bdNameplates.forcedWhitelist[name]) then return true end
-			-- if the user has whitelisted this
-			if (config.whitelist and config.whitelist[name]) then return true end
-			-- automatically display buffs cast by the player in config
-			if (config.automydebuff and caster == "player") then return true end
-			-- show if blizzard decided that it was a self-show or all-show aira 
-			if (nameplateShowAll or (nameplateShowSelf and caster == "player")) then return true end
-			-- if this is whitelisted for their own casts
-			if (config.selfwhitelist and (config.selfwhitelist[name] and caster == "player")) then return true end
-
-			return false
-		end, bdNameplates.cache)
+		return bdNameplates:auraFilter(name, caster, debuffType, isStealable, nameplateShowSelf, nameplateShowAll)
 	end
 	
 	self.Auras.PostUpdateIcon = function(self, unit, button, index, position, duration, expiration, debuffType, isStealable)
