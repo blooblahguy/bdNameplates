@@ -25,7 +25,19 @@ for eclass, color in next, FACTION_BAR_COLORS do
 end
 
 local function colorSave(self, tapDenied, isPlayer, reaction, status)
-	if (status ~= nil) then
+	-- if (unit == 'player' or UnitIsUnit('player', unit) or UnitIsFriend('player', unit) or status == nil) then
+-- 		self.Health:SetStatusBarColor(bdNameplates:unitColor(unit))
+-- 	elseif (status ~= nil and not UnitIsTapDenied(unit) and not UnitIsPlayer(unit) and (event == "UNIT_THREAT_LIST_UPDATE" or event == "NAME_PLATE_UNIT_ADDED")) then
+
+	if (isPlayer or status == false) then
+		if isPlayer then
+			return colors.class[isPlayer]
+		elseif (tapDenied) then
+			return colors.tapped
+		else
+			return colors.reaction[reaction]
+		end
+	else
 		if (status == 3) then
 			-- securely tanking
 			return config.threatcolor
@@ -36,17 +48,12 @@ local function colorSave(self, tapDenied, isPlayer, reaction, status)
 			-- on threat table, but not near tank threat
 			return config.nothreatcolor
 		end
-	else
-		if isPlayer then
-			return colors.class[class]
-		elseif (tapDenied) then
-			return colors.tapped
-		else
-			return colors.reaction[reaction]
-		end
 	end
 end
-bdNameplates.unitColor = memoize(colorSave)
+
+bdNameplates.unitColor = memoize(colorSave, bdNameplates.cache)
+
+
 
 function bdNameplates:numberize(v)
 	if v <= 9999 then return v end
