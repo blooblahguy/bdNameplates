@@ -34,13 +34,58 @@ specialSpells["Critial Mass"] = true
 
 local defaults = {}
 
---------------
+--=======================================
 -- Positioning & Display
---------------
+--=======================================
 defaults[#defaults+1] = {tab = {
 	type="tab",
 	value="Sizing & Display"
 }}
+defaults[#defaults+1] = {text = {
+	type="text",
+	value="Because of the way blizzard renders nameplates, you may have to type /reload to see certain changes take place."
+}}
+defaults[#defaults+1] = {width={
+	type="slider",
+	value=200,
+	min=30,
+	max=250,
+	step=2,
+	label="Nameplates Width",
+	callback=function() bdNameplates:configCallback() end
+}}
+
+defaults[#defaults+1] = {height={
+	type="slider",
+	value=20,
+	min=4,
+	max=50,
+	step=2,
+	label="Nameplates Height",
+	callback=function() bdNameplates:configCallback() end
+}}
+defaults[#defaults+1] = {targetingTopPadding={
+	type="slider",
+	value=10,
+	min=0,
+	max=30,
+	step=2,
+	label="Click target padding top",
+	label="Lets you click target units x pixels above their healthbar",
+	callback=function() bdNameplates:configCallback() end
+}}
+
+defaults[#defaults+1] = {targetingBottomPadding={
+	type="slider",
+	value=5,
+	min=0,
+	max=30,
+	step=2,
+	label="Click target padding bottom",
+	label="Lets you click target units x pixels below their healthbar",
+	callback=function() bdNameplates:configCallback() end
+}}
+
 defaults[#defaults+1] = {friendnamealpha={
 	type="slider",
 	value=1,
@@ -51,21 +96,21 @@ defaults[#defaults+1] = {friendnamealpha={
 	callback=function() bdNameplates:configCallback() end
 }}
 
-defaults[#defaults+1] = {trackResources = {
-	type = "checkbox",
-	value = true,
-	label = "Display class resources on nameplates.",
-	callback = function() bdNameplates:configCallback() end
-}}
-defaults[#defaults+1] = {resourceHeight={
-	type="slider",
-	value=12,
-	min=2,
-	max=50,
-	step=2,
-	label="Resource height",
-	callback=function() bdNameplates:configCallback() end
-}}
+-- defaults[#defaults+1] = {trackResources = {
+-- 	type = "checkbox",
+-- 	value = true,
+-- 	label = "Display class resources on nameplates.",
+-- 	callback = function() bdNameplates:configCallback() end
+-- }}
+-- defaults[#defaults+1] = {resourceHeight={
+-- 	type="slider",
+-- 	value=12,
+-- 	min=2,
+-- 	max=50,
+-- 	step=2,
+-- 	label="Resource height",
+-- 	callback=function() bdNameplates:configCallback() end
+-- }}
 
 defaults[#defaults+1] = {highlightPurge = {
 	type = "checkbox",
@@ -97,26 +142,6 @@ defaults[#defaults+1] = {friendlyplates = {
 	label = "Show friendly nameplate healthbars",
 	tooltip = "Normally we hide friendly healthbars and just show names, this will let you show both. ",
 	callback = function() bdNameplates:configCallback() end
-}}
-
-defaults[#defaults+1] = {width={
-	type="slider",
-	value=200,
-	min=30,
-	max=250,
-	step=2,
-	label="Nameplates Width",
-	callback=function() bdNameplates:configCallback() end
-}}
-
-defaults[#defaults+1] = {height={
-	type="slider",
-	value=20,
-	min=4,
-	max=50,
-	step=2,
-	label="Nameplates Height",
-	callback=function() bdNameplates:configCallback() end
 }}
 defaults[#defaults+1] = {verticalspacing={
 	type="slider",
@@ -160,9 +185,9 @@ defaults[#defaults+1] = {nameplatemotion = {
 	callback = function() cvar_set() end
 }}--]]
 
--------------
--- Text
--------------
+--=======================================
+-- TEXT
+--=======================================
 defaults[#defaults+1] = {tab = {
 	type="tab",
 	value="Text"
@@ -174,18 +199,18 @@ defaults[#defaults+1] = {hptext = {
 	label = "Nameplate Health Text",
 	callback = function() bdNameplates:configCallback() end
 }}
-defaults[#defaults+1] = {fixatealert = {
-	type = "dropdown",
-	value = "Personal",
-	options = {"Always","Personal","None"},
-	label = "Fixate Alert."
-}}
-defaults[#defaults+1] = {showFixateCircle = {
-	type = "checkbox",
-	value = true,
-	label = "Show Fixate Circle",
-	callback = function() bdNameplates:configCallback() end
-}}
+-- defaults[#defaults+1] = {fixatealert = {
+-- 	type = "dropdown",
+-- 	value = "Personal",
+-- 	options = {"Always","Personal","None"},
+-- 	label = "Fixate Alert."
+-- }}
+-- defaults[#defaults+1] = {showFixateCircle = {
+-- 	type = "checkbox",
+-- 	value = true,
+-- 	label = "Show Fixate Circle",
+-- 	callback = function() bdNameplates:configCallback() end
+-- }}
 defaults[#defaults+1] = {showhptexttargetonly = {
 	type = "checkbox",
 	value = false,
@@ -247,9 +272,9 @@ defaults[#defaults+1] = {raidmarkersize={
 	callback=function() bdNameplates:configCallback() end
 }}
 
--------------
--- Colors
--------------
+--=======================================
+-- COLORS
+--=======================================
 defaults[#defaults+1] = {tab = {
 	type="tab",
 	value="Colors"

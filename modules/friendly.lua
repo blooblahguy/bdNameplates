@@ -8,6 +8,7 @@ function bdNameplates:friendlyStyle(self, event, unit)
 
 	local colors = bdNameplates:unitColor(false, isPlayer, reaction, false)
 	self.Name:SetTextColor(unpack(colors))
+	self.Name:SetAlpha(config.friendnamealpha)
 
 	if (self.currentStyle and self.currentStyle == "friendly") then return end
 

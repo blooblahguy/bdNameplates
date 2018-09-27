@@ -64,7 +64,7 @@ local function nameplateSize(self)
 	end
 
 	C_NamePlate.SetNamePlateFriendlySize(config.width * bdNameplates.scale, 0.1)
-	C_NamePlate.SetNamePlateEnemySize(config.width * bdNameplates.scale, config.height * bdNameplates.scale)
+	C_NamePlate.SetNamePlateEnemySize(config.width * bdNameplates.scale, config.height + config.targetingTopPadding + config.targetingBottomPadding * bdNameplates.scale)
 	C_NamePlate.SetNamePlateSelfSize(config.width * bdNameplates.scale, config.height * bdNameplates.scale)
 	C_NamePlate.SetNamePlateFriendlyClickThrough(true)
 	C_NamePlate.SetNamePlateSelfClickThrough(true)
@@ -72,15 +72,6 @@ end
 bdNameplates.eventer = CreateFrame("frame", nil)
 bdNameplates.eventer:RegisterEvent("PLAYER_REGEN_ENABLED", nameplateSize)
 bdNameplates.eventer:RegisterEvent("PLAYER_LOGIN", nameplateSize)
-
--- CVar default for things that really never need changing
-SetCVar('nameplateMotionSpeed', .1)
-SetCVar('nameplateOverlapV', GetCVarDefault("nameplateOverlapV"))
-SetCVar('nameplateOverlapH', GetCVarDefault("nameplateOverlapH"))
-SetCVar('nameplateOtherTopInset', GetCVarDefault("nameplateOtherTopInset"))
-SetCVar('nameplateOtherBottomInset', GetCVarDefault("nameplateOtherBottomInset"))
-SetCVar('nameplateLargeTopInset', GetCVarDefault("nameplateLargeTopInset"))
-SetCVar('nameplateLargeBottomInset', GetCVarDefault("nameplateLargeBottomInset"))
 
 function bdNameplates:configCallback()
 	nameplateSize()
@@ -93,22 +84,29 @@ function bdNameplates:configCallback()
 
 	-- set cVars
 	local cvars = {
-		['nameplateSelfAlpha'] = 1,
-		['nameplateShowAll'] = 1,
-		['nameplateMinAlpha'] = 1,
-		['nameplateMaxAlpha'] = 1,
-		['nameplateOccludedAlphaMult'] = 1,
-		['nameplateMaxAlphaDistance'] = 1,
-		['nameplateMaxDistance'] = config.nameplatedistance+6, -- for some reason there is a 6yd diff
-		["nameplateOverlapV"] = config.verticalspacing, --0.8
-		['nameplateShowOnlyNames'] = 0,
-		['nameplateShowDebuffsOnFriendly'] = 0,
-		['nameplateMinScale'] = 1, 
-		['nameplateMaxScale'] = 1, 
-		['nameplateMaxScaleDistance'] = 0, 
-		['nameplateMinScaleDistance'] = 0, 
-		['nameplateLargerScale'] = 1, -- for bosses
-		['nameplateShowOnlyNames'] = config.friendlynamehack and 1 or 0, -- friendly names and no plates in raid
+		['nameplateSelfAlpha'] = 1
+		, ['nameplateShowAll'] = 1
+		, ['nameplateMinAlpha'] = 1
+		, ['nameplateMaxAlpha'] = 1
+		, ['nameplateMotionSpeed'] = 0.1
+		, ['nameplateOccludedAlphaMult'] = 1
+		, ['nameplateMaxAlphaDistance'] = 1
+		, ['nameplateMaxDistance'] = config.nameplatedistance+6 -- for some reason there is a 6yd diff
+		, ["nameplateOverlapV"] = config.verticalspacing --0.8
+		, ['nameplateShowOnlyNames'] = 0
+		, ['nameplateShowDebuffsOnFriendly'] = 0
+		, ['nameplateMinScale'] = 1
+		, ['nameplateMaxScale'] = 1
+		, ['nameplateMaxScaleDistance'] = 0
+		, ['nameplateMinScaleDistance'] = 0
+		, ['nameplateLargerScale'] = 1 -- for bosses
+		, ['nameplateShowOnlyNames'] = config.friendlynamehack and 1 or 0 -- friendly names and no plates in raid
+		, ['nameplateOverlapV'] = GetCVarDefault('nameplateOverlapV')
+		, ['nameplateOverlapH'] = GetCVarDefault('nameplateOverlapH')
+		, ['nameplateOtherTopInset'] = GetCVarDefault('nameplateOtherTopInset')
+		, ['nameplateOtherBottomInset'] = GetCVarDefault('nameplateOtherBottomInset')
+		, ['nameplateLargeTopInset'] = GetCVarDefault('nameplateLargeTopInset')
+		, ['nameplateLargeBottomInset'] = GetCVarDefault('nameplateLargeBottomInset')
 	}
 	-- loop through and set CVARS
 	if (not InCombatLockdown()) then
@@ -212,7 +210,7 @@ local function nameplateCallback(self, event, unit)
 	local reaction = UnitReaction("player", unit)
 
 	--==========================================
-	-- Configuration Updates First
+	-- Non-conflicting Configuration Updates First
 	--==========================================
 	self.Auras.size = config.raidbefuffs
 	self.Auras.showStealableBuffs = config.highlightPurge
@@ -224,11 +222,6 @@ local function nameplateCallback(self, event, unit)
 		self.RaidTargetIndicator:SetPoint('LEFT', self, "RIGHT", config.raidmarkersize/2, 0)
 	else
 		self.RaidTargetIndicator:SetPoint('BOTTOM', self, "TOP", 0, config.raidmarkersize)
-	end
-	if (config.hptext == "None" or (config.showhptexttargetonly and not UnitIsUnit(unit, "target"))) then
-		self.Curhp:Hide()
-	else
-		self.Curhp:Show()
 	end
 
 	--==========================================
@@ -245,11 +238,26 @@ local function nameplateCallback(self, event, unit)
 	end
 
 	--==========================================
-	-- Overrides
+	-- Overriding Configuration
 	--==========================================
+	-- cast icon
+	if (config.hidecasticon) then
+		self.Castbar.Icon:Hide()
+		self.Castbar.bg:Hide()
+	else
+		self.Castbar.Icon:Show()
+		self.Castbar.bg:Show()
+	end
 	-- disabled auras
 	if (config.disableauras) then
 		self.Auras:Hide()
+	end
+
+	-- hp text
+	if (config.hptext == "None" or (config.showhptexttargetonly and not UnitIsUnit(unit, "target"))) then
+		self.Curhp:Hide()
+	else
+		self.Curhp:Show()
 	end
 
 	-- Highlight targeted unit
@@ -275,7 +283,7 @@ end
 -- NAMEPLATE CREATE
 --- Calls when a new nameplate frame gets created
 --==========================================
-local function auraFilter(self, name, caster, debuffType, isStealable, nameplateShowSelf, nameplateShowAll)
+local function auraFilter(self, name, castByPlayer, debuffType, isStealable, nameplateShowSelf, nameplateShowAll)
 	-- blacklist is priority
 	if (config.blacklist and config.blacklist[name]) then return false end
 	-- purgable spell, whitelist it
@@ -287,11 +295,11 @@ local function auraFilter(self, name, caster, debuffType, isStealable, nameplate
 	-- if the user has whitelisted this
 	if (config.whitelist and config.whitelist[name]) then return true end
 	-- automatically display buffs cast by the player in config
-	if (config.automydebuff and caster == "player") then return true end
+	if (config.automydebuff and castByPlayer) then return true end
 	-- show if blizzard decided that it was a self-show or all-show aira 
-	if (nameplateShowAll or (nameplateShowSelf and caster == "player")) then return true end
+	if (nameplateShowAll or (nameplateShowSelf and castByPlayer)) then return true end
 	-- if this is whitelisted for their own casts
-	if (config.selfwhitelist and (config.selfwhitelist[name] and caster == "player")) then return true end
+	if (config.selfwhitelist and (config.selfwhitelist[name] and castByPlayer)) then return true end
 
 	return false
 end
@@ -302,7 +310,7 @@ local function nameplateCreate(self, unit)
 	self.scale = bdNameplates.scale
 	self.unit = unit
 	
-	self:SetPoint("CENTER", self.nameplate, "CENTER", 0, 0)
+	self:SetPoint("BOTTOM", self.nameplate, "BOTTOM", 0, config.targetingBottomPadding)
 	self:SetSize(config.width, config.height)
 	self:SetScale(self.scale)
 	self:EnableMouse(false)
@@ -430,24 +438,21 @@ local function nameplateCreate(self, unit)
 	self.specialExpiration = 0
 	self.enrageExpiration = 0
 	
-	
-
 	self.Auras.CustomFilter = function(element, unit, button, name, texture, count, debuffType, duration, expiration, caster, isStealable, nameplateShowSelf, spellID, canApply, isBossDebuff, casterIsPlayer, nameplateShowAll, timeMod, effect1, effect2, effect3)
-		debuffType = debuffType or false
-		caster = caster or false
-		isStealable = isStealable or false
-		nameplateShowSelf = nameplateShowSelf or false
-		nameplateShowAll = nameplateShowAll or false
+		local castByPlayer = caster and UnitIsUnit(caster, "player") or false
 
-		return bdNameplates:auraFilter(name, caster, debuffType, isStealable, nameplateShowSelf, nameplateShowAll)
+		return bdNameplates:auraFilter(name, castByPlayer, debuffType, isStealable, nameplateShowSelf, nameplateShowAll)
 	end
 	
 	self.Auras.PostUpdateIcon = function(self, unit, button, index, position, duration, expiration, debuffType, isStealable)
-		button:SetHeight(config.raidbefuffs*.6)
+		button:SetHeight(config.raidbefuffs * 0.6)
 		bdCore:setBackdrop(button)
-		if (config.highlightPurge and isStealable) then
-			button.border:SetVertexColor(.16, .5, .81, 1)
-		else
+
+		if (config.highlightPurge and isStealable) then -- purge alert
+			button.border:SetVertexColor(unpack(config.purgeColor))
+		elseif (config.highlightEnrage and debuffType == "") then -- enrage alert
+			button.border:SetVertexColor(unpack(config.enrageColor))
+		else -- neither
 			button.border:SetVertexColor(unpack(bdCore.media.border))
 		end
 
@@ -479,26 +484,29 @@ local function nameplateCreate(self, unit)
 	self.Castbar = CreateFrame("StatusBar", nil, self)
 	self.Castbar:SetFrameLevel(3)
 	self.Castbar:SetStatusBarTexture(bdCore.media.flat)
-	self.Castbar:SetStatusBarColor(.1, .4, .7, 1)
+	self.Castbar:SetStatusBarColor(unpack(config.kickable))
 	self.Castbar:SetPoint("TOPLEFT", self.Health, "BOTTOMLEFT", 0, -2)
 	self.Castbar:SetPoint("BOTTOMRIGHT", self.Health, "BOTTOMRIGHT", 0, -config.castbarheight)
 	bdCore:setBackdrop(self.Castbar)
 	
+	-- text
 	self.Castbar.Text = self.Castbar:CreateFontString(nil, "OVERLAY", "BDN_FONT_CASTBAR")
 	self.Castbar.Text:SetJustifyH("RIGHT")
 	self.Castbar.Text:SetPoint("CENTER", self.Castbar, "CENTER")
 	
+	-- icon
 	self.Castbar.Icon = self.Castbar:CreateTexture(nil, "OVERLAY")
 	self.Castbar.Icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
 	self.Castbar.Icon:SetDrawLayer('ARTWORK')
 	self.Castbar.Icon:SetSize(config.height+12, config.height+12)
 	self.Castbar.Icon:SetPoint("BOTTOMRIGHT",self.Castbar, "BOTTOMLEFT", -2, 0)
 	
-	self.Castbar.bg = self.Castbar:CreateTexture(nil, "BORDER")
-	self.Castbar.bg:SetTexture(bdCore.media.flat)
-	self.Castbar.bg:SetVertexColor(unpack(bdCore.media.border))
-	self.Castbar.bg:SetPoint("TOPLEFT", self.Castbar.Icon, "TOPLEFT", -borderSize, borderSize)
-	self.Castbar.bg:SetPoint("BOTTOMRIGHT", self.Castbar.Icon, "BOTTOMRIGHT", borderSize, -borderSize)
+	-- icon bg
+	self.Castbar.Icon.bg = self.Castbar:CreateTexture(nil, "BORDER")
+	self.Castbar.Icon.bg:SetTexture(bdCore.media.flat)
+	self.Castbar.Icon.bg:SetVertexColor(unpack(bdCore.media.border))
+	self.Castbar.Icon.bg:SetPoint("TOPLEFT", self.Castbar.Icon, "TOPLEFT", -borderSize, borderSize)
+	self.Castbar.Icon.bg:SetPoint("BOTTOMRIGHT", self.Castbar.Icon, "BOTTOMRIGHT", borderSize, -borderSize)
 
 	-- Change color if cast is kickable or not
 	function self.Castbar:kickable(unit, name)
