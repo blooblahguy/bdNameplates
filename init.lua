@@ -71,7 +71,7 @@ defaults[#defaults+1] = {targetingTopPadding={
 	max=30,
 	step=2,
 	label="Click target padding top",
-	label="Lets you click target units x pixels above their healthbar",
+	tooltip="Lets you click target units x pixels above their healthbar",
 	callback=function() bdNameplates:configCallback() end
 }}
 
@@ -82,7 +82,7 @@ defaults[#defaults+1] = {targetingBottomPadding={
 	max=30,
 	step=2,
 	label="Click target padding bottom",
-	label="Lets you click target units x pixels below their healthbar",
+	tooltip="Lets you click target units x pixels below their healthbar",
 	callback=function() bdNameplates:configCallback() end
 }}
 
@@ -394,7 +394,7 @@ defaults[#defaults+1] = {showfriendlybar = {
 -------------
 defaults[#defaults+1] = {tab = {
 	type="tab",
-	value="Your Debuffs"
+	value="Auras"
 }}
 defaults[#defaults+1] = {automydebuff={
 	type="checkbox",
@@ -408,13 +408,6 @@ defaults[#defaults+1] = {selfwhitelist={
 	tooltip="Use to show a specified aura cast by you."
 }}
 
--------------
--- Anyone's Auras
--------------
-defaults[#defaults+1] = {tab = {
-	type="tab",
-	value="All Auras"
-}}
 defaults[#defaults+1] = {raidbefuffs={
 	type="slider",
 	value=50,
@@ -430,13 +423,6 @@ defaults[#defaults+1] = {whitelist={
 	tooltip="Use to show a specified aura cast by anyone."
 }}
 
--------------
--- Blacklist
--------------
-defaults[#defaults+1] = {tab = {
-	type="tab",
-	value="Blacklist"
-}}
 defaults[#defaults+1] = {disableauras={
 	type="checkbox",
 	value=false,

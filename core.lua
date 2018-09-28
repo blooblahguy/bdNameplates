@@ -58,13 +58,14 @@ bdNameplates.scale = min(1.15, 768/screenHeight)
 
 -- Scale the default nameplate parameters - note this doesn't seem to do anything on load, so investigating
 local function nameplateSize(self)
-	if (not InCombatLockdown()) then return end
+	if (InCombatLockdown()) then return end
+
 	if (self) then
 		self:SetSize(config.width, config.height)
 	end
 
 	C_NamePlate.SetNamePlateFriendlySize(config.width * bdNameplates.scale, 0.1)
-	C_NamePlate.SetNamePlateEnemySize(config.width * bdNameplates.scale, config.height + config.targetingTopPadding + config.targetingBottomPadding * bdNameplates.scale)
+	C_NamePlate.SetNamePlateEnemySize(config.width * bdNameplates.scale, (config.height + config.targetingTopPadding + config.targetingBottomPadding) * bdNameplates.scale)
 	C_NamePlate.SetNamePlateSelfSize(config.width * bdNameplates.scale, config.height * bdNameplates.scale)
 	C_NamePlate.SetNamePlateFriendlyClickThrough(true)
 	C_NamePlate.SetNamePlateSelfClickThrough(true)
@@ -201,11 +202,12 @@ end
 ---- PLAYER_TARGET_CHANGED
 --==========================================
 local function nameplateCallback(self, event, unit)
+	if (not self) then return end
 
 	-- Force cvars/settings
 	nameplateSize(self)
+	nameplateUpdateHealth(self, event, unit)
 
-	if (not self) then return end
 	unit = unit or self.unit
 	local reaction = UnitReaction("player", unit)
 
