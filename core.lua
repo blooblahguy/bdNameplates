@@ -129,10 +129,13 @@ bdNameplates:configCallback()
 --==========================================
 local colorCache = {}
 local function nameplateUpdateHealth(self, event, unit)
-	if(not unit or self.unit ~= unit) then return end
+
+	if(not unit or not UnitIsUnit(self.unit, unit)) then  return end
 	if (event == "NAME_PLATE_UNIT_REMOVED") then return end
 	if (event == "OnShow") then return end
 	if (event == "OnUpdate") then return end
+
+	-- print(event, unit, self.unit)
 
 	local healthbar = self.Health
 	local cur, max = UnitHealth(unit), UnitHealthMax(unit)
