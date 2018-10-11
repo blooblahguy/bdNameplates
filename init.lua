@@ -1,5 +1,9 @@
 local addon, bdNameplates = ...
 
+--[[
+	add heler icon to healer healthbars
+ ]]
+
 bdNameplates.cache = {}
 
 function bdNameplates:configCallback() end
