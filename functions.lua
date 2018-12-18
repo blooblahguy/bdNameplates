@@ -29,15 +29,14 @@ local function colorSave(self, tapDenied, isPlayer, reaction, status, executable
 -- 		self.Health:SetStatusBarColor(bdNameplates:unitColor(unit))
 -- 	elseif (status ~= nil and not UnitIsTapDenied(unit) and not UnitIsPlayer(unit) and (event == "UNIT_THREAT_LIST_UPDATE" or event == "NAME_PLATE_UNIT_ADDED")) then
 
-	if (isPlayer or status == false) then
-		if isPlayer then
-			return colors.class[isPlayer]
-		elseif (tapDenied) then
+	if (isPlayer) then
+		return colors.class[isPlayer]
+	elseif (config.executecoloring and executable and not tapDenied) then
+		return config.executecolor
+	elseif (status == false) then
+		if (tapDenied) then
 			return colors.tapped
 		else
-			if (config.executecoloring and executable) then
-				return config.executecolor
-			end
 			return colors.reaction[reaction]
 		end
 	else
