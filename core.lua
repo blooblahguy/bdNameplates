@@ -139,6 +139,10 @@ local function nameplateUpdateHealth(self, event, unit)
 
 	local healthbar = self.Health
 	local cur, max = UnitHealth(unit), UnitHealthMax(unit)
+	local perc = 100;
+	if (cur ~= 0) then
+		perc = cur / max * 100
+	end
 	healthbar:SetMinMaxValues(0, max)
 	healthbar:SetValue(cur)
 
@@ -146,11 +150,12 @@ local function nameplateUpdateHealth(self, event, unit)
 	local isPlayer = UnitIsPlayer(unit) and select(2, UnitClass(unit)) or false
 	local reaction = UnitReaction("player", unit) or false
 	local status = UnitThreatSituation("player", unit)
+	local executable = perc <= config.executerange
 	if (status == nil) then
 		status = false
 	end
 
-	local colors = bdNameplates:unitColor(tapDenied, isPlayer, reaction, status)
+	local colors = bdNameplates:unitColor(tapDenied, isPlayer, reaction, status, executable)
 	healthbar:SetStatusBarColor(unpack(colors))
 
 -- 	function bdNameplates:unitColor(unit)

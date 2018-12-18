@@ -24,7 +24,7 @@ for eclass, color in next, FACTION_BAR_COLORS do
 	end
 end
 
-local function colorSave(self, tapDenied, isPlayer, reaction, status)
+local function colorSave(self, tapDenied, isPlayer, reaction, status, executable)
 	-- if (unit == 'player' or UnitIsUnit('player', unit) or UnitIsFriend('player', unit) or status == nil) then
 -- 		self.Health:SetStatusBarColor(bdNameplates:unitColor(unit))
 -- 	elseif (status ~= nil and not UnitIsTapDenied(unit) and not UnitIsPlayer(unit) and (event == "UNIT_THREAT_LIST_UPDATE" or event == "NAME_PLATE_UNIT_ADDED")) then
@@ -35,6 +35,9 @@ local function colorSave(self, tapDenied, isPlayer, reaction, status)
 		elseif (tapDenied) then
 			return colors.tapped
 		else
+			if (config.executecoloring and executable) then
+				return config.executecolor
+			end
 			return colors.reaction[reaction]
 		end
 	else

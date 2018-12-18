@@ -180,6 +180,12 @@ defaults[#defaults+1] = {hidecasticon = {
 	label = "Hide Castbar Icon",
 	callback = function() bdNameplates:configCallback() end
 }}
+defaults[#defaults+1] = {executecoloring = {
+	type = "checkbox",
+	value = false,
+	label = "Execute Range Color",
+	callback = function() bdNameplates:configCallback() end
+}}
 --[[
 defaults[#defaults+1] = {nameplatemotion = {
 	type = "dropdown",
