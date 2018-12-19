@@ -1,5 +1,5 @@
 local addon, bdNameplates = ...
-local config = bdCore.config.profile['Nameplates']
+local config = bdConfigLib:GetSave('Nameplates')
 
 local unpack, UnitPlayerControlled, UnitIsTapDenied, UnitIsPlayer, UnitClass, UnitReaction, format, floor = unpack, UnitPlayerControlled, UnitIsTapDenied, UnitIsPlayer, UnitClass, UnitReaction, string.format, math.floor
 
