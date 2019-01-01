@@ -2,8 +2,9 @@
 bdNameplates.cache = {}
 local bdCore = bdCore
 local oUF = bdCore.oUF
-local config = bdCore.config.profile['Nameplates']
-local borderSize = bdCore.config.persistent.General.border
+local config = bdConfigLib:GetSave('Nameplates')
+-- local borderSize = bdCore.config.persistent.General.border
+local borderSize = 2
 
 --[[
 	performance notes for myself
