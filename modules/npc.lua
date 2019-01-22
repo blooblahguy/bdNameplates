@@ -1,5 +1,5 @@
 local addon, bdNameplates = ...
-local config = bdCore.config.profile['Nameplates']
+local config = bdConfigLib:GetSave('Nameplates')
 
 -- v1 done
 function bdNameplates:npcStyle(self, event, unit)

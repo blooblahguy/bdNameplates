@@ -2,8 +2,8 @@ local addon, bdNameplates = ...
 bdNameplates.cache = {}
 local bdCore = bdCore
 local oUF = bdCore.oUF
-local config = bdCore.config.profile['Nameplates']
-local borderSize = bdCore.config.persistent.General.border
+local config = bdConfigLib:GetSave('Nameplates')
+local borderSize = bdConfigLib:GetSave("bdAddons").border or 2
 
 --[[
 	performance notes for myself
