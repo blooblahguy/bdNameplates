@@ -443,10 +443,7 @@ defaults[#defaults+1] = {blacklist={
 	tooltip="Useful if you want to blacklist any auras that Blizzard tracks by default."
 }}
 
-
--- bdCore:addModule("Nameplates", defaults)
-
-bdConfigLib:RegisterModule({
+local config = bdConfigLib:RegisterModule({
 	name = "Nameplates"
 }, defaults, "BD_persistent")
 
