@@ -1,10 +1,9 @@
-﻿local addon, bdNameplates = ...
+local addon, bdNameplates = ...
 bdNameplates.cache = {}
 local bdCore = bdCore
 local oUF = bdCore.oUF
-local config = bdConfigLib:GetSave('Nameplates')
--- local borderSize = bdCore.config.persistent.General.border
-local borderSize = 2
+local config = bdCore.config.profile['Nameplates']
+local borderSize = bdCore.config.persistent.General.border
 
 --[[
 	performance notes for myself
@@ -130,8 +129,8 @@ bdNameplates:configCallback()
 --==========================================
 local colorCache = {}
 local function nameplateUpdateHealth(self, event, unit)
-
-	if(not unit or not UnitIsUnit(self.unit, unit)) then  return end
+	if(not unit or not UnitIsUnit(self.unit, unit)) then return end
+	
 	if (event == "NAME_PLATE_UNIT_REMOVED") then return end
 	if (event == "OnShow") then return end
 	if (event == "OnUpdate") then return end
@@ -145,7 +144,7 @@ local function nameplateUpdateHealth(self, event, unit)
 
 	local tapDenied = UnitIsTapDenied(unit) or false
 	local isPlayer = UnitIsPlayer(unit) and select(2, UnitClass(unit)) or false
-	local reaction = UnitReaction("player", unit) or false
+	local reaction = UnitReaction(unit, "player") or false
 	local status = UnitThreatSituation("player", unit)
 	if (status == nil) then
 		status = false
@@ -153,32 +152,6 @@ local function nameplateUpdateHealth(self, event, unit)
 
 	local colors = bdNameplates:unitColor(tapDenied, isPlayer, reaction, status)
 	healthbar:SetStatusBarColor(unpack(colors))
-
--- 	function bdNameplates:unitColor(unit)
--- 	if(not UnitPlayerControlled(unit) and UnitIsTapDenied(unit)) then
--- 		return unpack(colors.tapped)
--- 	elseif UnitIsPlayer(unit) then
--- 		return unpack(colors.class[select(2, UnitClass(unit))])
--- 	else
--- 		return unpack(colors.reaction[UnitReaction(unit, 'player')])
--- 	end
--- end
-
--- 	if (unit == 'player' or UnitIsUnit('player', unit) or UnitIsFriend('player', unit) or status == nil) then
--- 		self.Health:SetStatusBarColor(bdNameplates:unitColor(unit))
--- 	elseif (status ~= nil and not UnitIsTapDenied(unit) and not UnitIsPlayer(unit) and (event == "UNIT_THREAT_LIST_UPDATE" or event == "NAME_PLATE_UNIT_ADDED")) then
--- 		if (status == 3) then
--- 			-- securely tanking
--- 			healthbar:SetStatusBarColor(unpack(config.threatcolor))
--- 		elseif (status == 2 or status == 1) then
--- 			-- near or over tank threat
--- 			healthbar:SetStatusBarColor(unpack(config.threatdangercolor))
--- 		else
--- 			-- on threat table, but not near tank threat
--- 			healthbar:SetStatusBarColor(unpack(config.nothreatcolor))
--- 		end
--- 	end
-
 end
 
 
@@ -341,7 +314,7 @@ local function nameplateCreate(self, unit)
 	-- CALLBACKS
 	--==========================================
 	-- targeting callback
-	self:RegisterEvent("PLAYER_TARGET_CHANGED", nameplateCallback)
+	self:RegisterEvent("PLAYER_TARGET_CHANGED", nameplateCallback, true)
 
 	-- coloring callbacks
 	self:RegisterEvent("UNIT_THREAT_LIST_UPDATE", nameplateUpdateHealth)
@@ -375,9 +348,10 @@ local function nameplateCreate(self, unit)
 	self.Curhp:SetJustifyH("RIGHT")
 	self.Curhp:SetAlpha(0.8)
 	self.Curhp:SetPoint("RIGHT", self.Health, "RIGHT", -4, 0)
+	self.Curhp.frequentUpdates = 0.1
 
-	oUF.Tags.Events['bdncurhp'] = 'UNIT_HEALTH'
-	oUF.Tags.Methods['bdncurhp'] = function(unit)
+	-- oUF.Tags.Events["bdncurhp"] = "UNIT_HEALTH UNIT_MAXHEALTH"
+	oUF.Tags.Methods["bdncurhp"] = function(unit)
 		if (config.hptext == "None") then return '' end
 		local hp, hpMax = UnitHealth(unit), UnitHealthMax(unit)
 		local hpPercent = bdNameplates:round(hp / hpMax * 100,1)

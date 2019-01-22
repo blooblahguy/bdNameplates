@@ -444,9 +444,5 @@ defaults[#defaults+1] = {blacklist={
 }}
 
 
--- bdCore:addModule("Nameplates", defaults)
-
-bdConfigLib:RegisterModule({
-	name = "Nameplates"
-}, defaults, "BD_persistent")
+bdCore:addModule("Nameplates", defaults)
 
