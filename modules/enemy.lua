@@ -26,7 +26,6 @@ function bdNameplates:enemyStyle(self, event, unit)
 	self.Castbar:ClearAllPoints()
 	self.Castbar:SetPoint("TOPLEFT", self.Health, "BOTTOMLEFT", 0, -2)
 	self.Castbar:SetPoint("BOTTOMRIGHT", self.Health, "BOTTOMRIGHT", 0, -config.castbarheight)
-	self.Castbar.Icon:SetSize(config.height+config.castbarheight, config.height+config.castbarheight)
 
 	-- healthbar
 	self.Health:Show()

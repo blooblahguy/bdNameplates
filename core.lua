@@ -116,15 +116,14 @@ function bdNameplates:configCallback()
 		end
 	end
 
+	bdCore:triggerEvent("bdNameplatesConfig")
 end
-bdNameplates:configCallback()
 
 --==========================================
 -- HEALTH UPDATER
 --- Calls on 
 ---- more than it ought to by default
 ---- NAME_PLATE_UNIT_ADDED
----- UNIT_THREAT_LIST_UPDATE
 ---- UNIT_HEALTH_FREQUENT
 --==========================================
 local colorCache = {}
@@ -153,7 +152,7 @@ local function nameplateUpdateHealth(self, event, unit)
 		status = false
 	end
 
-	local colors = bdNameplates:unitColor(tapDenied, self.isPlayer, self.reaction, status, special)
+	self.colors = bdNameplates:unitColor(tapDenied, self.isPlayer, self.reaction, status, special)
 	healthbar:SetStatusBarColor(unpack(colors))
 end
 
@@ -171,8 +170,6 @@ end
 		-- return table.concat(uid,":")
 	-- end)
 -- end
-
-
 
 --==========================================
 -- MAIN CALLBACK
@@ -192,21 +189,6 @@ local function nameplateCallback(self, event, unit)
 	if (not unit or not UnitIsUnit(self.unit, unit)) then return end
 
 	--==========================================
-	-- Non-conflicting Configuration Updates First
-	--==========================================
-	self.Auras.size = config.raidbefuffs
-	self.Auras.showStealableBuffs = config.highlightPurge
-	self.RaidTargetIndicator:SetSize(config.raidmarkersize, config.raidmarkersize)
-	self.RaidTargetIndicator:ClearAllPoints()
-	if (config.markposition == "LEFT") then
-		self.RaidTargetIndicator:SetPoint('RIGHT', self, "LEFT", -(config.raidmarkersize/2), 0)
-	elseif (config.markposition == "RIGHT") then
-		self.RaidTargetIndicator:SetPoint('LEFT', self, "RIGHT", config.raidmarkersize/2, 0)
-	else
-		self.RaidTargetIndicator:SetPoint('BOTTOM', self, "TOP", 0, config.raidmarkersize)
-	end
-
-	--==========================================
 	-- Style by unit type
 	--==========================================
 	if (UnitCanAttack("player", unit)) then
@@ -222,14 +204,6 @@ local function nameplateCallback(self, event, unit)
 	--==========================================
 	-- Overriding Configuration
 	--==========================================
-	-- cast icon
-	if (config.hidecasticon) then
-		self.Castbar.Icon:Hide()
-		self.Castbar.Icon.bg:Hide()
-	else
-		self.Castbar.Icon:Show()
-		self.Castbar.Icon.bg:Show()
-	end
 	-- disabled auras
 	if (config.disableauras) then
 		self.Auras:Hide()
@@ -246,7 +220,6 @@ local function nameplateCallback(self, event, unit)
 	if (self.isTarget) then
 		self:SetAlpha(1)
 		self.Health.Shadow:Show()
-		self.Health.Shadow:SetBackdropBorderColor(unpack(config.glowcolor))
 	else
 		self:SetAlpha(config.unselectedalpha)
 		self.Health.Shadow:Hide()
@@ -280,9 +253,38 @@ end
 bdNameplates.auraFilter = memoize(auraFilter, bdNameplates.cache)
 
 local function nameplateCreate(self, unit)
+	local module = self
 	self.nameplate = C_NamePlate.GetNamePlateForUnit(unit)
 	self.scale = bdNameplates.scale
 	self.unit = unit
+
+	bdCore:hookEvent("bdNameplatesConfig", function()
+		-- auras
+		module.Auras.size = config.raidbefuffs
+		module.Auras.showStealableBuffs = config.highlightPurge
+
+		-- raid target
+		module.RaidTargetIndicator:SetSize(config.raidmarkersize, config.raidmarkersize)
+		module.RaidTargetIndicator:ClearAllPoints()
+		if (config.markposition == "LEFT") then
+			module.RaidTargetIndicator:SetPoint('RIGHT', module, "LEFT", -(config.raidmarkersize/2), 0)
+		elseif (config.markposition == "RIGHT") then
+			module.RaidTargetIndicator:SetPoint('LEFT', module, "RIGHT", config.raidmarkersize/2, 0)
+		else
+			module.RaidTargetIndicator:SetPoint('BOTTOM', module, "TOP", 0, config.raidmarkersize)
+		end
+
+		-- castbars
+		module.Castbar.Icon:SetSize(config.height+config.castbarheight, config.height+config.castbarheight)
+		-- cast icon
+		if (config.hidecasticon) then
+			module.Castbar.Icon:Hide()
+			module.Castbar.Icon.bg:Hide()
+		else
+			module.Castbar.Icon:Show()
+			module.Castbar.Icon.bg:Show()
+		end
+	end)
 	
 	self:SetPoint("BOTTOM", self.nameplate, "BOTTOM", 0, config.targetingBottomPadding)
 	self:SetSize(config.width, config.height)
@@ -302,8 +304,8 @@ local function nameplateCreate(self, unit)
 	self.Health.colorReaction = true
 	bdCore:createShadow(self.Health, 10)
 	bdCore:setBackdrop(self.Health)
-	self.Health.Shadow:SetBackdropColor(1, 1, 1, 1)
-	self.Health.Shadow:SetBackdropBorderColor(1, 1, 1, 0.8)
+	self.Health.Shadow:SetBackdropColor(unpack(config.glowcolor))
+	self.Health.Shadow:SetBackdropBorderColor(unpack(config.glowcolor))
 
 	--==========================================
 	-- CALLBACKS
@@ -374,7 +376,7 @@ local function nameplateCreate(self, unit)
 	oUF.Tags.Methods['bdncurpower'] = function(unit)
 		if (not config.showenergy) then return '' end
 		pp, ppMax, ppPercent = UnitPower(unit), UnitPowerMax(unit), 0
-		if (pp == 0 or ppMax == 0) then return '' end
+		if (not pp or not ppMax) then return '' end
 		ppPercent = (pp / ppMax) * 100
 
 		return floor(ppPercent);
@@ -419,20 +421,10 @@ local function nameplateCreate(self, unit)
 		return bdNameplates:auraFilter(name, castByPlayer, debuffType, isStealable, nameplateShowSelf, nameplateShowAll)
 	end
 	
-	self.Auras.PostUpdateIcon = function(self, unit, button, index, position, duration, expiration, debuffType, isStealable)
+	self.Auras.PostCreateIcon = function(self, button)
 		button:SetHeight(config.raidbefuffs * 0.6)
 		bdCore:setBackdrop(button)
 
-		if (config.highlightPurge and isStealable) then -- purge alert
-			button.border:SetVertexColor(unpack(config.purgeColor))
-		elseif (config.highlightEnrage and debuffType == "") then -- enrage alert
-			button.border:SetVertexColor(unpack(config.enrageColor))
-		else -- neither
-			button.border:SetVertexColor(unpack(bdCore.media.border))
-		end
-
-		if (button.skinned) then return end
-		
 		local cdtext = button.cd:GetRegions()
 		cdtext:SetFontObject("BDN_FONT_SMALL") 
 		cdtext:SetJustifyH("CENTER")
@@ -449,8 +441,15 @@ local function nameplateCreate(self, unit)
 		
 		button.cd:SetReverse(true)
 		button.cd:SetHideCountdownNumbers(false)
-
-		button.skinned = true
+	end
+	self.Auras.PostUpdateIcon = function(self, unit, button, index, position, duration, expiration, debuffType, isStealable)
+		if (config.highlightPurge and isStealable) then -- purge alert
+			button.border:SetVertexColor(unpack(config.purgeColor))
+		elseif (config.highlightEnrage and debuffType == "") then -- enrage alert
+			button.border:SetVertexColor(unpack(config.enrageColor))
+		else -- neither
+			button.border:SetVertexColor(unpack(bdCore.media.border))
+		end
 	end
 
 	--==========================================

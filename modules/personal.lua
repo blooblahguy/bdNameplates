@@ -9,13 +9,6 @@ function bdNameplates:personalStyle(self, event, unit)
 	self:EnableElement("Castbar")
 	self.Castbar:SetPoint("TOPLEFT", self.Power, "BOTTOMLEFT", 0, -2)
 	self.Castbar:SetPoint("BOTTOMRIGHT", self.Power, "BOTTOMRIGHT", 0, -config.castbarheight)
-	if (config.hidecasticon) then
-		self.Castbar.Icon:Hide()
-		self.Castbar.bg:Hide()
-	else
-		self.Castbar.Icon:Show()
-		self.Castbar.bg:Show()
-	end
 
 	-- healthbar
 	self.Health:Show()

@@ -56,7 +56,6 @@ defaults[#defaults+1] = {width={
 	max=250,
 	step=2,
 	label="Nameplates Width",
-	callback=function() bdNameplates:configCallback() end
 }}
 
 defaults[#defaults+1] = {height={
@@ -66,7 +65,6 @@ defaults[#defaults+1] = {height={
 	max=50,
 	step=2,
 	label="Nameplates Height",
-	callback=function() bdNameplates:configCallback() end
 }}
 defaults[#defaults+1] = {targetingTopPadding={
 	type="slider",
@@ -76,7 +74,6 @@ defaults[#defaults+1] = {targetingTopPadding={
 	step=2,
 	label="Click target padding top",
 	tooltip="Lets you click target units x pixels above their healthbar",
-	callback=function() bdNameplates:configCallback() end
 }}
 
 defaults[#defaults+1] = {targetingBottomPadding={
@@ -87,7 +84,6 @@ defaults[#defaults+1] = {targetingBottomPadding={
 	step=2,
 	label="Click target padding bottom",
 	tooltip="Lets you click target units x pixels below their healthbar",
-	callback=function() bdNameplates:configCallback() end
 }}
 
 defaults[#defaults+1] = {friendnamealpha={
@@ -97,14 +93,12 @@ defaults[#defaults+1] = {friendnamealpha={
 	max=1,
 	step=0.1,
 	label="Friendly Name Opacity",
-	callback=function() bdNameplates:configCallback() end
 }}
 
 -- defaults[#defaults+1] = {trackResources = {
 -- 	type = "checkbox",
 -- 	value = true,
 -- 	label = "Display class resources on nameplates.",
--- 	callback = function() bdNameplates:configCallback() end
 -- }}
 -- defaults[#defaults+1] = {resourceHeight={
 -- 	type="slider",
@@ -113,21 +107,18 @@ defaults[#defaults+1] = {friendnamealpha={
 -- 	max=50,
 -- 	step=2,
 -- 	label="Resource height",
--- 	callback=function() bdNameplates:configCallback() end
 -- }}
 
 defaults[#defaults+1] = {highlightPurge = {
 	type = "checkbox",
 	value = true,
 	label = "Highlist units who have auras that can be purged",
-	callback = function() bdNameplates:configCallback() end
 }}
 
 defaults[#defaults+1] = {highlightEnrage = {
 	type = "checkbox",
 	value = false,
 	label = "Auto whitelist enrage auras on units.",
-	callback = function() bdNameplates:configCallback() end
 }}
 
 
@@ -138,14 +129,12 @@ defaults[#defaults+1] = {friendlynamehack = {
 	value = false,
 	label = "Friendly Names in Raid",
 	tooltip = "This will disable friendly nameplates in raid while keeping the friendly name. Uncheck this before uninstalling bdNameplates. ",
-	callback = function() bdNameplates:configCallback() end
 }}
 defaults[#defaults+1] = {friendlyplates = {
 	type = "checkbox",
 	value = false,
 	label = "Show friendly nameplate healthbars",
 	tooltip = "Normally we hide friendly healthbars and just show names, this will let you show both. ",
-	callback = function() bdNameplates:configCallback() end
 }}
 defaults[#defaults+1] = {verticalspacing={
 	type="slider",
@@ -154,7 +143,6 @@ defaults[#defaults+1] = {verticalspacing={
 	max=4,
 	step=0.1,
 	label="Vertical Spacing",
-	callback=function() bdNameplates:configCallback() end
 }}
 defaults[#defaults+1] = {castbarheight={
 	type="slider",
@@ -163,7 +151,6 @@ defaults[#defaults+1] = {castbarheight={
 	max=50,
 	step=2,
 	label="Castbar Height",
-	callback=function() bdNameplates:configCallback() end
 }}
 defaults[#defaults+1] = {nameplatedistance={
 	type="slider",
@@ -172,13 +159,11 @@ defaults[#defaults+1] = {nameplatedistance={
 	max=100,
 	step=2,
 	label="Nameplates Draw Distance",
-	callback=function() bdNameplates:configCallback() end
 }}
 defaults[#defaults+1] = {hidecasticon = {
 	type = "checkbox",
 	value = false,
 	label = "Hide Castbar Icon",
-	callback = function() bdNameplates:configCallback() end
 }}
 --[[
 defaults[#defaults+1] = {nameplatemotion = {
@@ -186,7 +171,6 @@ defaults[#defaults+1] = {nameplatemotion = {
 	value = 1,
 	options = {1,0},
 	label = "Stacking: 1 for stacked, 0 for overlapping",
-	callback = function() cvar_set() end
 }}--]]
 
 --=======================================
@@ -201,7 +185,6 @@ defaults[#defaults+1] = {hptext = {
 	value = "HP - %",
 	options = {"None","HP - %", "HP", "%"},
 	label = "Nameplate Health Text",
-	callback = function() bdNameplates:configCallback() end
 }}
 -- defaults[#defaults+1] = {fixatealert = {
 -- 	type = "dropdown",
@@ -213,32 +196,27 @@ defaults[#defaults+1] = {hptext = {
 -- 	type = "checkbox",
 -- 	value = true,
 -- 	label = "Show Fixate Circle",
--- 	callback = function() bdNameplates:configCallback() end
 -- }}
 defaults[#defaults+1] = {showhptexttargetonly = {
 	type = "checkbox",
 	value = false,
 	label = "Show Health Text on target only",
-	callback = function() bdNameplates:configCallback() end
 }}
 defaults[#defaults+1] = {showenergy = {
 	type = "checkbox",
 	value = false,
 	label = "Show energy value on healthbar",
-	callback = function() bdNameplates:configCallback() end
 }}
 defaults[#defaults+1] = {hideEnemyNames = {
 	type = "dropdown",
 	value = "Always Show",
 	options = {"Always Show", "Always Hide", "Only Target", "Hide in Arena"},
 	label = "Hide Enemy Names",
-	callback = function() bdNameplates:configCallback() end
 }}
 defaults[#defaults+1] = {hidefriendnames = {
 	type = "checkbox",
 	value = false,
 	label = "Hide Friendly Names",
-	callback = function() bdNameplates:configCallback() end
 }}
 defaults[#defaults+1] = {enemynamesize={
 	type="slider",
@@ -247,7 +225,6 @@ defaults[#defaults+1] = {enemynamesize={
 	max=24,
 	step=1,
 	label="Enemy Name Font Size",
-	callback=function() bdNameplates:configCallback() end
 }}
 defaults[#defaults+1] = {friendlynamesize={
 	type="slider",
@@ -256,7 +233,6 @@ defaults[#defaults+1] = {friendlynamesize={
 	max=24,
 	step=1,
 	label="Friendly Name Font Size",
-	callback=function() bdNameplates:configCallback() end
 }}
 defaults[#defaults+1] = {markposition = {
 	type = "dropdown",
@@ -264,7 +240,6 @@ defaults[#defaults+1] = {markposition = {
 	options = {"LEFT","TOP","RIGHT"},
 	label = "Raid Marker position",
 	tooltip = "Where raid markers should be positioned on the nameplate.",
-	callback = function() bdNameplates:configCallback() end
 }}
 defaults[#defaults+1] = {raidmarkersize={
 	type="slider",
@@ -273,7 +248,6 @@ defaults[#defaults+1] = {raidmarkersize={
 	max=50,
 	step=2,
 	label="Raid Marker Icon Size",
-	callback=function() bdNameplates:configCallback() end
 }}
 
 --=======================================
@@ -340,7 +314,6 @@ defaults[#defaults+1] = {executerange = {
 	max=40,
 	step=5,
 	label = "Execute range",
-	callback = function() bdNameplates:configCallback() end
 }}
 defaults[#defaults+1] = {unselectedalpha={
 	type="slider",
@@ -349,7 +322,6 @@ defaults[#defaults+1] = {unselectedalpha={
 	max=1,
 	step=0.1,
 	label="Unselected nameplate alpha",
-	callback=function() bdNameplates:configCallback() end
 }}
 -------------
 -- Special Units
@@ -390,7 +362,6 @@ defaults[#defaults+1] = {showfriendlybar = {
 	type = "checkbox",
 	value = false,
 	label = "Show health bar when targeting friendly.",
-	callback = function() bdNameplates:configCallback() end
 }}--]]
 
 -------------
@@ -445,6 +416,7 @@ defaults[#defaults+1] = {blacklist={
 
 local config = bdConfigLib:RegisterModule({
 	name = "Nameplates"
+	callback = bdNameplates.configCallback
 }, defaults, "BD_persistent")
 
 

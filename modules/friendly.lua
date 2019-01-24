@@ -3,8 +3,8 @@ local config = bdConfigLib:GetSave('Nameplates')
 
 -- v1 done
 function bdNameplates:friendlyStyle(self, event, unit)
-	local colors = bdNameplates:unitColor(false, self.isPlayer, self.reaction, false)
-	self.Name:SetTextColor(unpack(colors))
+	-- local colors = bdNameplates:unitColor(false, self.isPlayer, self.reaction, false)
+	self.Name:SetTextColor(unpack(self.colors))
 	self.Name:SetAlpha(config.friendnamealpha)
 
 	if (self.currentStyle and self.currentStyle == "friendly") then return end
