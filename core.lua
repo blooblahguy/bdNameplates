@@ -128,17 +128,14 @@ end
 --==========================================
 local colorCache = {}
 local function nameplateUpdateHealth(self, event, unit)
-	if(not unit or not UnitIsUnit(self.unit, unit)) then return end
+	if(not unit or not UnitIsUnit(self.unit, unit)) then return false end
 	
-	if (event == "NAME_PLATE_UNIT_REMOVED") then return end
-	if (event == "OnShow") then return end
-	if (event == "OnUpdate") then return end
+	if (event == "NAME_PLATE_UNIT_REMOVED") then return false end
+	if (event == "OnShow") then return false end
+	if (event == "OnUpdate") then return false end
 
 	-- store these values for reuse
-	self.isTarget = UnitIsUnit("target", unit)
-	self.isPlayer = UnitIsPlayer(unit) and select(2, UnitClass(unit)) or false
-	self.reaction = UnitReaction(unit, "player") or false
-	print(event)
+	storeVars(self, unit)
 
 	local healthbar = self.Health
 	local cur, max = UnitHealth(unit), UnitHealthMax(unit)
@@ -156,6 +153,11 @@ local function nameplateUpdateHealth(self, event, unit)
 	healthbar:SetStatusBarColor(unpack(self.smartColors))
 end
 
+local function updateVars(module, unit)
+	module.isTarget = UnitIsUnit("target", unit)
+	module.isPlayer = UnitIsPlayer(unit) and select(2, UnitClass(unit)) or false
+	module.reaction = UnitReaction(unit, "player") or false
+end
 
 -- idk if we'll use this yet, but basically we can theoretically cache units to see if units have changed but kept the same id
 -- local function unitID(unitUID)
@@ -183,7 +185,9 @@ local function nameplateCallback(self, event, unit)
 
 	-- Force cvars/settings
 	nameplateSize(self)
-	nameplateUpdateHealth(self, event, unit)
+	if (not nameplateUpdateHealth(self, event, unit)) then
+		updateVars(self, unit)
+	end
 
 	unit = unit or self.unit
 
