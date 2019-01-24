@@ -209,14 +209,14 @@ local function nameplateCallback(self, event, unit)
 	--==========================================
 	-- Style by unit type
 	--==========================================
-	if (UnitIsUnit(unit, "player")) then
-		bdNameplates:personalStyle(self, event, unit)
-	elseif (UnitIsPVPSanctuary(unit) or (UnitIsPlayer(unit) and UnitIsFriend("player",unit) and self.reaction >= 5)) then
-		bdNameplates:friendlyStyle(self, event, unit)
-	elseif (not self.isPlayer and (self.reaction >= 5) or ufaction == "Neutral") then
-		bdNameplates:npcStyle(self, event, unit)
-	else
+	if (UnitCanAttack("player", unit)) then
 		bdNameplates:enemyStyle(self, event, unit)
+	elseif (UnitIsUnit(unit, "player")) then
+		bdNameplates:personalStyle(self, event, unit)
+	elseif (self.isPlayer) then
+		bdNameplates:friendlyStyle(self, event, unit)
+	else
+		bdNameplates:npcStyle(self, event, unit)
 	end
 
 	--==========================================
