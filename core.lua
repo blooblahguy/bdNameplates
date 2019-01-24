@@ -153,7 +153,7 @@ local function nameplateUpdateHealth(self, event, unit)
 	end
 
 	self.colors = bdNameplates:unitColor(tapDenied, self.isPlayer, self.reaction, status, special)
-	healthbar:SetStatusBarColor(unpack(colors))
+	healthbar:SetStatusBarColor(unpack(self.colors))
 end
 
 
