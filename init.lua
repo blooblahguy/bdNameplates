@@ -415,7 +415,7 @@ defaults[#defaults+1] = {blacklist={
 }}
 
 local config = bdConfigLib:RegisterModule({
-	name = "Nameplates"
+	name = "Nameplates",
 	callback = bdNameplates.configCallback
 }, defaults, "BD_persistent")
 
