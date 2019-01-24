@@ -119,6 +119,12 @@ function bdNameplates:configCallback()
 	bdCore:triggerEvent("bdNameplatesConfig")
 end
 
+local function updateVars(module, unit)
+	module.isTarget = UnitIsUnit("target", unit)
+	module.isPlayer = UnitIsPlayer(unit) and select(2, UnitClass(unit)) or false
+	module.reaction = UnitReaction(unit, "player") or false
+end
+
 --==========================================
 -- HEALTH UPDATER
 --- Calls on 
@@ -135,7 +141,7 @@ local function nameplateUpdateHealth(self, event, unit)
 	if (event == "OnUpdate") then return false end
 
 	-- store these values for reuse
-	storeVars(self, unit)
+	updateVars(self, unit)
 
 	local healthbar = self.Health
 	local cur, max = UnitHealth(unit), UnitHealthMax(unit)
@@ -151,12 +157,6 @@ local function nameplateUpdateHealth(self, event, unit)
 
 	self.smartColors = bdNameplates:unitColor(tapDenied, self.isPlayer, self.reaction, status, special)
 	healthbar:SetStatusBarColor(unpack(self.smartColors))
-end
-
-local function updateVars(module, unit)
-	module.isTarget = UnitIsUnit("target", unit)
-	module.isPlayer = UnitIsPlayer(unit) and select(2, UnitClass(unit)) or false
-	module.reaction = UnitReaction(unit, "player") or false
 end
 
 -- idk if we'll use this yet, but basically we can theoretically cache units to see if units have changed but kept the same id
