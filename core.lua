@@ -116,13 +116,13 @@ function bdNameplates:configCallback()
 		end
 	end
 
-	bdCore:triggerEvent("bdNameplatesConfig")
+	bd_do_action("bdNameplatesConfig")
 end
 
-local function updateVars(module, unit)
-	module.isTarget = UnitIsUnit("target", unit)
-	module.isPlayer = UnitIsPlayer(unit) and select(2, UnitClass(unit)) or false
-	module.reaction = UnitReaction(unit, "player") or false
+local function updateVars(self, unit)
+	self.isTarget = UnitIsUnit("target", unit)
+	self.isPlayer = UnitIsPlayer(unit) and select(2, UnitClass(unit)) or false
+	self.reaction = UnitReaction(unit, "player") or false
 end
 
 --==========================================
@@ -132,7 +132,6 @@ end
 ---- NAME_PLATE_UNIT_ADDED
 ---- UNIT_HEALTH_FREQUENT
 --==========================================
-local colorCache = {}
 local function nameplateUpdateHealth(self, event, unit)
 	if(not unit or not UnitIsUnit(self.unit, unit)) then return false end
 	
@@ -157,6 +156,8 @@ local function nameplateUpdateHealth(self, event, unit)
 
 	self.smartColors = bdNameplates:unitColor(tapDenied, self.isPlayer, self.reaction, status, special)
 	healthbar:SetStatusBarColor(unpack(self.smartColors))
+
+	return true
 end
 
 -- idk if we'll use this yet, but basically we can theoretically cache units to see if units have changed but kept the same id
@@ -256,36 +257,36 @@ end
 bdNameplates.auraFilter = memoize(auraFilter, bdNameplates.cache)
 
 local function nameplateCreate(self, unit)
-	local module = self
 	self.nameplate = C_NamePlate.GetNamePlateForUnit(unit)
 	self.scale = bdNameplates.scale
 	self.unit = unit
 
-	bdCore:hookEvent("bdNameplatesConfig", function()
+	-- nameplate specific callback
+	bd_add_action("bdNameplatesConfig", function()
 		-- auras
-		module.Auras.size = config.raidbefuffs
-		module.Auras.showStealableBuffs = config.highlightPurge
+		self.Auras.size = config.raidbefuffs
+		self.Auras.showStealableBuffs = config.highlightPurge
 
 		-- raid target
-		module.RaidTargetIndicator:SetSize(config.raidmarkersize, config.raidmarkersize)
-		module.RaidTargetIndicator:ClearAllPoints()
+		self.RaidTargetIndicator:SetSize(config.raidmarkersize, config.raidmarkersize)
+		self.RaidTargetIndicator:ClearAllPoints()
 		if (config.markposition == "LEFT") then
-			module.RaidTargetIndicator:SetPoint('RIGHT', module, "LEFT", -(config.raidmarkersize/2), 0)
+			self.RaidTargetIndicator:SetPoint('RIGHT', self, "LEFT", -(config.raidmarkersize/2), 0)
 		elseif (config.markposition == "RIGHT") then
-			module.RaidTargetIndicator:SetPoint('LEFT', module, "RIGHT", config.raidmarkersize/2, 0)
+			self.RaidTargetIndicator:SetPoint('LEFT', self, "RIGHT", config.raidmarkersize/2, 0)
 		else
-			module.RaidTargetIndicator:SetPoint('BOTTOM', module, "TOP", 0, config.raidmarkersize)
+			self.RaidTargetIndicator:SetPoint('BOTTOM', self, "TOP", 0, config.raidmarkersize)
 		end
 
 		-- castbars
-		module.Castbar.Icon:SetSize(config.height+config.castbarheight, config.height+config.castbarheight)
+		self.Castbar.Icon:SetSize(config.height+config.castbarheight, config.height+config.castbarheight)
 		-- cast icon
 		if (config.hidecasticon) then
-			module.Castbar.Icon:Hide()
-			module.Castbar.Icon.bg:Hide()
+			self.Castbar.Icon:Hide()
+			self.Castbar.Icon.bg:Hide()
 		else
-			module.Castbar.Icon:Show()
-			module.Castbar.Icon.bg:Show()
+			self.Castbar.Icon:Show()
+			self.Castbar.Icon.bg:Show()
 		end
 	end)
 	

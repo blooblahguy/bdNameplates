@@ -3,7 +3,6 @@ local config = bdConfigLib:GetSave('Nameplates')
 
 local unpack, UnitPlayerControlled, UnitIsTapDenied, UnitIsPlayer, UnitClass, UnitReaction, format, floor = unpack, UnitPlayerControlled, UnitIsTapDenied, UnitIsPlayer, UnitClass, UnitReaction, string.format, math.floor
 
-local colorCache = {}
 local colors = {}
 colors.tapped = {.6,.6,.6}
 colors.offline = {.6,.6,.6}
@@ -17,7 +16,7 @@ for eclass, color in next, RAID_CLASS_COLORS do
 	end
 end
 
--- factino colors
+-- faction colors
 for eclass, color in next, FACTION_BAR_COLORS do
 	if not colors.reaction[eclass] then
 		colors.reaction[eclass] = {color.r, color.g, color.b}
@@ -38,14 +37,11 @@ local function unitColor(self, tapDenied, isPlayer, reaction, status, special)
 			return colors.reaction[reaction]
 		end
 	else
-		if (status == 3) then
-			-- securely tanking
+		if (status == 3) then -- securely tanking
 			return config.threatcolor
-		elseif (status == 2 or status == 1) then
-			-- near or over tank threat
+		elseif (status == 2 or status == 1) then -- near or over tank threat
 			return config.threatdangercolor
-		else
-			-- on threat table, but not near tank threat
+		else -- on threat table, but not near tank threat
 			return config.nothreatcolor
 		end
 	end
