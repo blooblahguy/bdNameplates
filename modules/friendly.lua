@@ -3,10 +3,7 @@ local config = bdConfigLib:GetSave('Nameplates')
 
 -- v1 done
 function bdNameplates:friendlyStyle(self, event, unit)
-	local isPlayer = UnitIsPlayer(unit) and select(2, UnitClass(unit)) or false
-	local reaction = UnitReaction("player", unit) or false
-
-	local colors = bdNameplates:unitColor(false, isPlayer, reaction, false)
+	local colors = bdNameplates:unitColor(false, self.isPlayer, self.reaction, false)
 	self.Name:SetTextColor(unpack(colors))
 	self.Name:SetAlpha(config.friendnamealpha)
 

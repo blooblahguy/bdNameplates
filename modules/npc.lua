@@ -3,8 +3,7 @@ local config = bdConfigLib:GetSave('Nameplates')
 
 -- v1 done
 function bdNameplates:npcStyle(self, event, unit)
-	local reaction = UnitReaction("player", unit) or false
-	local colors = bdNameplates:unitColor(false, false, reaction, false)
+	local colors = bdNameplates:unitColor(false, false, self.reaction, false)
 	self.Name:SetTextColor(unpack(colors))
 
 	if (self.currentStyle and self.currentStyle == "npc") then return end

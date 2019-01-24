@@ -135,7 +135,11 @@ local function nameplateUpdateHealth(self, event, unit)
 	if (event == "OnShow") then return end
 	if (event == "OnUpdate") then return end
 
-	-- print(event, unit, self.unit)
+	-- store these values for reuse
+	self.isTarget = UnitIsUnit("target", unit)
+	self.isPlayer = UnitIsPlayer(unit) and select(2, UnitClass(unit)) or false
+	self.reaction = UnitReaction(unit, "player") or false
+	print(event)
 
 	local healthbar = self.Health
 	local cur, max = UnitHealth(unit), UnitHealthMax(unit)
@@ -143,15 +147,13 @@ local function nameplateUpdateHealth(self, event, unit)
 	healthbar:SetValue(cur)
 
 	local tapDenied = UnitIsTapDenied(unit) or false
-	local isPlayer = UnitIsPlayer(unit) and select(2, UnitClass(unit)) or false
-	local reaction = UnitReaction(unit, "player") or false
 	local status = UnitThreatSituation("player", unit)
 	local special = config.specialunits[UnitName(unit)]
 	if (status == nil) then
 		status = false
 	end
 
-	local colors = bdNameplates:unitColor(tapDenied, isPlayer, reaction, status, special)
+	local colors = bdNameplates:unitColor(tapDenied, self.isPlayer, reaction, status, special)
 	healthbar:SetStatusBarColor(unpack(colors))
 end
 
@@ -187,7 +189,7 @@ local function nameplateCallback(self, event, unit)
 	nameplateUpdateHealth(self, event, unit)
 
 	unit = unit or self.unit
-	local reaction = UnitReaction("player", unit)
+	if (not unit or not UnitIsUnit(self.unit, unit)) then return end
 
 	--==========================================
 	-- Non-conflicting Configuration Updates First
@@ -207,11 +209,11 @@ local function nameplateCallback(self, event, unit)
 	--==========================================
 	-- Style by unit type
 	--==========================================
-	if (UnitIsUnit(unit,"player")) then
+	if (UnitIsUnit(unit, "player")) then
 		bdNameplates:personalStyle(self, event, unit)
-	elseif (UnitIsPVPSanctuary(unit) or (UnitIsPlayer(unit) and UnitIsFriend("player",unit) and reaction and reaction >= 5)) then
+	elseif (UnitIsPVPSanctuary(unit) or (UnitIsPlayer(unit) and UnitIsFriend("player",unit) and self.reaction >= 5)) then
 		bdNameplates:friendlyStyle(self, event, unit)
-	elseif (not UnitIsPlayer(unit) and (reaction and reaction >= 5) or ufaction == "Neutral") then
+	elseif (not self.isPlayer and (self.reaction >= 5) or ufaction == "Neutral") then
 		bdNameplates:npcStyle(self, event, unit)
 	else
 		bdNameplates:enemyStyle(self, event, unit)
@@ -234,14 +236,14 @@ local function nameplateCallback(self, event, unit)
 	end
 
 	-- hp text
-	if (config.hptext == "None" or (config.showhptexttargetonly and not UnitIsUnit(unit, "target"))) then
+	if (config.hptext == "None" or (config.showhptexttargetonly and not self.isTarget)) then
 		self.Curhp:Hide()
 	else
 		self.Curhp:Show()
 	end
 
 	-- Highlight targeted unit
-	if (UnitIsUnit("target", unit)) then
+	if (self.isTarget) then
 		self:SetAlpha(1)
 		self.Health.Shadow:Show()
 		self.Health.Shadow:SetBackdropBorderColor(unpack(config.glowcolor))
@@ -249,14 +251,6 @@ local function nameplateCallback(self, event, unit)
 		self:SetAlpha(config.unselectedalpha)
 		self.Health.Shadow:Hide()
 	end
-
-	-- special unit
-	if (config.specialunits[UnitName(unit)]) then
-		self.specialUnit = true
-	else
-		self.specialUnit = false
-	end
-
 end
 
 --==========================================
@@ -318,7 +312,7 @@ local function nameplateCreate(self, unit)
 	self:RegisterEvent("PLAYER_TARGET_CHANGED", nameplateCallback, true)
 
 	-- coloring callbacks
-	self:RegisterEvent("UNIT_THREAT_LIST_UPDATE", nameplateUpdateHealth, true)
+	-- self:RegisterEvent("UNIT_THREAT_SITUATION_UPDATE", nameplateUpdateHealth, true)
 	self.Health.Override = nameplateUpdateHealth
 	
 	--==========================================

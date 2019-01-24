@@ -6,7 +6,7 @@ function bdNameplates:enemyStyle(self, event, unit)
 	self.Name:Show()
 	if (config.hideEnemyNames == "Always Hide") then
 		self.Name:Hide()
-	elseif (config.hideEnemyNames == "Only Target" and not UnitIsUnit(unit, "target")) then
+	elseif (config.hideEnemyNames == "Only Target" and not self.isTarget) then
 		self.Name:Hide()
 	elseif (config.hideEnemyNames == "Hide in Arena") then
 		local inInstance, instanceType = IsInInstance();

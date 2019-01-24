@@ -25,10 +25,6 @@ for eclass, color in next, FACTION_BAR_COLORS do
 end
 
 local function unitColor(self, tapDenied, isPlayer, reaction, status, special)
-	-- if (unit == 'player' or UnitIsUnit('player', unit) or UnitIsFriend('player', unit) or status == nil) then
--- 		self.Health:SetStatusBarColor(bdNameplates:unitColor(unit))
--- 	elseif (status ~= nil and not UnitIsTapDenied(unit) and not UnitIsPlayer(unit) and (event == "UNIT_THREAT_LIST_UPDATE" or event == "NAME_PLATE_UNIT_ADDED")) then
-
 	if (special) then
 		return config.specialcolor
 	end
@@ -56,8 +52,6 @@ local function unitColor(self, tapDenied, isPlayer, reaction, status, special)
 end
 
 bdNameplates.unitColor = memoize(unitColor, bdNameplates.cache)
-
-
 
 function bdNameplates:numberize(v)
 	if v <= 9999 then return v end
