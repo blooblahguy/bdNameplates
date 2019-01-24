@@ -186,7 +186,6 @@ local function nameplateCallback(self, event, unit)
 	nameplateUpdateHealth(self, event, unit)
 
 	unit = unit or self.unit
-	if (not unit or not UnitIsUnit(self.unit, unit)) then return end
 
 	--==========================================
 	-- Style by unit type
