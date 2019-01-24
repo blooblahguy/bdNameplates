@@ -146,11 +146,12 @@ local function nameplateUpdateHealth(self, event, unit)
 	local isPlayer = UnitIsPlayer(unit) and select(2, UnitClass(unit)) or false
 	local reaction = UnitReaction(unit, "player") or false
 	local status = UnitThreatSituation("player", unit)
+	local special = config.specialunits[UnitName(unit)]
 	if (status == nil) then
 		status = false
 	end
 
-	local colors = bdNameplates:unitColor(tapDenied, isPlayer, reaction, status)
+	local colors = bdNameplates:unitColor(tapDenied, isPlayer, reaction, status, special)
 	healthbar:SetStatusBarColor(unpack(colors))
 end
 
@@ -300,7 +301,7 @@ local function nameplateCreate(self, unit)
 	self.Health = CreateFrame("StatusBar", nil, self)
 	self.Health:SetStatusBarTexture(bdCore.media.smooth)
 	self.Health:SetAllPoints(self)
-	-- self.Health.frequentUpdates = true
+	self.Health.frequentUpdates = true
 	self.Health.colorTapping = true
 	self.Health.colorDisconnected = true
 	self.Health.colorClass = true
@@ -317,7 +318,7 @@ local function nameplateCreate(self, unit)
 	self:RegisterEvent("PLAYER_TARGET_CHANGED", nameplateCallback, true)
 
 	-- coloring callbacks
-	self:RegisterEvent("UNIT_THREAT_LIST_UPDATE", nameplateUpdateHealth)
+	self:RegisterEvent("UNIT_THREAT_LIST_UPDATE", nameplateUpdateHealth, true)
 	self.Health.Override = nameplateUpdateHealth
 	
 	--==========================================

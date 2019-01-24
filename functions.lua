@@ -1,5 +1,5 @@
 local addon, bdNameplates = ...
-local config = bdCore.config.profile['Nameplates']
+local config = bdConfigLib:GetSave('Nameplates')
 
 local unpack, UnitPlayerControlled, UnitIsTapDenied, UnitIsPlayer, UnitClass, UnitReaction, format, floor = unpack, UnitPlayerControlled, UnitIsTapDenied, UnitIsPlayer, UnitClass, UnitReaction, string.format, math.floor
 
@@ -24,10 +24,14 @@ for eclass, color in next, FACTION_BAR_COLORS do
 	end
 end
 
-local function colorSave(self, tapDenied, isPlayer, reaction, status)
+local function colorSave(self, tapDenied, isPlayer, reaction, status, special)
 	-- if (unit == 'player' or UnitIsUnit('player', unit) or UnitIsFriend('player', unit) or status == nil) then
 -- 		self.Health:SetStatusBarColor(bdNameplates:unitColor(unit))
 -- 	elseif (status ~= nil and not UnitIsTapDenied(unit) and not UnitIsPlayer(unit) and (event == "UNIT_THREAT_LIST_UPDATE" or event == "NAME_PLATE_UNIT_ADDED")) then
+
+	if (special) then
+		return config.specialcolor
+	end
 
 	if (isPlayer or status == false) then
 		if isPlayer then
