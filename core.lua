@@ -64,9 +64,9 @@ local function nameplateSize(self)
 		self:SetSize(config.width, config.height)
 	end
 
-	C_NamePlate.SetNamePlateFriendlySize(config.width * bdNameplates.scale, 0.1)
-	C_NamePlate.SetNamePlateEnemySize(config.width * bdNameplates.scale, (config.height + config.targetingTopPadding + config.targetingBottomPadding) * bdNameplates.scale)
-	C_NamePlate.SetNamePlateSelfSize(config.width * bdNameplates.scale, config.height * bdNameplates.scale)
+	C_NamePlate.SetNamePlateFriendlySize(config.width, 0.1)
+	C_NamePlate.SetNamePlateEnemySize(config.width, (config.height + config.targetingTopPadding + config.targetingBottomPadding))
+	C_NamePlate.SetNamePlateSelfSize(config.width, config.height)
 	C_NamePlate.SetNamePlateFriendlyClickThrough(true)
 	C_NamePlate.SetNamePlateSelfClickThrough(true)
 end
@@ -119,10 +119,12 @@ function bdNameplates:configCallback()
 	bd_do_action("bdNameplatesConfig")
 end
 
-local function updateVars(self, unit)
-	self.isTarget = UnitIsUnit("target", unit)
-	self.isPlayer = UnitIsPlayer(unit) and select(2, UnitClass(unit)) or false
-	self.reaction = UnitReaction(unit, "player") or false
+local function updateVars(frame, unit)
+	if (not unit) then return end
+		
+	frame.isTarget = UnitIsUnit("target", unit)
+	frame.isPlayer = UnitIsPlayer(unit) and select(2, UnitClass(unit)) or false
+	frame.reaction = UnitReaction(unit, "player") or false
 end
 
 --==========================================
@@ -132,6 +134,7 @@ end
 ---- NAME_PLATE_UNIT_ADDED
 ---- UNIT_HEALTH_FREQUENT
 --==========================================
+local specialunits = config.specialunits
 local function nameplateUpdateHealth(self, event, unit)
 	if(not unit or not UnitIsUnit(self.unit, unit)) then return false end
 	
@@ -149,7 +152,7 @@ local function nameplateUpdateHealth(self, event, unit)
 
 	local tapDenied = UnitIsTapDenied(unit) or false
 	local status = UnitThreatSituation("player", unit)
-	local special = config.specialunits[UnitName(unit)]
+	local special = specialunits[UnitName(unit)]
 	if (status == nil) then
 		status = false
 	end
@@ -181,16 +184,34 @@ end
 ---- NAME_PLATE_UNIT_REMOVED
 ---- PLAYER_TARGET_CHANGED
 --==========================================
-local function nameplateCallback(self, event, unit)
-	if (not self) then return end
-
-	-- Force cvars/settings
-	nameplateSize(self)
-	if (not nameplateUpdateHealth(self, event, unit)) then
-		updateVars(self, unit)
+bdNameplates.target = false
+local function calculateTarget(self, event, unit)
+	-- print(bdNameplates.target)
+	if (bdNameplates.target == self.unit) then
+		self:target()
+		self.isTarget = true
+	else
+		self:untarget()
+		self.isTarget = false
+	end
+end
+local function bdNameplateCallback(self, event, unit)
+	if (event == "PLAYER_TARGET_CHANGED" ) then
+		if (not self) then
+			bdNameplates.target = false
+		else
+			bdNameplates.target = self.unit
+		end
 	end
 
+	if (not self) then return end
 	unit = unit or self.unit
+
+	self.isPlayer = UnitIsPlayer(unit) and select(2, UnitClass(unit)) or false
+	self.reaction = UnitReaction(unit, "player") or false
+
+	-- Force cvars/settings
+	nameplateSize()
 
 	--==========================================
 	-- Style by unit type
@@ -220,14 +241,7 @@ local function nameplateCallback(self, event, unit)
 		self.Curhp:Show()
 	end
 
-	-- Highlight targeted unit
-	if (self.isTarget) then
-		self:SetAlpha(1)
-		self.Health.Shadow:Show()
-	else
-		self:SetAlpha(config.unselectedalpha)
-		self.Health.Shadow:Hide()
-	end
+	
 end
 
 --==========================================
@@ -258,7 +272,6 @@ bdNameplates.auraFilter = memoize(auraFilter, bdNameplates.cache)
 
 local function nameplateCreate(self, unit)
 	self.nameplate = C_NamePlate.GetNamePlateForUnit(unit)
-	self.scale = bdNameplates.scale
 	self.unit = unit
 
 	-- nameplate specific callback
@@ -290,9 +303,9 @@ local function nameplateCreate(self, unit)
 		end
 	end)
 	
-	self:SetPoint("BOTTOM", self.nameplate, "BOTTOM", 0, config.targetingBottomPadding)
-	self:SetSize(config.width, config.height)
-	self:SetScale(self.scale)
+	self:SetPoint("BOTTOM", self.nameplate, "BOTTOM", 0, math.floor(config.targetingBottomPadding))
+	self:SetSize(math.floor(config.width), math.floor(config.height))
+	self:SetScale(bdCore.scale)
 	self:EnableMouse(false)
 
 	--==========================================
@@ -314,8 +327,18 @@ local function nameplateCreate(self, unit)
 	--==========================================
 	-- CALLBACKS
 	--==========================================
+	function self:untarget()
+		self:SetAlpha(config.unselectedalpha)
+		self.Health.Shadow:Hide()
+	end
+	function self:target()
+		self:SetAlpha(1)
+		self.Health.Shadow:Show()
+	end
+	self:untarget()
+
 	-- targeting callback
-	self:RegisterEvent("PLAYER_TARGET_CHANGED", nameplateCallback, true)
+	self:RegisterEvent("PLAYER_TARGET_CHANGED", calculateTarget, true)
 
 	-- coloring callbacks
 	-- self:RegisterEvent("UNIT_THREAT_SITUATION_UPDATE", nameplateUpdateHealth, true)
@@ -426,7 +449,6 @@ local function nameplateCreate(self, unit)
 	end
 	
 	self.Auras.PostCreateIcon = function(self, button)
-		button:SetHeight(config.raidbefuffs * 0.6)
 		bdCore:setBackdrop(button)
 
 		local cdtext = button.cd:GetRegions()
@@ -447,6 +469,7 @@ local function nameplateCreate(self, unit)
 		button.cd:SetHideCountdownNumbers(false)
 	end
 	self.Auras.PostUpdateIcon = function(self, unit, button, index, position, duration, expiration, debuffType, isStealable)
+		button:SetHeight(config.raidbefuffs * 0.6)
 		if (config.highlightPurge and isStealable) then -- purge alert
 			button.border:SetVertexColor(unpack(config.purgeColor))
 		elseif (config.highlightEnrage and debuffType == "") then -- enrage alert
@@ -504,4 +527,4 @@ end
 
 oUF:RegisterStyle("bdNameplates", nameplateCreate)
 oUF:SetActiveStyle("bdNameplates")
-oUF:SpawnNamePlates("bdNameplates", nameplateCallback)
+oUF:SpawnNamePlates("bdNameplates", bdNameplateCallback)
