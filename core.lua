@@ -186,7 +186,6 @@ end
 --==========================================
 bdNameplates.target = false
 local function calculateTarget(self, event, unit)
-	-- print(bdNameplates.target)
 	if (bdNameplates.target == self.unit) then
 		self:target()
 		self.isTarget = true
@@ -196,7 +195,18 @@ local function calculateTarget(self, event, unit)
 	end
 end
 local function bdNameplateCallback(self, event, unit)
+	-- print(event, self, unit)
+	-- if (self) then
+	-- 	print(self.unit)
+	-- end
+	if (event == "NAME_PLATE_UNIT_ADDED" and not bdNameplates.target) then
+		if (UnitIsUnit(unit, "target")) then
+			bdNameplates.target = unit
+			calculateTarget(self, event, unit)
+		end
+	end
 	if (event == "PLAYER_TARGET_CHANGED" ) then
+		-- bdNameplates.target = C_NamePlate.GetNamePlateForUnit('target')
 		if (not self) then
 			bdNameplates.target = false
 		else
@@ -205,7 +215,13 @@ local function bdNameplateCallback(self, event, unit)
 	end
 
 	if (not self) then return end
+	
+
 	unit = unit or self.unit
+	-- if (UnitIsUnit(unit, "target")) then
+	-- 	bdNameplates.target = unit
+	-- 	calculateTarget(self, event, unit)
+	-- end
 
 	self.isPlayer = UnitIsPlayer(unit) and select(2, UnitClass(unit)) or false
 	self.reaction = UnitReaction(unit, "player") or false
@@ -403,7 +419,7 @@ local function nameplateCreate(self, unit)
 	oUF.Tags.Methods['bdncurpower'] = function(unit)
 		if (not config.showenergy) then return '' end
 		pp, ppMax, ppPercent = UnitPower(unit), UnitPowerMax(unit), 0
-		if (not pp or not ppMax) then return '' end
+		if (pp == 0 or ppMax == 0) then return '' end
 		ppPercent = (pp / ppMax) * 100
 
 		return floor(ppPercent);
