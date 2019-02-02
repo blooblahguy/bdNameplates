@@ -54,7 +54,6 @@ bdNameplates.font_castbar:SetShadowOffset(1, -1)
 
 -- Scale of the UI here
 local screenWidth, screenHeight = GetPhysicalScreenSize()
-bdNameplates.scale = min(1.15, 768/screenHeight)
 
 -- Scale the default nameplate parameters - note this doesn't seem to do anything on load, so investigating
 local function nameplateSize(self)
@@ -186,42 +185,21 @@ end
 --==========================================
 bdNameplates.target = false
 local function calculateTarget(self, event, unit)
-	if (bdNameplates.target == self.unit) then
-		self:target()
+	unit = unit or self.unit
+	if (UnitIsUnit(unit, "target")) then
 		self.isTarget = true
+		self:SetAlpha(1)
+		self.Health.Shadow:Show()
 	else
-		self:untarget()
 		self.isTarget = false
+		self:SetAlpha(config.unselectedalpha)
+		self.Health.Shadow:Hide()
 	end
 end
 local function bdNameplateCallback(self, event, unit)
-	-- print(event, self, unit)
-	-- if (self) then
-	-- 	print(self.unit)
-	-- end
-	if (event == "NAME_PLATE_UNIT_ADDED" and not bdNameplates.target) then
-		if (UnitIsUnit(unit, "target")) then
-			bdNameplates.target = unit
-			calculateTarget(self, event, unit)
-		end
-	end
-	if (event == "PLAYER_TARGET_CHANGED" ) then
-		-- bdNameplates.target = C_NamePlate.GetNamePlateForUnit('target')
-		if (not self) then
-			bdNameplates.target = false
-		else
-			bdNameplates.target = self.unit
-		end
-	end
-
 	if (not self) then return end
-	
-
+	calculateTarget(self, event, unit)
 	unit = unit or self.unit
-	-- if (UnitIsUnit(unit, "target")) then
-	-- 	bdNameplates.target = unit
-	-- 	calculateTarget(self, event, unit)
-	-- end
 
 	self.isPlayer = UnitIsPlayer(unit) and select(2, UnitClass(unit)) or false
 	self.reaction = UnitReaction(unit, "player") or false
@@ -256,8 +234,6 @@ local function bdNameplateCallback(self, event, unit)
 	else
 		self.Curhp:Show()
 	end
-
-	
 end
 
 --==========================================
@@ -289,6 +265,12 @@ bdNameplates.auraFilter = memoize(auraFilter, bdNameplates.cache)
 local function nameplateCreate(self, unit)
 	self.nameplate = C_NamePlate.GetNamePlateForUnit(unit)
 	self.unit = unit
+
+	-- self.bgtest = self:CreateTexture(nil, "OVERALY")
+	-- self.bgtest:SetTexture(bdCore.media.flat)
+	-- self.bgtest:SetVertexColor(0, 1, 0)
+	-- self.bgtest:SetAlpha(0.5)
+	-- self.bgtest:SetAllPoints()
 
 	-- nameplate specific callback
 	bd_add_action("bdNameplatesConfig", function()
@@ -343,16 +325,6 @@ local function nameplateCreate(self, unit)
 	--==========================================
 	-- CALLBACKS
 	--==========================================
-	function self:untarget()
-		self:SetAlpha(config.unselectedalpha)
-		self.Health.Shadow:Hide()
-	end
-	function self:target()
-		self:SetAlpha(1)
-		self.Health.Shadow:Show()
-	end
-	self:untarget()
-
 	-- targeting callback
 	self:RegisterEvent("PLAYER_TARGET_CHANGED", calculateTarget, true)
 
