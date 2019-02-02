@@ -23,11 +23,21 @@ for eclass, color in next, FACTION_BAR_COLORS do
 	end
 end
 
-local function unitColor(self, tapDenied, isPlayer, reaction, status, special)
-	if (special) then
-		return config.specialcolor
+-- basic class coloring
+function bdNameplates:unitColor(unit)
+	if (not UnitExists(unit)) then
+		return unpack(colors.tapped)
 	end
+	if UnitIsPlayer(unit) then
+		return unpack(colors.class[select(2, UnitClass(unit))])
+	elseif UnitIsTapDenied(unit) then
+		return unpack(colors.tapped)
+	else
+		return unpack(colors.reaction[UnitReaction(unit, 'player')])
+	end
+end
 
+local function unitColor(self, tapDenied, isPlayer, reaction, status)
 	if (isPlayer or status == false) then
 		if isPlayer then
 			return colors.class[isPlayer]

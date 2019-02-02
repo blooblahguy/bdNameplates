@@ -20,6 +20,7 @@ fixateMobs['Sickly Tadpole'] = true
 fixateMobs['Soul Residue'] = true
 fixateMobs['Nightmare Ichor'] = true
 fixateMobs['Atrigan'] = true
+fixateMobs['Tester'] = true
 
 local specialMobs = {}
 specialMobs["Fel Explosives"] = true
@@ -122,8 +123,6 @@ defaults[#defaults+1] = {highlightEnrage = {
 }}
 
 
-
-
 defaults[#defaults+1] = {friendlynamehack = {
 	type = "checkbox",
 	value = false,
@@ -186,12 +185,6 @@ defaults[#defaults+1] = {hptext = {
 	options = {"None","HP - %", "HP", "%"},
 	label = "Nameplate Health Text",
 }}
--- defaults[#defaults+1] = {fixatealert = {
--- 	type = "dropdown",
--- 	value = "Personal",
--- 	options = {"Always","Personal","None"},
--- 	label = "Fixate Alert."
--- }}
 -- defaults[#defaults+1] = {showFixateCircle = {
 -- 	type = "checkbox",
 -- 	value = true,
@@ -328,17 +321,25 @@ defaults[#defaults+1] = {unselectedalpha={
 -------------
 defaults[#defaults+1] = {tab = {
 	type="tab",
-	value="Special Units"
+	value="Fixates & Specials"
+}}
+defaults[#defaults+1] = {fixatealert = {
+	type = "dropdown",
+	value = "Personal",
+	options = {"Always", "Personal", "Hide"},
+	label = "Target/Fixate Alert"
 }}
 defaults[#defaults+1] = {specialunits={
 	type = "list",
 	value = specialMobs,
+	autoadd = specialMobs,
 	label = "Special Unit List",
 	tooltip = "Units who's name are in this list will have their healthbar colored with the 'Special Unit Color' "
 }}
 defaults[#defaults+1] = {fixateMobs={
 	type = "list",
 	value = fixateMobs,
+	autoadd = fixateMobs,
 	label = "Fixate Unit List",
 	tooltip = "Units who's name are in this list will have a fixate icon when they target you."
 }}

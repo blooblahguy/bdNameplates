@@ -118,6 +118,28 @@ function bdNameplates:configCallback()
 	bd_do_action("bdNameplatesConfig")
 end
 
+local function fixateUpdate(self, event, unit)
+	if (not self.unit == unit) then return end
+
+	local target = unit.."target"
+
+	self.Fixate:Hide()
+
+	if (config.fixateMobs[UnitName(unit)]) then
+		self.Fixate:Show()
+		self.Fixate.text:SetText(UnitName(target))
+	else
+		if (UnitExists(target) and UnitIsPlayer(target)) then
+			if (config.fixatealert == "Always" or config.fixatealert == "All") then
+				self.Fixate:Show()
+				self.Fixate.text:SetText(UnitName(target))
+			elseif (config.fixatealert == "Personal" and UnitIsUnit(target, "player")) then
+				self.Fixate:Show()
+				self.Fixate.text:SetText(UnitName(target))
+			end
+		end
+	end
+end
 local function updateVars(frame, unit)
 	if (not unit) then return end
 		
@@ -149,15 +171,19 @@ local function nameplateUpdateHealth(self, event, unit)
 	healthbar:SetMinMaxValues(0, max)
 	healthbar:SetValue(cur)
 
-	local tapDenied = UnitIsTapDenied(unit) or false
-	local status = UnitThreatSituation("player", unit)
-	local special = specialunits[UnitName(unit)]
-	if (status == nil) then
-		status = false
+	if (((cur / max) * 100) <= config.executerange) then
+		healthbar:SetStatusBarColor(unpack(config.executecolor))
+	elseif (specialunits[UnitName(unit)]) then
+		healthbar:SetStatusBarColor(unpack(config.specialcolor))
+	else
+		local tapDenied = UnitIsTapDenied(unit) or false
+		local status = UnitThreatSituation("player", unit)
+		if (status == nil) then
+			status = false
+		end
+		self.smartColors = bdNameplates:unitColor(tapDenied, self.isPlayer, self.reaction, status)
+		healthbar:SetStatusBarColor(unpack(self.smartColors))
 	end
-
-	self.smartColors = bdNameplates:unitColor(tapDenied, self.isPlayer, self.reaction, status, special)
-	healthbar:SetStatusBarColor(unpack(self.smartColors))
 
 	return true
 end
@@ -199,6 +225,7 @@ end
 local function bdNameplateCallback(self, event, unit)
 	if (not self) then return end
 	calculateTarget(self, event, unit)
+	fixateUpdate(self, event, unit)
 	unit = unit or self.unit
 
 	self.isPlayer = UnitIsPlayer(unit) and select(2, UnitClass(unit)) or false
@@ -408,6 +435,33 @@ local function nameplateCreate(self, unit)
 	else
 		self.RaidTargetIndicator:SetPoint('BOTTOM', self, "TOP", 0, config.raidmarkersize)
 	end
+
+	--==========================================
+	-- FIXATES / TARGETS
+	--==========================================
+	self.Fixate = CreateFrame("frame",nil,self)
+	self.Fixate:SetFrameLevel(4)
+	self.Fixate:SetPoint("BOTTOMLEFT", self.Health, "BOTTOMLEFT", 0, -20)
+	self.Fixate:SetPoint("TOPRIGHT", self.Health, "BOTTOMRIGHT", 0, -8)
+	self.Fixate:SetFrameLevel(100)
+	self.Fixate.text = self.Fixate:CreateFontString(nil, "OVERLAY")
+	self.Fixate.text:SetFontObject("BDN_FONT_SMALL")
+	local icon = select(3, GetSpellInfo(210099))
+	self.Fixate.text.SetText_Old = self.Fixate.text.SetText
+	self.Fixate.text.SetText = function(self, unit)
+		local color = bdCore:RGBToHex(bdNameplates:unitColor(unit))
+		if (unit and UnitIsUnit(unit,"player")) then
+			self:SetAlpha(1)
+			self:SetText_Old("|T"..icon..":16:16:0:0:60:60:4:56:4:56|t ".."|cff"..color..unit.."|r")
+		else
+			self:SetAlpha(0.8)
+			self:SetText_Old("|cff"..color..text.."|r")
+		end
+	end
+	self.Fixate.text:SetAllPoints(self.Fixate)
+	self.Fixate.text:SetJustifyH("CENTER")
+	self.Fixate:Hide()
+	self:RegisterEvent("UNIT_TARGET", fixateUpdate)
 
 	--==========================================
 	-- AURAS
