@@ -455,7 +455,7 @@ local function nameplateCreate(self, unit)
 			self:SetText_Old("|T"..icon..":16:16:0:0:60:60:4:56:4:56|t ".."|cff"..color..unit.."|r")
 		else
 			self:SetAlpha(0.8)
-			self:SetText_Old("|cff"..color..text.."|r")
+			self:SetText_Old("|cff"..color..unit.."|r")
 		end
 	end
 	self.Fixate.text:SetAllPoints(self.Fixate)
