@@ -43,12 +43,12 @@ bdNameplates.font_friendly:SetShadowColor(0, 0, 0)
 bdNameplates.font_friendly:SetShadowOffset(1, -1)
 
 bdNameplates.font_small = CreateFont("BDN_FONT_SMALL")
-bdNameplates.font_small:SetFont(bdCore.media.font, 13)
+bdNameplates.font_small:SetFont(bdCore.media.font, 10 + config.height * 0.25)
 bdNameplates.font_small:SetShadowColor(0, 0, 0)
 bdNameplates.font_small:SetShadowOffset(1, -1)
 
 bdNameplates.font_castbar = CreateFont("BDN_FONT_CASTBAR")
-bdNameplates.font_castbar:SetFont(bdCore.media.font, config.castbarheight*0.85)
+bdNameplates.font_castbar:SetFont(bdCore.media.font, config.castbarheight * 0.85)
 bdNameplates.font_castbar:SetShadowColor(0, 0, 0)
 bdNameplates.font_castbar:SetShadowOffset(1, -1)
 
@@ -76,6 +76,7 @@ bdNameplates.eventer:RegisterEvent("PLAYER_LOGIN", nameplateSize)
 function bdNameplates:configCallback()
 	nameplateSize()
 
+	-- print(config.height * 0.85)
 	-- update font sizes
 	bdNameplates.font:SetFont(bdCore.media.font, config.enemynamesize)
 	bdNameplates.font_small:SetFont(bdCore.media.font, config.height * 0.85)
