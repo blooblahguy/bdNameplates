@@ -98,7 +98,7 @@ defaults[#defaults+1] = {friendnamealpha={
 
 defaults[#defaults+1] = {showCenterDot = {
 	type = "checkbox",
-	value = true,
+	value = false,
 	label = "Show center dot, useful for tracking character",
 }}
 
