@@ -73,6 +73,26 @@ bdNameplates.eventer = CreateFrame("frame", nil)
 bdNameplates.eventer:RegisterEvent("PLAYER_REGEN_ENABLED", nameplateSize)
 bdNameplates.eventer:RegisterEvent("PLAYER_LOGIN", nameplateSize)
 
+
+bdNameplates.dot = CreateFrame("frame", nil, UIParent)
+bdNameplates.dot:SetSize(20, 20)
+bdNameplates.dot:SetPoint("CENTER", 0, -15)
+bdNameplates.dot.tex = bdNameplates.dot:CreateTexture(nil, "OVERLAY")
+bdNameplates.dot.tex:SetTexture("Interface/Addons/bdNameplates/media/circle.blp")
+bdNameplates.dot.tex:SetPoint("TOPLEFT", -2, 2)
+bdNameplates.dot.tex:SetPoint("BOTTOMRIGHT", 2, -2)
+bdNameplates.dot.tex:SetVertexColor(0,0,0,1)
+bdNameplates.dot.tex2 = bdNameplates.dot:CreateTexture(nil, "OVERLAY")
+bdNameplates.dot.tex2:SetTexture("Interface/Addons/bdNameplates/media/circle.blp")
+bdNameplates.dot.tex2:SetAllPoints()
+bdNameplates.dot.tex2:SetVertexColor(unpack(bdCore.media.red))
+if (config.showCenterDot) then
+	bdNameplates.dot:Show()
+else
+	bdNameplates.dot:Hide()
+end
+
+
 function bdNameplates:configCallback()
 	nameplateSize()
 
@@ -82,6 +102,12 @@ function bdNameplates:configCallback()
 	bdNameplates.font_small:SetFont(bdCore.media.font, config.height * 0.85)
 	bdNameplates.font_castbar:SetFont(bdCore.media.font, config.castbarheight*0.85)
 	bdNameplates.font_friendly:SetFont(bdCore.media.font, config.friendlynamesize)
+
+	if (config.showCenterDot) then
+		bdNameplates.dot:Show()
+	else
+		bdNameplates.dot:Hide()
+	end
 
 	-- set cVars
 	local cvars = {

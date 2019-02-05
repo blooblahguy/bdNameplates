@@ -96,6 +96,13 @@ defaults[#defaults+1] = {friendnamealpha={
 	label="Friendly Name Opacity",
 }}
 
+defaults[#defaults+1] = {showCenterDot = {
+	type = "checkbox",
+	value = true,
+	label = "Show center dot, useful for tracking character",
+}}
+
+
 -- defaults[#defaults+1] = {trackResources = {
 -- 	type = "checkbox",
 -- 	value = true,
