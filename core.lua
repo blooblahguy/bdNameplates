@@ -74,7 +74,7 @@ bdNameplates.eventer:RegisterEvent("PLAYER_REGEN_ENABLED", nameplateSize)
 bdNameplates.eventer:RegisterEvent("PLAYER_LOGIN", nameplateSize)
 
 
-bdNameplates.dot = CreateFrame("frame", nil, UIParent)
+bdNameplates.dot = CreateFrame("frame", "bdNameplates Player Dot", UIParent)
 bdNameplates.dot:SetSize(20, 20)
 bdNameplates.dot:SetPoint("CENTER", 0, -15)
 bdNameplates.dot.tex = bdNameplates.dot:CreateTexture(nil, "OVERLAY")
@@ -91,6 +91,7 @@ if (config.showCenterDot) then
 else
 	bdNameplates.dot:Hide()
 end
+bdCore:makeMovable(bdNameplates.dot)
 
 
 function bdNameplates:configCallback()
