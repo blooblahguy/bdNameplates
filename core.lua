@@ -251,10 +251,13 @@ end
 local function bdNameplateCallback(self, event, unit)
 	if (not self) then return end
 	calculateTarget(self, event, unit)
-	unit = unit or self.unit
 
-	self.nameplate = C_NamePlate.GetNamePlateForUnit(unit)
-	self.guid = UnitGUID(self.nameplate.namePlateUnitToken)
+	if (unit) then
+		self.nameplate = C_NamePlate.GetNamePlateForUnit(unit)
+		self.guid = UnitGUID(self.nameplate.namePlateUnitToken)
+	end
+
+	unit = unit or self.unit
 	self.isPlayer = UnitIsPlayer(unit) and select(2, UnitClass(unit)) or false
 	self.reaction = UnitReaction(unit, "player") or false
 	self.Fixate:Hide()
