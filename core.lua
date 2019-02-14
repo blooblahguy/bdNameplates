@@ -253,6 +253,8 @@ local function bdNameplateCallback(self, event, unit)
 	calculateTarget(self, event, unit)
 	unit = unit or self.unit
 
+	self.nameplate = C_NamePlate.GetNamePlateForUnit(unit)
+	self.guid = UnitGUID(self.nameplate.namePlateUnitToken)
 	self.isPlayer = UnitIsPlayer(unit) and select(2, UnitClass(unit)) or false
 	self.reaction = UnitReaction(unit, "player") or false
 	self.Fixate:Hide()
@@ -318,6 +320,7 @@ bdNameplates.auraFilter = memoize(auraFilter, bdNameplates.cache)
 
 local function nameplateCreate(self, unit)
 	self.nameplate = C_NamePlate.GetNamePlateForUnit(unit)
+	self.guid = UnitGUID(self.nameplate.namePlateUnitToken)
 	self.unit = unit
 
 	-- self.bgtest = self:CreateTexture(nil, "OVERALY")
@@ -586,18 +589,15 @@ local function nameplateCreate(self, unit)
 	function self.Castbar:CastbarAttribute() 
 		local timestamp, event, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellID, spellName, spellSchool, extraSpellID, extraSpellName, extraSchool = CombatLogGetCurrentEventInfo();
 
-		--print(event, destName, sourceName)
-		--print(CombatLogGetCurrentEventInfo());
-
 		if (event == 'SPELL_CAST_START') then
+			if (self.guid ~= sourceGUID) then return end
+			destName = self.unit.."target"
 
-			if UnitIsUnit(self.nameplate.namePlateUnitToken.."target", "player") and bit.band(sourceFlags, COMBATLOG_OBJECT_REACTION_HOSTILE) > 0 then
+			if UnitIsUnit(destName, "player") and bit.band(sourceFlags, COMBATLOG_OBJECT_REACTION_HOSTILE) > 0 then
 				print( format("%s is casting %s on me", sourceName, GetSpellLink(spellID)) )
 			end
-			--print(CombatLogGetCurrentEventInfo())
+			
 			self.Castbar.AttributeText:SetText("")
-
-
 			-- attribute who this cast is targeting
 			if (UnitExists(destName)) then
 				self.Castbar.AttributeText:SetText(UnitName(destName))
