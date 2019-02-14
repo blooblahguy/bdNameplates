@@ -469,10 +469,10 @@ local function nameplateCreate(self, unit)
 	-- FIXATES / TARGETS
 	--==========================================
 	self.Fixate = CreateFrame("frame",nil,self)
-	self.Fixate:SetFrameLevel(4)
+	--self.Fixate:SetFrameLevel(4)
 	self.Fixate:SetPoint("BOTTOMLEFT", self.Health, "BOTTOMLEFT", 0, -20)
 	self.Fixate:SetPoint("TOPRIGHT", self.Health, "BOTTOMRIGHT", 0, -8)
-	self.Fixate:SetFrameLevel(100)
+	--self.Fixate:SetFrameLevel(100)
 	self.Fixate.text = self.Fixate:CreateFontString(nil, "OVERLAY", "BDN_FONT_SMALL")
 
 	local icon = select(3, GetSpellInfo(210099))
