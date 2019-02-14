@@ -586,6 +586,8 @@ local function nameplateCreate(self, unit)
 	function self.Castbar:CastbarAttribute() 
 		local timestamp, event, hideCaster, sourceGUI, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellID, spellName, spellSchool, extraSpellID, extraSpellName, extraSchool CombatLogGetCurrentEventInfo();
 
+		print(event, destName, sourceName)
+
 		if (event == 'SPELL_CAST_START') then
 			self.AttributeText:SetText("")
 
