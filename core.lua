@@ -584,21 +584,28 @@ local function nameplateCreate(self, unit)
 
 	-- Combat log based extra information
 	function self.Castbar:CastbarAttribute() 
-		local timestamp, event, hideCaster, sourceGUI, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellID, spellName, spellSchool, extraSpellID, extraSpellName, extraSchool CombatLogGetCurrentEventInfo();
+		local timestamp, event, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellID, spellName, spellSchool, extraSpellID, extraSpellName, extraSchool = CombatLogGetCurrentEventInfo();
 
-		print(event, destName, sourceName)
+		--print(event, destName, sourceName)
+		--print(CombatLogGetCurrentEventInfo());
 
 		if (event == 'SPELL_CAST_START') then
-			self.AttributeText:SetText("")
+
+			if UnitIsUnit(self.nameplate.namePlateUnitToken.."target", "player") and bit.band(sourceFlags, COMBATLOG_OBJECT_REACTION_HOSTILE) > 0 then
+				print( format("%s is casting %s on me", sourceName, GetSpellLink(spellID)) )
+			end
+			--print(CombatLogGetCurrentEventInfo())
+			self.Castbar.AttributeText:SetText("")
+
 
 			-- attribute who this cast is targeting
 			if (UnitExists(destName)) then
-				self.AttributeText:SetText(UnitName(destName))
+				self.Castbar.AttributeText:SetText(UnitName(destName))
 			end
 		elseif (event == "SPELL_INTERRUPT") then
 			-- attribute who interrupted this cast
 			if (UnitExists(sourceName)) then
-				self.AttributeText:SetText(UnitName(sourceName))
+				self.Castbar.AttributeText:SetText(UnitName(sourceName))
 			end
 		end
 	end
