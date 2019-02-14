@@ -5,18 +5,20 @@ local oUF = bdCore.oUF
 local config = bdConfigLib:GetSave('Nameplates')
 local borderSize = bdConfigLib:GetSave("bdAddons").border or 2
 
---[[
-	performance notes for myself
-	-lua is a funny language, localizing variables function calls is a big performance increase
-	-local variables are accessed MUCH faster (anywhere from 30-300% faster)
-	-table resizing is really expensive, try to create tables at the correct size. better still, instantiate table structures with a local table template var
-	-tables don't get their size unset when they are set to nil, collect garbage at good times or only use correctly-sized tables
-	-string concatenation through s = s + s2 is fucking terrible, instead store strings into table keys and use table.concat
-	-table lists (keyless) are smaller and faster than associative tables
-	-string.match is faster than string.find
-	-look into cooroutines for some tasks
-	-would be great if wow team could implement jit, though i don't think x64 supports it yet? (need to check)
---]]
+local guid_plates = {}
+local guid_attribute = {}
+local plateMapper = CreateFrame("frame")
+plateMapper:RegisterEvent("NAME_PLATE_UNIT_ADDED")
+plateMapper:RegisterEvent("NAME_PLATE_UNIT_REMOVED")
+plateMapper:SetScript("OnEvent", function(self, event, unit)
+	if (event == "NAME_PLATE_UNIT_ADDED") then
+		guid_plates[UnitGUID(unit)] = unit
+		-- guid_attribute[UnitGUID(unit)] = {}
+	elseif (event == "NAME_PLATE_UNIT_REMOVED") then
+		guid_plates[UnitGUID(unit)] = nil
+		-- guid_attribute[UnitGUID(unit)] = nil
+	end
+end)
 
 -- lua functions
 local unpack, floor = unpack, math.floor
@@ -252,11 +254,6 @@ local function bdNameplateCallback(self, event, unit)
 	if (not self) then return end
 	calculateTarget(self, event, unit)
 
-	if (unit) then
-		self.nameplate = C_NamePlate.GetNamePlateForUnit(unit)
-		self.guid = UnitGUID(self.nameplate.namePlateUnitToken)
-	end
-
 	unit = unit or self.unit
 	self.isPlayer = UnitIsPlayer(unit) and select(2, UnitClass(unit)) or false
 	self.reaction = UnitReaction(unit, "player") or false
@@ -323,7 +320,6 @@ bdNameplates.auraFilter = memoize(auraFilter, bdNameplates.cache)
 
 local function nameplateCreate(self, unit)
 	self.nameplate = C_NamePlate.GetNamePlateForUnit(unit)
-	self.guid = UnitGUID(self.nameplate.namePlateUnitToken)
 	self.unit = unit
 
 	-- self.bgtest = self:CreateTexture(nil, "OVERALY")
@@ -592,11 +588,12 @@ local function nameplateCreate(self, unit)
 	function self.Castbar:CastbarAttribute() 
 		local timestamp, event, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellID, spellName, spellSchool, extraSpellID, extraSpellName, extraSchool = CombatLogGetCurrentEventInfo();
 
-		if (self.guid ~= sourceGUID) then return end
 
 		if (event == 'SPELL_CAST_START') then
-			destName = self.unit.."target"
+			if (self.unit ~= guid_plates[sourceGUID]) then return end
 
+			destName = guid_plates[sourceGUID].."target"
+			
 			if UnitIsUnit(destName, "player") and bit.band(sourceFlags, COMBATLOG_OBJECT_REACTION_HOSTILE) > 0 then
 				print( format("%s is casting %s on me", sourceName, GetSpellLink(spellID)) )
 			end
