@@ -586,14 +586,14 @@ local function nameplateCreate(self, unit)
 	function self.Castbar:CastbarAttribute() 
 		local timestamp, event, hideCaster, sourceGUI, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellID, spellName, spellSchool, extraSpellID, extraSpellName, extraSchool CombatLogGetCurrentEventInfo();
 
-		if (subevent == 'SPELL_CAST_START') then
+		if (event == 'SPELL_CAST_START') then
 			self.AttributeText:SetText("")
 
 			-- attribute who this cast is targeting
 			if (UnitExists(destName)) then
 				self.AttributeText:SetText(UnitName(destName))
 			end
-		elseif (subevent == "SPELL_INTERRUPT") then
+		elseif (event == "SPELL_INTERRUPT") then
 			-- attribute who interrupted this cast
 			if (UnitExists(sourceName)) then
 				self.AttributeText:SetText(UnitName(sourceName))
