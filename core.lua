@@ -593,7 +593,7 @@ local function nameplateCreate(self, unit)
 			if (UnitExists(destName)) then
 				self.AttributeText:SetText(UnitName(destName))
 			end
-		elseif (subevent == "SPELL_INTERRUPT")
+		elseif (subevent == "SPELL_INTERRUPT") then
 			-- attribute who interrupted this cast
 			if (UnitExists(sourceName)) then
 				self.AttributeText:SetText(UnitName(sourceName))
