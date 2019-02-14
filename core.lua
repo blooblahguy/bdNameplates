@@ -151,8 +151,6 @@ local function fixateUpdate(self, event, unit)
 
 	local target = unit.."target"
 
-	self.Fixate:Hide()
-
 	if (config.fixateMobs[UnitName(unit)]) then
 		self.Fixate:Show()
 		self.Fixate.text:SetText(UnitName(target))
@@ -253,12 +251,12 @@ end
 local function bdNameplateCallback(self, event, unit)
 	if (not self) then return end
 	calculateTarget(self, event, unit)
-	fixateUpdate(self, event, unit)
 	unit = unit or self.unit
 
 	self.isPlayer = UnitIsPlayer(unit) and select(2, UnitClass(unit)) or false
 	self.reaction = UnitReaction(unit, "player") or false
-
+	self.Fixate:Hide()
+	
 	-- Force cvars/settings
 	nameplateSize()
 
@@ -266,6 +264,7 @@ local function bdNameplateCallback(self, event, unit)
 	-- Style by unit type
 	--==========================================
 	if (UnitCanAttack("player", unit)) then
+		fixateUpdate(self, event, unit)
 		bdNameplates:enemyStyle(self, event, unit)
 	elseif (UnitIsUnit(unit, "player")) then
 		bdNameplates:personalStyle(self, event, unit)
