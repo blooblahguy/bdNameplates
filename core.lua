@@ -582,6 +582,26 @@ local function nameplateCreate(self, unit)
 	self.Castbar.Icon.bg:SetPoint("TOPLEFT", self.Castbar.Icon, "TOPLEFT", -borderSize, borderSize)
 	self.Castbar.Icon.bg:SetPoint("BOTTOMRIGHT", self.Castbar.Icon, "BOTTOMRIGHT", borderSize, -borderSize)
 
+	-- Combat log based extra information
+	function self.Castbar:CastbarAttribute() 
+		local timestamp, event, hideCaster, sourceGUI, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellID, spellName, spellSchool, extraSpellID, extraSpellName, extraSchool CombatLogGetCurrentEventInfo();
+
+		if (subevent == 'SPELL_CAST_START') then
+			self.AttributeText:SetText("")
+
+			-- attribute who this cast is targeting
+			if (UnitExists(destName)) then
+				self.AttributeText:SetText(UnitName(destName))
+			end
+		elseif (subevent == "SPELL_INTERRUPT")
+			-- attribute who interrupted this cast
+			if (UnitExists(sourceName)) then
+				self.AttributeText:SetText(UnitName(sourceName))
+			end
+		end
+	end
+	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", self.Castbar.CastbarAttribute, true)
+
 	-- Change color if cast is kickable or not
 	function self.Castbar:kickable(unit, name)
 		if (self.notInterruptible) then
@@ -595,31 +615,7 @@ local function nameplateCreate(self, unit)
 	self.Castbar.PostChannelStart = self.Castbar.kickable
 	self.Castbar.PostCastNotInterruptible = self.Castbar.kickable
 	self.Castbar.PostCastInterruptible = self.Castbar.kickable
-
-	-- Interrupted by attribute
-	self.Castbar.PostCastInterrupted = function(castbar, unit)
-		castbar.holdTime = 0.3
-		castbar:SetStatusBarColor(unpack(bdCore.media.red))
-		local timestamp, event, hideCaster, sourceGUI, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellID, spellName, spellSchool, extraSpellID, extraSpellName, extraSchool CombatLogGetCurrentEventInfo();
-
-		-- castbar.AttributeText:SetText("")
-		if (subevent ~= 'SPELL_INTERRUPT') then return end
-		if (UnitExists(sourceName)) then
-			castbar.AttributeText:SetText(UnitName(sourceName))
-		end
-	end
-
-	-- Cast target attribute
-	self.Castbar.PostCastStart = function(castbar, unit, name)
-		local timestamp, event, hideCaster, sourceGUI, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellID, spellName, spellSchool, extraSpellID, extraSpellName, extraSchool CombatLogGetCurrentEventInfo();
-		castbar:kickable(unit, name)
-
-		castbar.AttributeText:SetText("")
-		if (subevent ~= 'SPELL_CAST_START') then return end
-		if (UnitExists(destName)) then
-			castbar.AttributeText:SetText(UnitName(destName))
-		end
-	end
+	self.Castbar.PostCastStart = self.Castbar.kickable
 end
 
 oUF:RegisterStyle("bdNameplates", nameplateCreate)
