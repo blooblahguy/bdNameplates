@@ -471,8 +471,8 @@ local function nameplateCreate(self, unit)
 	self.Fixate:SetPoint("BOTTOMLEFT", self.Health, "BOTTOMLEFT", 0, -20)
 	self.Fixate:SetPoint("TOPRIGHT", self.Health, "BOTTOMRIGHT", 0, -8)
 	self.Fixate:SetFrameLevel(100)
-	self.Fixate.text = self.Fixate:CreateFontString(nil, "OVERLAY")
-	self.Fixate.text:SetFontObject("BDN_FONT_SMALL")
+	self.Fixate.text = self.Fixate:CreateFontString(nil, "OVERLAY", "BDN_FONT_SMALL")
+
 	local icon = select(3, GetSpellInfo(210099))
 	self.Fixate.text.SetText_Old = self.Fixate.text.SetText
 	self.Fixate.text.SetText = function(self, unit)
@@ -561,8 +561,12 @@ local function nameplateCreate(self, unit)
 	
 	-- text
 	self.Castbar.Text = self.Castbar:CreateFontString(nil, "OVERLAY", "BDN_FONT_CASTBAR")
-	self.Castbar.Text:SetJustifyH("RIGHT")
-	self.Castbar.Text:SetPoint("CENTER", self.Castbar, "CENTER")
+	self.Castbar.Text:SetJustifyH("LEFT")
+	self.Castbar.Text:SetPoint("LEFT", self.Castbar, "LEFT", 10, 0)
+
+	self.Castbar.AttributeText = self.Castbar:CreateFontString(nil, "OVERLAY", "BDN_FONT_CASTBAR")
+	self.Castbar.AttributeText:SetJustifyH("RIGHT")
+	self.Castbar.AttributeText:SetPoint("RIGHT", self.Castbar, "RIGHT", -10, 0)
 	
 	-- icon
 	self.Castbar.Icon = self.Castbar:CreateTexture(nil, "OVERLAY")
@@ -589,9 +593,33 @@ local function nameplateCreate(self, unit)
 		end
 	end	
 	self.Castbar.PostChannelStart = self.Castbar.kickable
-	self.Castbar.PostCastStart = self.Castbar.kickable
 	self.Castbar.PostCastNotInterruptible = self.Castbar.kickable
 	self.Castbar.PostCastInterruptible = self.Castbar.kickable
+
+	-- Interrupted by attribute
+	self.Castbar.PostCastInterrupted = function(casbar, unit)
+		casbar.holdTime = 0.3
+		casbar.Castbar:SetStatusBarColor(unpack(bdCore.media.red))
+		local timestamp, event, hideCaster, sourceGUI, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellID, spellName, spellSchool, extraSpellID, extraSpellName, extraSchool CombatLogGetCurrentEventInfo();
+
+		-- castbar.AttributeText:SetText("")
+		if (subevent ~= 'SPELL_INTERRUPT') then return end
+		if (UnitExists(sourceName)) then
+			castbar.AttributeText:SetText(UnitName(sourceName))
+		end
+	end
+
+	-- Cast target attribute
+	self.Castbar.PostCastStart = function(casbar, unit, name)
+		local timestamp, event, hideCaster, sourceGUI, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellID, spellName, spellSchool, extraSpellID, extraSpellName, extraSchool CombatLogGetCurrentEventInfo();
+		self.Castbar:kickable(unit, name)
+
+		castbar.AttributeText:SetText("")
+		if (subevent ~= 'SPELL_CAST_START') then return end
+		if (UnitExists(destName)) then
+			castbar.AttributeText:SetText(UnitName(destName))
+		end
+	end
 end
 
 oUF:RegisterStyle("bdNameplates", nameplateCreate)
