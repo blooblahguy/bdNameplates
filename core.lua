@@ -589,14 +589,15 @@ local function nameplateCreate(self, unit)
 	function self.Castbar:CastbarAttribute() 
 		local timestamp, event, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellID, spellName, spellSchool, extraSpellID, extraSpellName, extraSchool = CombatLogGetCurrentEventInfo();
 
+		if (self.guid ~= sourceGUID) then return end
+
 		if (event == 'SPELL_CAST_START') then
-			if (self.guid ~= sourceGUID) then return end
 			destName = self.unit.."target"
 
 			if UnitIsUnit(destName, "player") and bit.band(sourceFlags, COMBATLOG_OBJECT_REACTION_HOSTILE) > 0 then
 				print( format("%s is casting %s on me", sourceName, GetSpellLink(spellID)) )
 			end
-			
+
 			self.Castbar.AttributeText:SetText("")
 			-- attribute who this cast is targeting
 			if (UnitExists(destName)) then
