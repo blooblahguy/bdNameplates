@@ -598,9 +598,9 @@ local function nameplateCreate(self, unit)
 	self.Castbar.PostCastInterruptible = self.Castbar.kickable
 
 	-- Interrupted by attribute
-	self.Castbar.PostCastInterrupted = function(casbar, unit)
-		casbar.holdTime = 0.3
-		casbar.Castbar:SetStatusBarColor(unpack(bdCore.media.red))
+	self.Castbar.PostCastInterrupted = function(castbar, unit)
+		castbar.holdTime = 0.3
+		castbar:SetStatusBarColor(unpack(bdCore.media.red))
 		local timestamp, event, hideCaster, sourceGUI, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellID, spellName, spellSchool, extraSpellID, extraSpellName, extraSchool CombatLogGetCurrentEventInfo();
 
 		-- castbar.AttributeText:SetText("")
@@ -611,9 +611,9 @@ local function nameplateCreate(self, unit)
 	end
 
 	-- Cast target attribute
-	self.Castbar.PostCastStart = function(casbar, unit, name)
+	self.Castbar.PostCastStart = function(castbar, unit, name)
 		local timestamp, event, hideCaster, sourceGUI, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellID, spellName, spellSchool, extraSpellID, extraSpellName, extraSchool CombatLogGetCurrentEventInfo();
-		self.Castbar:kickable(unit, name)
+		castbar:kickable(unit, name)
 
 		castbar.AttributeText:SetText("")
 		if (subevent ~= 'SPELL_CAST_START') then return end
