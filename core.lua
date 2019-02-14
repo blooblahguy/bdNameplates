@@ -593,24 +593,28 @@ local function nameplateCreate(self, unit)
 			if (self.unit ~= guid_plates[sourceGUID]) then return end
 
 			destName = guid_plates[sourceGUID].."target"
-			
-			if UnitIsUnit(destName, "player") and bit.band(sourceFlags, COMBATLOG_OBJECT_REACTION_HOSTILE) > 0 then
-				print( format("%s is casting %s on me", sourceName, GetSpellLink(spellID)) )
-			end
 
 			self.Castbar.AttributeText:SetText("")
 			-- attribute who this cast is targeting
 			if (UnitExists(destName)) then
 				self.Castbar.AttributeText:SetText(UnitName(destName))
+				self.Castbar.AttributeText:SetTextColor(bdNameplates:autoUnitColor(destName))
 			end
 		elseif (event == "SPELL_INTERRUPT") then
 			-- attribute who interrupted this cast
 			if (UnitExists(sourceName)) then
 				self.Castbar.AttributeText:SetText(UnitName(sourceName))
+				self.Castbar.AttributeText:SetTextColor(bdNameplates:autoUnitColor(sourceName))
 			end
 		end
 	end
 	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", self.Castbar.CastbarAttribute, true)
+
+	-- interrupted delay
+	self.Castbar.PostCastInterrupted = function(self, unit)
+		self.holdTime = 0.8
+		self:SetStatusBarColor(unpack(bdCore.media.red))
+	end
 
 	-- Change color if cast is kickable or not
 	function self.Castbar:kickable(unit, name)

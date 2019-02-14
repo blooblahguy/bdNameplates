@@ -24,7 +24,7 @@ for eclass, color in next, FACTION_BAR_COLORS do
 end
 
 -- basic class coloring
-function bdNameplates:unitColor(unit)
+function bdNameplates:autoUnitColor(unit)
 	if (not UnitExists(unit)) then
 		return unpack(colors.tapped)
 	end
