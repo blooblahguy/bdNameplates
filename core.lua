@@ -125,6 +125,7 @@ function bdNameplates:configCallback()
 		, ["nameplateOverlapV"] = config.verticalspacing --0.8
 		, ['nameplateShowOnlyNames'] = 0
 		, ['nameplateShowDebuffsOnFriendly'] = 0
+		, ['nameplateSelectedScale'] = 1
 		, ['nameplateMinScale'] = 1
 		, ['nameplateMaxScale'] = 1
 		, ['nameplateMaxScaleDistance'] = 0
@@ -147,6 +148,7 @@ function bdNameplates:configCallback()
 
 	bd_do_action("bdNameplatesConfig")
 end
+bdNameplates:configCallback()
 
 local function fixateUpdate(self, event, unit)
 	if (not self.unit == unit) then return end
