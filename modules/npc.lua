@@ -4,7 +4,9 @@ local config = bdConfigLib:GetSave('Nameplates')
 -- v1 done
 function bdNameplates:npcStyle(self, event, unit)
 	-- local colors = bdNameplates:unitColor(false, false, self.reaction, false)
-	self.Name:SetTextColor(unpack(self.smartColors))
+	if (self.smartColors) then
+		self.Name:SetTextColor(unpack(self.smartColors))
+	end
 
 	if (self.currentStyle and self.currentStyle == "npc") then return end
 
