@@ -1,4 +1,4 @@
-## Interface: 80000
+## Interface: 80200
 ## Title: |cffA02C2Fbd|rNameplates
 ## DefaultState: Enabled
 ## LoadOnDemand: 0

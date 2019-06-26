@@ -185,6 +185,18 @@ end
 ---- NAME_PLATE_UNIT_ADDED
 ---- UNIT_HEALTH_FREQUENT
 --==========================================
+local function setSmartColors(self, unit)
+	self.tapDenied = UnitIsTapDenied(unit) or false
+	self.status = UnitThreatSituation("player", unit)
+	if (self.status == nil) then
+		self.status = false
+	end
+	self.isPlayer = UnitIsPlayer(unit) and select(2, UnitClass(unit)) or false
+	self.reaction = UnitReaction(unit, "player") or false
+	
+	self.smartColors = bdNameplates:unitColor(self.tapDenied, self.isPlayer, self.reaction, self.status)
+end
+
 local specialunits = config.specialunits
 local function nameplateUpdateHealth(self, event, unit)
 	if(not unit or not UnitIsUnit(self.unit, unit)) then return false end
@@ -206,12 +218,7 @@ local function nameplateUpdateHealth(self, event, unit)
 	elseif (specialunits[UnitName(unit)]) then
 		healthbar:SetStatusBarColor(unpack(config.specialcolor))
 	else
-		local tapDenied = UnitIsTapDenied(unit) or false
-		local status = UnitThreatSituation("player", unit)
-		if (status == nil) then
-			status = false
-		end
-		self.smartColors = bdNameplates:unitColor(tapDenied, self.isPlayer, self.reaction, status)
+		setSmartColors(self, unit)
 		healthbar:SetStatusBarColor(unpack(self.smartColors))
 	end
 
@@ -254,11 +261,9 @@ local function calculateTarget(self, event, unit)
 end
 local function bdNameplateCallback(self, event, unit)
 	if (not self) then return end
+	setSmartColors(self, unit)
 	calculateTarget(self, event, unit)
-
 	unit = unit or self.unit
-	self.isPlayer = UnitIsPlayer(unit) and select(2, UnitClass(unit)) or false
-	self.reaction = UnitReaction(unit, "player") or false
 	self.Fixate:Hide()
 	
 	-- Force cvars/settings
