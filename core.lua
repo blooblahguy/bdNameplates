@@ -425,7 +425,7 @@ local function nameplateCreate(self, unit)
 	self.Curhp:SetPoint("RIGHT", self.Health, "RIGHT", -4, 0)
 	self.Curhp.frequentUpdates = 0.1
 
-	-- oUF.Tags.Events["bdncurhp"] = "UNIT_HEALTH UNIT_MAXHEALTH"
+	oUF.Tags.Events["bdncurhp"] = "UNIT_HEALTH UNIT_MAXHEALTH"
 	oUF.Tags.Methods["bdncurhp"] = function(unit)
 		if (config.hptext == "None") then return '' end
 		local hp, hpMax = UnitHealth(unit), UnitHealthMax(unit)
@@ -595,8 +595,7 @@ local function nameplateCreate(self, unit)
 	function self.Castbar:CastbarAttribute() 
 		local timestamp, event, hideCaster, sourceGUID, sourceName, sourceFlags, sourceRaidFlags, destGUID, destName, destFlags, destRaidFlags, spellID, spellName, spellSchool, extraSpellID, extraSpellName, extraSchool = CombatLogGetCurrentEventInfo();
 
-
-		if (event == 'SPELL_CAST_START') then
+		if (event == 'SPELL_CAST_START' and config.showcasttarget) then
 			if (self.unit ~= guid_plates[sourceGUID]) then return end
 
 			destName = guid_plates[sourceGUID].."target"
@@ -607,7 +606,7 @@ local function nameplateCreate(self, unit)
 				self.Castbar.AttributeText:SetText(UnitName(destName))
 				self.Castbar.AttributeText:SetTextColor(bdNameplates:autoUnitColor(destName))
 			end
-		elseif (event == "SPELL_INTERRUPT") then
+		elseif (event == "SPELL_INTERRUPT" and config.showcastinterrupt) then
 			-- attribute who interrupted this cast
 			if (UnitExists(sourceName)) then
 				self.Castbar.AttributeText:SetText(UnitName(sourceName))

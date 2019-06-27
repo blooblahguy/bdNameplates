@@ -197,6 +197,16 @@ defaults[#defaults+1] = {hptext = {
 -- 	value = true,
 -- 	label = "Show Fixate Circle",
 -- }}
+defaults[#defaults+1] = {showcasttarget = {
+	type = "checkbox",
+	value = false,
+	label = "Show Health Text on target only",
+}}
+defaults[#defaults+1] = {showcastinterrupt = {
+	type = "checkbox",
+	value = true,
+	label = "Show castbar target (experimental)",
+}}
 defaults[#defaults+1] = {showhptexttargetonly = {
 	type = "checkbox",
 	value = false,
