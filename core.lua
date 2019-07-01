@@ -3,7 +3,8 @@ bdNameplates.cache = {}
 local bdCore = bdCore
 local oUF = bdCore.oUF
 local config = bdConfigLib:GetSave('Nameplates')
-local borderSize = bdConfigLib:GetSave("bdAddons").border or 2
+local bdAddons = bdConfigLib:GetSave("bdAddons")
+local borderSize = bdAddons.border or 2
 
 local guid_plates = {}
 local guid_attribute = {}
@@ -54,12 +55,11 @@ bdNameplates.font_castbar:SetFont(bdCore.media.font, config.castbarheight * 0.85
 bdNameplates.font_castbar:SetShadowColor(0, 0, 0)
 bdNameplates.font_castbar:SetShadowOffset(1, -1)
 
--- Scale of the UI here
-local screenWidth, screenHeight = GetPhysicalScreenSize()
-
 -- Scale the default nameplate parameters - note this doesn't seem to do anything on load, so investigating
 local function nameplateSize(self)
 	if (InCombatLockdown()) then return end
+
+	bdNameplates:configCallback()
 
 	if (self) then
 		self:SetSize(config.width, config.height)
@@ -74,7 +74,6 @@ end
 bdNameplates.eventer = CreateFrame("frame", nil)
 bdNameplates.eventer:RegisterEvent("PLAYER_REGEN_ENABLED", nameplateSize)
 bdNameplates.eventer:RegisterEvent("PLAYER_LOGIN", nameplateSize)
-
 
 bdNameplates.dot = CreateFrame("frame", "bdNameplates Player Dot", UIParent)
 bdNameplates.dot:SetSize(20, 20)
@@ -97,7 +96,7 @@ bdCore:makeMovable(bdNameplates.dot)
 
 
 function bdNameplates:configCallback()
-	nameplateSize()
+	-- nameplateSize()
 
 	-- print(config.height * 0.85)
 	-- update font sizes
@@ -114,7 +113,8 @@ function bdNameplates:configCallback()
 
 	-- set cVars
 	local cvars = {
-		['nameplateSelfAlpha'] = 1
+		['nameplateGlobalScale'] = GetCVar("uiScale") or 1
+		, ['nameplateSelfAlpha'] = 1
 		, ['nameplateShowAll'] = 1
 		, ['nameplateMinAlpha'] = 1
 		, ['nameplateMaxAlpha'] = 1
@@ -139,16 +139,19 @@ function bdNameplates:configCallback()
 		, ['nameplateLargeTopInset'] = GetCVarDefault('nameplateLargeTopInset')
 		, ['nameplateLargeBottomInset'] = GetCVarDefault('nameplateLargeBottomInset')
 	}
+
+	if (bdAddons.forcescale) then
+		cvars['nameplateGlobalScale'] = bdCore.scale
+	end
+
 	-- loop through and set CVARS
-	if (not InCombatLockdown()) then
-		for k, v in pairs(cvars) do
-			SetCVar(k, v)
-		end
+	for k, v in pairs(cvars) do
+		SetCVar(k, v)
 	end
 
 	bd_do_action("bdNameplatesConfig")
 end
-bdNameplates:configCallback()
+nameplateSize()
 
 local function fixateUpdate(self, event, unit)
 	if (not self.unit == unit) then return end
@@ -366,7 +369,6 @@ local function nameplateCreate(self, unit)
 	
 	self:SetPoint("BOTTOM", self.nameplate, "BOTTOM", 0, math.floor(config.targetingBottomPadding))
 	self:SetSize(math.floor(config.width), math.floor(config.height))
-	self:SetScale(bdCore.scale)
 	self:EnableMouse(false)
 
 	--==========================================
@@ -382,6 +384,7 @@ local function nameplateCreate(self, unit)
 	self.Health.colorReaction = true
 	bdCore:createShadow(self.Health, 10)
 	bdCore:setBackdrop(self.Health)
+
 	self.Health.Shadow:SetBackdropColor(unpack(config.glowcolor))
 	self.Health.Shadow:SetBackdropBorderColor(unpack(config.glowcolor))
 
