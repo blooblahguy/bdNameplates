@@ -29,6 +29,7 @@ function bdNameplates:friendlyStyle(self, event, unit)
 	else
 		self.Health:Hide()
 	end
+	self.disableFixate = true
 
 	-- power
 	self.Power:Hide()

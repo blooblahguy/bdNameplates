@@ -27,33 +27,48 @@ local unpack, floor = unpack, math.floor
 -- blizz functions
 local GetCVar, SetCVar, UnitThreatSituation, UnitAffectingCombat, UnitHealth, UnitHealthMax, UnitPlayerControlled, UnitIsTapDenied, UnitIsPlayer, UnitClass, UnitReaction, UnitIsUnit, UnitIsPlayer, UnitIsFriend, UnitIsPVPSanctuary, UnitName, C_NamePlate, UnitGUID = GetCVar, SetCVar, UnitThreatSituation, UnitAffectingCombat, UnitHealth, UnitHealthMax, UnitPlayerControlled, UnitIsTapDenied, UnitIsPlayer, UnitClass, UnitReaction, UnitIsUnit, UnitIsPlayer, UnitIsFriend, UnitIsPVPSanctuary, UnitName, C_NamePlate, UnitGUID
 
--- Features to reimplement
--- Fixate alerts
--- Circle module
--- Special Units
--- Special Spells
--- Absorbs
-
 -- Fonts we use
 bdNameplates.font = CreateFont("BDN_FONT")
 bdNameplates.font:SetFont(bdCore.media.font, config.enemynamesize)
-bdNameplates.font:SetShadowColor(0, 0, 0)
-bdNameplates.font:SetShadowOffset(1, -1)
 
 bdNameplates.font_friendly = CreateFont("BDN_FONT_FRIENDLY")
 bdNameplates.font_friendly:SetFont(bdCore.media.font, config.friendlynamesize)
-bdNameplates.font_friendly:SetShadowColor(0, 0, 0)
-bdNameplates.font_friendly:SetShadowOffset(1, -1)
 
 bdNameplates.font_small = CreateFont("BDN_FONT_SMALL")
-bdNameplates.font_small:SetFont(bdCore.media.font, 10 + config.height * 0.25)
-bdNameplates.font_small:SetShadowColor(0, 0, 0)
-bdNameplates.font_small:SetShadowOffset(1, -1)
+bdNameplates.font_small:SetFont(bdCore.media.font, 10 + config.height * 0.25, "OUTLINE")
 
 bdNameplates.font_castbar = CreateFont("BDN_FONT_CASTBAR")
 bdNameplates.font_castbar:SetFont(bdCore.media.font, config.castbarheight * 0.85)
-bdNameplates.font_castbar:SetShadowColor(0, 0, 0)
-bdNameplates.font_castbar:SetShadowOffset(1, -1)
+
+function bdNameplates:get_border(frame)
+	local screenheight = select(2, GetPhysicalScreenSize())
+	local scale = 768 / screenheight
+	local frame_scale = frame:GetEffectiveScale()
+	local pixel = scale / frame_scale
+	local border = pixel * borderSize
+
+	return border
+end
+
+function bdNameplates:set_border(frame, type)
+	local border = bdNameplates:get_border(frame)
+
+	if (not frame.background) then
+		frame.background = frame:CreateTexture(nil, "BACKGROUND", nil, -7)
+		frame.background:SetTexture(bdCore.media.flat)
+		frame.background:SetVertexColor(unpack(bdCore.media.backdrop))
+		frame.background.SetFrameLevel = bdCore.noop
+		frame.border = frame:CreateTexture(nil, "BACKGROUND", nil, -8)
+		frame.border:SetTexture(bdCore.media.flat)
+		frame.border:SetVertexColor(unpack(bdCore.media.border))
+		frame.border.SetFrameLevel = bdCore.noop
+	end
+
+	frame.border:SetPoint("TOPLEFT", frame, "TOPLEFT", -border, border)
+	frame.border:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", border, -border)
+	frame.background:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
+	frame.background:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
+end
 
 -- Scale the default nameplate parameters - note this doesn't seem to do anything on load, so investigating
 local function nameplateSize(self)
@@ -100,10 +115,10 @@ function bdNameplates:configCallback()
 
 	-- print(config.height * 0.85)
 	-- update font sizes
-	bdNameplates.font:SetFont(bdCore.media.font, config.enemynamesize)
-	bdNameplates.font_small:SetFont(bdCore.media.font, config.height * 0.85)
-	bdNameplates.font_castbar:SetFont(bdCore.media.font, config.castbarheight*0.85)
-	bdNameplates.font_friendly:SetFont(bdCore.media.font, config.friendlynamesize)
+	bdNameplates.font:SetFont(bdCore.media.font, config.enemynamesize, "OUTLINE")
+	bdNameplates.font_small:SetFont(bdCore.media.font, config.height * 0.82, "OUTLINE")
+	bdNameplates.font_castbar:SetFont(bdCore.media.font, config.castbarheight*0.82, "OUTLINE")
+	bdNameplates.font_friendly:SetFont(bdCore.media.font, config.friendlynamesize, "OUTLINE")
 
 	if (config.showCenterDot) then
 		bdNameplates.dot:Show()
@@ -113,7 +128,8 @@ function bdNameplates:configCallback()
 
 	-- set cVars
 	local cvars = {
-		['nameplateGlobalScale'] = GetCVar("uiScale") or 1
+		['nameplateGlobalScale'] = config.scale
+		, ['nameplateSelfScale'] = config.scale
 		, ['nameplateSelfAlpha'] = 1
 		, ['nameplateShowAll'] = 1
 		, ['nameplateMinAlpha'] = 1
@@ -140,10 +156,6 @@ function bdNameplates:configCallback()
 		, ['nameplateLargeBottomInset'] = GetCVarDefault('nameplateLargeBottomInset')
 	}
 
-	if (bdAddons.forcescale) then
-		cvars['nameplateGlobalScale'] = bdCore.scale
-	end
-
 	-- loop through and set CVARS
 	for k, v in pairs(cvars) do
 		SetCVar(k, v)
@@ -155,6 +167,7 @@ nameplateSize()
 
 local function fixateUpdate(self, event, unit)
 	if (not self.unit == unit) then return end
+	if (self.disableFixate) then self.Fixate:Hide() return end
 
 	local target = unit.."target"
 
@@ -255,7 +268,9 @@ local function calculateTarget(self, event, unit)
 	if (UnitIsUnit(unit, "target")) then
 		self.isTarget = true
 		self:SetAlpha(1)
-		self.Health.Shadow:Show()
+		if (not UnitIsUnit(unit, "player")) then
+			self.Health.Shadow:Show()
+		end
 	else
 		self.isTarget = false
 		self:SetAlpha(config.unselectedalpha)
@@ -268,9 +283,19 @@ local function bdNameplateCallback(self, event, unit)
 	calculateTarget(self, event, unit)
 	unit = unit or self.unit
 	self.Fixate:Hide()
+	local border = bdNameplates:get_border(self)
 	
 	-- Force cvars/settings
 	nameplateSize()
+	bdNameplates:set_border(self.Health)
+	bdNameplates:set_border(self.Castbar)
+
+	self.Castbar.Icon:SetPoint("BOTTOMRIGHT", self.Castbar, "BOTTOMLEFT", -border, 0)
+	local cbi_size = (config.height+config.castbarheight) * config.castbariconscale
+	self.Castbar.Icon:SetSize( cbi_size, cbi_size )
+
+	self.Castbar.Icon.bg:SetPoint("TOPLEFT", self.Castbar.Icon, "TOPLEFT", -border, border)
+	self.Castbar.Icon.bg:SetPoint("BOTTOMRIGHT", self.Castbar.Icon, "BOTTOMRIGHT", border, -border)
 
 	--==========================================
 	-- Style by unit type
@@ -340,6 +365,8 @@ local function nameplateCreate(self, unit)
 
 	-- nameplate specific callback
 	bd_add_action("bdNameplatesConfig", function()
+		local border = bdNameplates:get_border(self)
+
 		-- auras
 		self.Auras.size = config.raidbefuffs
 		self.Auras.showStealableBuffs = config.highlightPurge
@@ -356,7 +383,11 @@ local function nameplateCreate(self, unit)
 		end
 
 		-- castbars
-		self.Castbar.Icon:SetSize(config.height+config.castbarheight, config.height+config.castbarheight)
+		-- local cbi_size = (config.height+config.castbarheight) * config.castbariconscale
+		-- local diff = (config.height+config.castbarheight - cbi_size) / 2
+		-- self.Castbar.Icon:SetSize( cbi_size, cbi_size )
+		-- self.Castbar.Icon:ClearAllPoints()
+		-- self.Castbar.Icon:SetPoint("BOTTOMRIGHT", self.Castbar, "BOTTOMLEFT", -(border + diff), 0)
 		-- cast icon
 		if (config.hidecasticon) then
 			self.Castbar.Icon:Hide()
@@ -383,7 +414,7 @@ local function nameplateCreate(self, unit)
 	self.Health.colorClass = true
 	self.Health.colorReaction = true
 	bdCore:createShadow(self.Health, 10)
-	bdCore:setBackdrop(self.Health)
+	bdNameplates:set_border(self.Health)
 
 	self.Health.Shadow:SetBackdropColor(unpack(config.glowcolor))
 	self.Health.Shadow:SetBackdropBorderColor(unpack(config.glowcolor))
@@ -406,7 +437,7 @@ local function nameplateCreate(self, unit)
 	self.Power:ClearAllPoints()
 	self.Power:SetPoint("TOPLEFT", self.Health, "BOTTOMLEFT",0, -2)
 	self.Power:SetPoint("TOPRIGHT", self.Health, "BOTTOMRIGHT",0, -2)
-	self.Power:SetHeight(6)
+	self.Power:SetHeight(3)
 	self.Power.displayAltPower = true
 	self.Power.colorPower = true
 	self.Power:Hide()
@@ -480,15 +511,16 @@ local function nameplateCreate(self, unit)
 	--==========================================
 	self.Fixate = CreateFrame("frame",nil,self)
 	--self.Fixate:SetFrameLevel(4)
-	self.Fixate:SetPoint("BOTTOMLEFT", self.Health, "BOTTOMLEFT", 0, -20)
-	self.Fixate:SetPoint("TOPRIGHT", self.Health, "BOTTOMRIGHT", 0, -8)
+	-- self.Fixate:SetPoint("BOTTOMLEFT", self.Health, "BOTTOMLEFT", 0, -20)
+	self.Fixate:SetPoint("LEFT", self.Health, "RIGHT", 4, -1)
+	self.Fixate:SetSize(self.Health:GetSize())
 	--self.Fixate:SetFrameLevel(100)
 	self.Fixate.text = self.Fixate:CreateFontString(nil, "OVERLAY", "BDN_FONT_SMALL")
 
 	local icon = select(3, GetSpellInfo(210099))
 	self.Fixate.text.SetText_Old = self.Fixate.text.SetText
 	self.Fixate.text.SetText = function(self, unit)
-		local color = bdCore:RGBToHex(bdNameplates:unitColor(unit))
+		local color = bdCore:RGBToHex(bdNameplates:autoUnitColor(unit))
 		if (unit and UnitIsUnit(unit,"player")) then
 			self:SetAlpha(1)
 			self:SetText_Old("|T"..icon..":16:16:0:0:60:60:4:56:4:56|t ".."|cff"..color..unit.."|r")
@@ -498,7 +530,8 @@ local function nameplateCreate(self, unit)
 		end
 	end
 	self.Fixate.text:SetAllPoints(self.Fixate)
-	self.Fixate.text:SetJustifyH("CENTER")
+	self.Fixate.text:SetJustifyH("LEFT")
+	self.Fixate.text:SetTextColor(1,1,1)
 	self.Fixate:Hide()
 	self:RegisterEvent("UNIT_TARGET", fixateUpdate)
 
@@ -563,13 +596,14 @@ local function nameplateCreate(self, unit)
 	--==========================================
 	-- CASTBARS
 	--==========================================
+	local border = bdNameplates:get_border(self)
 	self.Castbar = CreateFrame("StatusBar", nil, self)
 	self.Castbar:SetFrameLevel(3)
 	self.Castbar:SetStatusBarTexture(bdCore.media.flat)
 	self.Castbar:SetStatusBarColor(unpack(config.kickable))
-	self.Castbar:SetPoint("TOPLEFT", self.Health, "BOTTOMLEFT", 0, -2)
+	self.Castbar:SetPoint("TOPLEFT", self.Health, "BOTTOMLEFT", 0, -border)
 	self.Castbar:SetPoint("BOTTOMRIGHT", self.Health, "BOTTOMRIGHT", 0, -config.castbarheight)
-	bdCore:setBackdrop(self.Castbar)
+	bdNameplates:set_border(self.Castbar)
 	
 	-- text
 	self.Castbar.Text = self.Castbar:CreateFontString(nil, "OVERLAY", "BDN_FONT_CASTBAR")
@@ -584,15 +618,15 @@ local function nameplateCreate(self, unit)
 	self.Castbar.Icon = self.Castbar:CreateTexture(nil, "OVERLAY")
 	self.Castbar.Icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
 	self.Castbar.Icon:SetDrawLayer('ARTWORK')
-	self.Castbar.Icon:SetSize(config.height+12, config.height+12)
-	self.Castbar.Icon:SetPoint("BOTTOMRIGHT",self.Castbar, "BOTTOMLEFT", -2, 0)
+	self.Castbar.Icon:SetSize( config.height+config.castbarheight, config.height+config.castbarheight )
+	self.Castbar.Icon:SetPoint("BOTTOMRIGHT", self.Castbar, "BOTTOMLEFT", -(border), 0)
 	
 	-- icon bg
 	self.Castbar.Icon.bg = self.Castbar:CreateTexture(nil, "BORDER")
 	self.Castbar.Icon.bg:SetTexture(bdCore.media.flat)
 	self.Castbar.Icon.bg:SetVertexColor(unpack(bdCore.media.border))
-	self.Castbar.Icon.bg:SetPoint("TOPLEFT", self.Castbar.Icon, "TOPLEFT", -borderSize, borderSize)
-	self.Castbar.Icon.bg:SetPoint("BOTTOMRIGHT", self.Castbar.Icon, "BOTTOMRIGHT", borderSize, -borderSize)
+	self.Castbar.Icon.bg:SetPoint("TOPLEFT", self.Castbar.Icon, "TOPLEFT", -border, border)
+	self.Castbar.Icon.bg:SetPoint("BOTTOMRIGHT", self.Castbar.Icon, "BOTTOMRIGHT", border, -border)
 
 	-- Combat log based extra information
 	function self.Castbar:CastbarAttribute() 
@@ -621,12 +655,14 @@ local function nameplateCreate(self, unit)
 
 	-- interrupted delay
 	self.Castbar.PostCastInterrupted = function(self, unit)
-		self.holdTime = 0.8
+		self.holdTime = 0.7
+		self:SetAlpha(0.7)
 		self:SetStatusBarColor(unpack(bdCore.media.red))
 	end
 
 	-- Change color if cast is kickable or not
 	function self.Castbar:kickable(unit, name)
+		self:SetAlpha(1)
 		if (self.notInterruptible) then
 			self.Icon:SetDesaturated(1)
 			self:SetStatusBarColor(unpack(config.nonkickable))

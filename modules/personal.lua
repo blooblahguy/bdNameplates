@@ -5,6 +5,9 @@ local config = bdConfigLib:GetSave('Nameplates')
 function bdNameplates:personalStyle(self, event, unit)
 	if (self.currentStyle and self.currentStyle == "personal") then return end
 
+	ClassNameplateManaBarFrame:Hide()
+	ClassNameplateManaBarFrame.Show = noop
+
 	-- castbar
 	self:EnableElement("Castbar")
 	self.Castbar:SetPoint("TOPLEFT", self.Power, "BOTTOMLEFT", 0, -2)
@@ -17,6 +20,9 @@ function bdNameplates:personalStyle(self, event, unit)
 	else
 		self.Curhp:Show()
 	end
+
+	self.disableFixate = true
+	bdNameplates:set_border(self)
 
 	-- powerbar
 	self.Power:Show()

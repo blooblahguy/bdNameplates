@@ -24,11 +24,12 @@ function bdNameplates:enemyStyle(self, event, unit)
 	-- castbars
 	self:EnableElement("Castbar")
 	self.Castbar:ClearAllPoints()
-	self.Castbar:SetPoint("TOPLEFT", self.Health, "BOTTOMLEFT", 0, -2)
+	self.Castbar:SetPoint("TOPLEFT", self.Health, "BOTTOMLEFT", 0, -bdNameplates:get_border(self.Castbar))
 	self.Castbar:SetPoint("BOTTOMRIGHT", self.Health, "BOTTOMRIGHT", 0, -config.castbarheight)
 
 	-- healthbar
 	self.Health:Show()
+	self.disableFixate = false
 
 	-- power
 	self.Power:Hide()

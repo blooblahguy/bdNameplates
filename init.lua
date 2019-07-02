@@ -50,6 +50,15 @@ defaults[#defaults+1] = {text = {
 	type="text",
 	value="Because of the way blizzard renders nameplates, you may have to type /reload to see certain changes take place."
 }}
+defaults[#defaults+1] = {scale={
+	type="slider",
+	value=1,
+	min=0,
+	max=1,
+	step=0.1,
+	label="Nameplates Scale",
+}}
+
 defaults[#defaults+1] = {width={
 	type="slider",
 	value=200,
@@ -158,6 +167,15 @@ defaults[#defaults+1] = {castbarheight={
 	step=2,
 	label="Castbar Height",
 }}
+defaults[#defaults+1] = {castbariconscale={
+	type="slider",
+	value=1,
+	min=0.1,
+	max=1,
+	step=0.1,
+	label="Castbar Icon Scale",
+}}
+
 defaults[#defaults+1] = {nameplatedistance={
 	type="slider",
 	value=50,
@@ -317,6 +335,9 @@ defaults[#defaults+1] = {enrageColor={
 	value = bdCore.media.red,
 	name = "Special Unit Color"
 }}
+defaults[#defaults+1] = {clear = {
+	type = "clear"
+}}
 defaults[#defaults+1] = {executerange = {
 	type = "slider",
 	value=20,
@@ -342,7 +363,7 @@ defaults[#defaults+1] = {tab = {
 }}
 defaults[#defaults+1] = {fixatealert = {
 	type = "dropdown",
-	value = "Personal",
+	value = "Hide",
 	options = {"Always", "Personal", "Hide"},
 	label = "Target/Fixate Alert"
 }}

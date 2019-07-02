@@ -15,6 +15,7 @@ function bdNameplates:npcStyle(self, event, unit)
 
 	-- healthbar
 	self.Health:Hide()
+	self.disableFixate = true
 
 	-- powerbar
 	self.Power:Hide()
