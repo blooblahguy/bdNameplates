@@ -109,6 +109,23 @@ else
 end
 bdCore:makeMovable(bdNameplates.dot)
 
+function bdNameplates:reset()
+	-- set cVars
+	local cvars = {
+		['nameplateOverlapV'] = GetCVarDefault('nameplateOverlapV')
+		, ['nameplateOverlapH'] = GetCVarDefault('nameplateOverlapH')
+		, ['nameplateOtherTopInset'] = GetCVarDefault('nameplateOtherTopInset')
+		, ['nameplateOtherBottomInset'] = GetCVarDefault('nameplateOtherBottomInset')
+		, ['nameplateLargeTopInset'] = GetCVarDefault('nameplateLargeTopInset')
+		, ['nameplateLargeBottomInset'] = GetCVarDefault('nameplateLargeBottomInset')
+	}
+
+	-- loop through and set CVARS
+	for k, v in pairs(cvars) do
+		SetCVar(k, v)
+	end
+end
+
 
 function bdNameplates:configCallback()
 	-- nameplateSize()
@@ -148,12 +165,6 @@ function bdNameplates:configCallback()
 		, ['nameplateMinScaleDistance'] = 0
 		, ['nameplateLargerScale'] = 1 -- for bosses
 		, ['nameplateShowOnlyNames'] = config.friendlynamehack and 1 or 0 -- friendly names and no plates in raid
-		, ['nameplateOverlapV'] = GetCVarDefault('nameplateOverlapV')
-		, ['nameplateOverlapH'] = GetCVarDefault('nameplateOverlapH')
-		, ['nameplateOtherTopInset'] = GetCVarDefault('nameplateOtherTopInset')
-		, ['nameplateOtherBottomInset'] = GetCVarDefault('nameplateOtherBottomInset')
-		, ['nameplateLargeTopInset'] = GetCVarDefault('nameplateLargeTopInset')
-		, ['nameplateLargeBottomInset'] = GetCVarDefault('nameplateLargeBottomInset')
 	}
 
 	-- loop through and set CVARS
